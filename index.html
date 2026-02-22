@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>업무처리 가이드 검색</title>
+
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, Arial;
+  max-width: 760px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+h1 { font-size: 28px; }
+.search-box { display:flex; gap:10px; margin-top:20px; }
+input { flex:1; padding:14px; font-size:16px; border:1px solid #ddd; border-radius:8px; }
+button { padding:14px 20px; font-size:16px; border:none; background:black; color:white; border-radius:8px; cursor:pointer; }
+#result { margin-top:30px; line-height:1.6; white-space:pre-wrap; }
+</style>
+</head>
+
+<body>
+
+<h1>업무처리 가이드 검색</h1>
+
+<div class="search-box">
+<input id="q" placeholder="궁금한 업무를 입력하세요">
+<button onclick="ask()">검색</button>
+</div>
+
+<div id="result"></div>
+
+<script>
+const GUIDE = `여기에 너 가이드 내용 그대로 붙이면 됨`;
+
+function ask(){
+  const q = document.getElementById("q").value;
+  const result = document.getElementById("result");
+
+  if(!q) return;
+
+  const text = GUIDE.toLowerCase();
+  const keyword = q.toLowerCase();
+
+  if(text.includes(keyword)){
+    result.innerText = "관련 내용 발견:\n\n" + GUIDE.split("\n").filter(v=>v.toLowerCase().includes(keyword)).join("\n");
+  }else{
+    result.innerText = "관련 내용 없음";
+  }
+}
+</script>
+
+</body>
+</html>
