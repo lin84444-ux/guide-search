@@ -31,10 +31,36 @@ button { padding:14px 20px; font-size:16px; border:none; background:black; color
 <div id="result"></div>
 
 <script>
-const GUIDE = `
-재응시 테스트 문장
-시험 점수 미달 시 자동 재응시 제공
-GS리테일 재응시 문의 가능
+const GUIDE = [
+{
+  category: "재응시",
+  text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내",
+  keywords: ["재응시","GS건설","과락","GS"]
+},
+{
+  category: "재응시",
+  text: "GS리테일 재응시 가능",
+  keywords: ["GS","GS리테일","재응시","과락"]
+},
+{
+  category: "가입",
+  text: "지해로 개인가입 2월 말 오픈 예정",
+  keywords: ["지해로","가입","해양수산부"]
+},
+{
+  category: "학습",
+  text: "차그룹 안전보건교육 기간연장 불가",
+  keywords: ["차그룹","연장","기간연장","안전"]
+},
+{
+  category: "학습",
+  text: "차그룹 신청일 포함 3일 이내 취소 가능",
+  keywords: ["차그룹","신청","수강신청","취소"]
+},
+{
+  category: "가입",
+  text: "지해로 개인가입 2월 말 오픈 예정",
+  keywords: ["지해로","가입","해양수산부"]
 `;
 
 function ask(){
@@ -57,4 +83,5 @@ function ask(){
 </body>
 
 </html>
+
 
