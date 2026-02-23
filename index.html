@@ -2,136 +2,214 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>업무처리 가이드 검색</title>
+<title>업무처리 가이드 관리</title>
 <style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, Arial;
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 20px;
-    background: #f9f9f9;
-    color: #333;
-  }
-  h1 {
-    font-size: 28px;
-    text-align: center;
-    color: #222;
-  }
-  .search-box {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  input {
-    flex: 1;
-    padding: 14px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
-  button {
-    padding: 14px 20px;
-    font-size: 16px;
-    border: none;
-    background: #4CAF50;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  button:hover {
-    background: #45a049;
-  }
-  #result {
-    margin-top: 30px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-  }
-  .category {
-    font-weight: bold;
-    color: #007BFF;
-  }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, Arial;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+  background: #f5f7fa;
+  color: #333;
+}
+h1 { font-size: 28px; margin-bottom: 20px; text-align:center; }
+.nav { display:flex; gap:10px; justify-content:center; margin-bottom:30px; }
+.nav button { padding:10px 20px; border:none; border-radius:6px; cursor:pointer; background:#007bff; color:white; }
+.nav button.active { background:#0056b3; }
+.section { display:none; }
+.section.active { display:block; }
+input, select, textarea { width:100%; padding:10px; margin:5px 0 15px 0; border-radius:6px; border:1px solid #ccc; font-size:14px; }
+button.action { background:#28a745; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; }
+button.delete { background:#dc3545; }
+button.restore { background:#ffc107; }
+#searchResult, #trashResult { margin-top:20px; line-height:1.6; white-space:pre-wrap; }
+.card { background:white; padding:10px 15px; border-radius:6px; margin-bottom:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+.card-actions { margin-top:5px; display:flex; gap:5px; }
 </style>
 </head>
 <body>
 
-<h1>업무처리 가이드 검색</h1>
+<h1>업무처리 가이드 관리</h1>
 
-<div class="search-box">
-  <input id="q" placeholder="궁금한 업무를 입력하세요" onkeydown="enterSearch(event)">
-  <button onclick="ask()">검색</button>
+<div class="nav">
+  <button onclick="showSection('search')" class="active">검색</button>
+  <button onclick="showSection('add')">등록</button>
+  <button onclick="showSection('trash')">휴지통</button>
 </div>
 
-<div id="result"></div>
+<!-- 검색 섹션 -->
+<div class="section active" id="search">
+  <input id="searchQuery" placeholder="키워드로 검색" onkeydown="if(event.key==='Enter'){searchGuide();}">
+  <div id="searchResult"></div>
+</div>
+
+<!-- 등록/수정 섹션 -->
+<div class="section" id="add">
+  <input id="editCategory" placeholder="카테고리">
+  <input id="editText" placeholder="내용">
+  <input id="editKeywords" placeholder="키워드 (쉼표로 구분)">
+  <button class="action" onclick="saveGuide()">저장</button>
+</div>
+
+<!-- 휴지통 섹션 -->
+<div class="section" id="trash">
+  <div id="trashResult"></div>
+</div>
 
 <script>
-const GUIDE = [
-  { category: "재응시", text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내", keywords: ["재응시","GS건설","과락","GS"] },
-  { category: "오류", text: "에러코드 224002: 캐시삭제로 해결", keywords: ["에러코드","오류코드","오류"] },
-  { category: "오류", text: "에러코드 232011, 102630: 네트워크 불안정(사내망 보안 설정이나 와이파이 문제), 데이터누적사유(캐시), 브라우저 버전 문제", keywords: ["에러코드","오류코드","오류"] },
-  { category: "오류", text: "포트가 사용중입니다. 기기를 재부팅하세요.: 어플삭제, 기기재부팅, 어플재설치 하면 대부분 해결", keywords: ["에러코드","오류코드","어플"] },
-  { category: "오류", text: "플레이어에서 오류가 발생하여 종료합니다.: 데이터환경불안정, 기기 메모리 부족 등의 문제", keywords: ["에러코드","오류코드","오류"] },
-  { category: "오류", text: "우호! 뭔가 잘못되었습니다. 파일을 열 수 없습니다.: PDF Reader 앱이 APK 파일을 잘못된 형식의 문서로 인식했을 때 뜨는 오류", keywords: ["에러코드","오류코드","오류"] },
-  { category: "오류", text: "패키지 파싱오류: 학습자 휴대폰 캐시 삭제로 해결", keywords: ["에러코드","오류코드","파싱"] },
-  { category: "재응시", text: "GS리테일 재응시 가능", keywords: ["GS","GS리테일","재응시","과락"] },
-  { category: "가입", text: "지해로 개인가입 2월 말 오픈 예정", keywords: ["지해로","가입","해양수산부"] },
-  { category: "학습", text: "차그룹 안전보건교육 기간연장 불가", keywords: ["차그룹","연장","기간연장","안전"] },
-  { category: "학습", text: "차그룹 신청일 포함 3일 이내 취소 가능", keywords: ["차그룹","신청","수강신청","취소"] },
-  { category: "대관", text: "휴넷캠퍼스 대관은 임재훈님 문의", keywords: ["문의","대관","휴넷캠퍼스"] },
-  { category: "학습", text: "네이버커넥트 부스트캠프 OT 및 학습 관련 문의 시 boost_help@naver.com", keywords: ["네이버","부스트캠프","커넥트","네이버커넥트"] },
-  { category: "재응시", text: "국립암센터 재응시 문의 시 교육수련팀 안내", keywords: ["국립암센터","암센터","재응시","과락"] },
-  { category: "학습", text: "국립암센터 취소 문의 시 교육훈련팀 안내", keywords: ["국립암센터","암센터","취소","신청"] },
-  { category: "재응시", text: "국민건강보험공단[특별안전보건교육]_4.폭발성물질, 인화성액체의 취급작업 등 과정 재응시 문의 시 사내 송정아 대리 안내", keywords: ["국민건강보험공단","건보","재응시","과락"] },
-  { category: "학습", text: "국민건강보험공단 수시과정 취소 불가", keywords: ["국민건강보험공단","건보","신청","취소"] },
-  { category: "재응시", text: "국민연금공단 노후준비지원실 기업 재응시 모두 사내문의", keywords: ["국민연금공단","노후준비지원실","재응시","과락"] },
-  { category: "재응시", text: "대한적십자사 인재개발원 재응시 사내문의", keywords: ["대한적십자사 인재개발원","적십자","재응시"] },
-  { category: "학습", text: "건강보험심사평가원 밀리의서재 수료기준 1개월 1권 완독", keywords: ["수료","수료기준","밀리의서재"] },
-  { category: "학습", text: "클리드아카데미 경상북도 울진군 교재 미제공 연수원", keywords: ["클리드","지역정보개발원","교재"] },
-  { category: "학습", text: "클리드아카데미 인천광역시 중구 홀수달에만 수강 가능", keywords: ["클리드","지역정보개발원","신청"] },
-  { category: "학습", text: "클리드아카데미 강원특별자치도 인제군 월별 신청과정수 제한 없음", keywords: ["클리드","지역정보개발원","신청"] },
-  { category: "학습", text: "여신금융 시험접수사이트 허용 문자 { } [ ] ( ) / | ? ! . * ~ ‘ ^ - _ + # $ % =", keywords: ["여신","여신금융협회","가입"] },
-  { category: "학습", text: "여신금융 시험 4지선다형 40문항, 진위형(O/X) 10문항으로 총50문항", keywords: ["여신","여신금융협회","시험"] },
-  { category: "학습", text: "맥스 AI 구독권 수료기준 학습완료티켓 8회", keywords: ["맥스","구독권","수료"] },
-  { category: "학습", text: "부커스 구독권 수료기준 1권 기준 80%이상 열람", keywords: ["부커스","구독권","수료"] },
-  { category: "학습", text: "성희롱예방교육 문의처 고용노동부 1350", keywords: ["법정교육","필수","문의"] },
-  { category: "학습", text: "개인정보보호교육 문의처 한국인터넷진흥원 1544-5118", keywords: ["법정교육","필수교육","문의"] },
-  { category: "학습", text: "장애인인식개선교육 문의처 한국장애인고용공단 1588-1519", keywords: ["법정교육","필수교육","문의"] },
-  { category: "학습", text: "퇴직연금교육 문의처 근로복지공단 1661-0075", keywords: ["법정교육","필수교육","문의"] }
+// 초기 GUIDE 데이터
+const INITIAL_GUIDE = [
+  {category: "재응시", text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내", keywords:["재응시","GS건설","과락","GS"]},
+  {category: "오류", text: "에러코드 224002: 캐시삭제로 해결", keywords:["에러코드","오류코드","오류"]},
+  {category: "오류", text: "에러코드 232011, 102630: 네트워크 불안정(사내망 보안 설정이나 와이파이 문제), 데이터누적사유(캐시), 브라우저 버전 문제", keywords:["에러코드","오류코드","오류"]},
+  {category: "오류", text: "포트가 사용중입니다. 기기를 재부팅하세요.: 어플삭제, 기기재부팅, 어플재설치 하면 대부분 해결", keywords:["에러코드","오류코드","어플"]},
+  {category: "오류", text: "플레이어에서 오류가 발생하여 종료합니다.: 데이터환경불안정, 기기 메모리 부족 등의 문제", keywords:["에러코드","오류코드","오류"]},
+  {category: "오류", text: "우호! 뭔가 잘못되었습니다. 파일을 열 수 없습니다.: PDF Reader 앱이 APK 파일을 잘못된 형식의 문서로 인식했을 때 뜨는 오류", keywords:["에러코드","오류코드","오류"]},
+  {category: "오류", text: "패키지 파싱오류: 학습자 휴대폰 캐시 삭제로 해결", keywords:["에러코드","오류코드","파싱"]},
+  {category: "재응시", text: "GS리테일 재응시 가능", keywords:["GS","GS리테일","재응시","과락"]},
+  {category: "가입", text: "지해로 개인가입 2월 말 오픈 예정", keywords:["지해로","가입","해양수산부"]},
+  {category: "학습", text: "차그룹 안전보건교육 기간연장 불가", keywords:["차그룹","연장","기간연장","안전"]},
+  {category: "학습", text: "차그룹 신청일 포함 3일 이내 취소 가능", keywords:["차그룹","신청","수강신청","취소"]},
+  {category: "대관", text: "휴넷캠퍼스 대관은 임재훈님 문의", keywords:["문의","대관","휴넷캠퍼스"]},
+  {category: "학습", text: "네이버커넥트 부스트캠프 OT 및 학습 관련 문의 시 boost_help@naver.com", keywords:["네이버","부스트캠프","커넥트","네이버커넥트"]},
+  {category: "재응시", text: "국립암센터 재응시 문의 시 교육수련팀 안내", keywords:["국립암센터","암센터","재응시","과락"]},
+  {category: "학습", text: "국립암센터 취소 문의 시 교육훈련팀 안내", keywords:["국립암센터","암센터","취소","신청"]},
+  {category: "재응시", text: "국민건강보험공단[특별안전보건교육]_4.폭발성물질, 인화성액체의 취급작업 등 과정 재응시 문의 시 사내 송정아 대리 안내", keywords:["국민건강보험공단","건보","재응시","과락"]},
+  {category: "학습", text: "국민건강보험공단 수시과정 취소 불가", keywords:["국민건강보험공단","건보","신청","취소"]},
+  {category: "재응시", text: "국민연금공단 노후준비지원실 기업 재응시 모두 사내문의", keywords:["국민연금공단","노후준비지원실","재응시","과락"]},
+  {category: "재응시", text: "대한적십자사 인재개발원 재응시 사내문의", keywords:["대한적십자사 인재개발원","적십자","재응시"]},
+  {category: "학습", text: "건강보험심사평가원 밀리의서재 수료기준 1개월 1권 완독", keywords:["수료","수료기준","밀리의서재"]},
+  {category: "학습", text: "클리드아카데미 경상북도 울진군 교재 미제공 연수원", keywords:["클리드","지역정보개발원","교재"]},
+  {category: "학습", text: "클리드아카데미 인천광역시 중구 홀수달에만 수강 가능", keywords:["클리드","지역정보개발원","신청"]},
+  {category: "학습", text: "클리드아카데미 강원특별자치도 인제군 월별 신청과정수 제한 없음", keywords:["클리드","지역정보개발원","신청"]},
+  {category: "학습", text: "여신금융 시험접수사이트 허용 문자 { } [ ] ( ) / | ? ! . * ~ ‘ ^ - _ + # $ % =", keywords:["여신","여신금융협회","가입"]},
+  {category: "학습", text: "여신금융 시험 4지선다형 40문항, 진위형(O/X) 10문항으로 총50문항", keywords:["여신","여신금융협회","시험"]},
+  {category: "학습", text: "맥스 AI 구독권 수료기준 학습완료티켓 8회", keywords:["맥스","구독권","수료"]},
+  {category: "학습", text: "부커스 구독권 수료기준 1권 기준 80%이상 열람", keywords:["부커스","구독권","수료"]},
+  {category: "학습", text: "성희롱예방교육 문의처 고용노동부 1350", keywords:["법정교육","필수","문의"]},
+  {category: "학습", text: "개인정보보호교육 문의처 한국인터넷진흥원 1544-5118", keywords:["법정교육","필수교육","문의"]},
+  {category: "학습", text: "장애인인식개선교육 문의처 한국장애인고용공단 1588-1519", keywords:["법정교육","필수교육","문의"]},
+  {category: "학습", text: "퇴직연금교육 문의처 근로복지공단 1661-0075", keywords:["법정교육","필수교육","문의"]}
 ];
 
-// 검색 함수
-function ask(){
-  const q = document.getElementById("q").value.trim().toLowerCase();
-  const result = document.getElementById("result");
-  if(!q) return;
+// GUIDE와 TRASH 초기화 (로컬스토리지에서 가져오거나 초기데이터)
+let GUIDE = JSON.parse(localStorage.getItem("GUIDE") || "null") || INITIAL_GUIDE;
+let TRASH = JSON.parse(localStorage.getItem("TRASH") || "[]");
+localStorage.setItem("GUIDE", JSON.stringify(GUIDE));
 
-  // 특수문자 포함 검색 지원
-  const escapeReg = str => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-  const regex = new RegExp(escapeReg(q), "i");
+let editIndex = null;
+
+// 섹션 전환
+function showSection(id){
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+  document.querySelector(`.nav button[onclick*="${id}"]`).classList.add("active");
+  if(id==='search') searchGuide();
+  if(id==='trash') showTrash();
+}
+
+// 검색
+function searchGuide(){
+  const q = document.getElementById("searchQuery").value.toLowerCase();
+  const result = document.getElementById("searchResult");
+  if(!q){ result.innerHTML=""; return; }
 
   const found = GUIDE.filter(item =>
-    regex.test(item.text) || item.keywords.some(k => regex.test(k))
+    item.text.toLowerCase().includes(q) ||
+    item.category.toLowerCase().includes(q) ||
+    item.keywords.some(k => k.toLowerCase().includes(q))
   );
 
   if(found.length){
-    result.innerHTML = "관련 내용 발견:<br><br>" + 
-      found.map(i => `<span class="category">[${i.category}]</span> ${i.text}`).join("<br>");
-  } else {
-    result.innerText = "관련 내용 없음";
-  }
+    result.innerHTML = found.map((i,index)=>`
+      <div class="card">
+        <b>[${i.category}]</b> ${i.text} <br>
+        <small>키워드: ${i.keywords.join(", ")}</small>
+        <div class="card-actions">
+          <button class="action" onclick="editGuide(${index})">수정</button>
+          <button class="delete" onclick="deleteGuide(${index})">삭제</button>
+        </div>
+      </div>
+    `).join("");
+  } else { result.innerHTML = "관련 내용 없음"; }
 }
 
-// 엔터 입력 시 검색
-function enterSearch(e){
-  if(e.key === "Enter"){
-    ask();
-  }
+// 등록/수정 저장
+function saveGuide(){
+  const cat = document.getElementById("editCategory").value.trim();
+  const txt = document.getElementById("editText").value.trim();
+  const kws = document.getElementById("editKeywords").value.split(",").map(k=>k.trim()).filter(k=>k);
+  if(!cat || !txt){ alert("카테고리와 내용을 입력하세요."); return; }
+
+  const obj = {category:cat, text:txt, keywords:kws};
+  if(editIndex!==null){ GUIDE[editIndex]=obj; editIndex=null; }
+  else{ GUIDE.push(obj); }
+
+  localStorage.setItem("GUIDE", JSON.stringify(GUIDE));
+  document.getElementById("editCategory").value="";
+  document.getElementById("editText").value="";
+  document.getElementById("editKeywords").value="";
+  alert("저장 완료!");
+  showSection('search');
 }
+
+// 수정
+function editGuide(index){
+  const item = GUIDE[index];
+  document.getElementById("editCategory").value=item.category;
+  document.getElementById("editText").value=item.text;
+  document.getElementById("editKeywords").value=item.keywords.join(", ");
+  editIndex=index;
+  showSection('add');
+}
+
+// 삭제
+function deleteGuide(index){
+  if(!confirm("정말 삭제하시겠습니까?")) return;
+  TRASH.push(GUIDE[index]);
+  GUIDE.splice(index,1);
+  localStorage.setItem("GUIDE", JSON.stringify(GUIDE));
+  localStorage.setItem("TRASH", JSON.stringify(TRASH));
+  searchGuide();
+}
+
+// 휴지통 표시
+function showTrash(){
+  const result=document.getElementById("trashResult");
+  if(!TRASH.length){ result.innerHTML="휴지통이 비어있습니다."; return; }
+  result.innerHTML=TRASH.map((i,index)=>`
+    <div class="card">
+      <b>[${i.category}]</b> ${i.text} <br>
+      <small>키워드: ${i.keywords.join(", ")}</small>
+      <div class="card-actions">
+        <button class="restore" onclick="restoreGuide(${index})">복원</button>
+        <button class="delete" onclick="permanentDelete(${index})">완전삭제</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+// 휴지통 복원
+function restoreGuide(index){
+  GUIDE.push(TRASH[index]);
+  TRASH.splice(index,1);
+  localStorage.setItem("GUIDE", JSON.stringify(GUIDE));
+  localStorage.setItem("TRASH", JSON.stringify(TRASH));
+  showTrash();
+}
+
+// 완전삭제
+function permanentDelete(index){
+  if(!confirm("완전히 삭제하시겠습니까?")) return;
+  TRASH.splice(index,1);
+  localStorage.setItem("TRASH", JSON.stringify(TRASH));
+  showTrash();
+}
+
+// 초기 검색
+searchGuide();
+
 </script>
-
 </body>
 </html>
