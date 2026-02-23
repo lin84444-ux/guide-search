@@ -31,6 +31,7 @@ button { padding:14px 20px; font-size:16px; border:none; background:black; color
 <div id="result"></div>
 
 <script>
+<script>
 const GUIDE = [
 {
   category: "재응시",
@@ -56,12 +57,29 @@ const GUIDE = [
   category: "학습",
   text: "차그룹 신청일 포함 3일 이내 취소 가능",
   keywords: ["차그룹","신청","수강신청","취소"]
-},
-{
-  category: "가입",
-  text: "지해로 개인가입 2월 말 오픈 예정",
-  keywords: ["지해로","가입","해양수산부"]
-`;
+}
+];
+
+function ask(){
+  const q = document.getElementById("q").value.toLowerCase();
+  const result = document.getElementById("result");
+
+  if(!q) return;
+
+  const found = GUIDE.filter(item =>
+    item.text.toLowerCase().includes(q) ||
+    item.keywords.some(k => k.toLowerCase().includes(q))
+  );
+
+  if(found.length){
+    result.innerText =
+      "관련 내용 발견:\n\n" +
+      found.map(i => `[${i.category}] ${i.text}`).join("\n");
+  }else{
+    result.innerText = "관련 내용 없음";
+  }
+}
+</script>
 
 function ask(){
   const q = document.getElementById("q").value;
@@ -83,5 +101,6 @@ function ask(){
 </body>
 
 </html>
+
 
 
