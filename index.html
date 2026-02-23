@@ -2,189 +2,256 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>업무처리 가이드 & 오늘의 공유</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkHub | 업무 가이드 & 공유</title>
 <style>
-/* 기본 스타일 */
-body { font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif; margin:0; padding:0; background:#f7f6f5; color:#333; }
-header { background:#a8dadc; color:#1d3557; padding:20px 40px; font-size:24px; font-weight:600; }
-main { max-width:1000px; margin:40px auto; padding:0 20px; }
-h2 { margin-top:30px; color:#457b9d; }
+  :root {
+    --bg-color: #f8f9fa;
+    --primary-color: #a2d2ff; /* 파스텔 블루 */
+    --secondary-color: #ffafcc; /* 파스텔 핑크 */
+    --accent-color: #bde0fe;
+    --text-main: #495057;
+    --text-dark: #212529;
+    --white: #ffffff;
+    --shadow: 0 4px 15px rgba(0,0,0,0.05);
+  }
 
-/* 입력, 버튼 스타일 */
-.search-box, .admin-box { display:flex; gap:10px; margin-top:10px; }
-input, textarea { flex:1; padding:12px; font-size:16px; border:1px solid #ddd; border-radius:6px; outline:none; }
-button { padding:12px 20px; font-size:16px; border:none; border-radius:6px; cursor:pointer; background:#457b9d; color:white; }
-button.delete { background:#f28482; }
-button.restore { background:#90be6d; }
-button.complete { background:#f4a261; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    margin: 0; padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.6;
+  }
 
-/* 리스트 아이템 */
-.list-item { padding:10px 15px; background:white; margin-bottom:10px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1); display:flex; justify-content:space-between; align-items:center; }
-.list-text { flex:1; }
-.list-item input { width:100%; border:1px solid #ddd; border-radius:4px; padding:4px; }
+  /* --- 헤더 --- */
+  header {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--white);
+    box-shadow: var(--shadow);
+  }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: -1px; }
+  header p { margin: 5px 0 0; opacity: 0.9; font-size: 14px; }
 
-/* 오늘의 공유창 */
-#today-share { background:#ffe5d9; padding:15px; border-radius:6px; margin-bottom:10px; }
+  main { max-width: 900px; margin: -30px auto 50px; padding: 0 20px; }
 
-/* 관리자 패널 */
-#admin-panel { display:none; margin-top:20px; background:#e0f7fa; padding:15px; border-radius:6px; }
-#trash-list { background:#f0efeb; padding:15px; border-radius:6px; margin-top:20px; }
+  /* --- 공통 카드 스타일 --- */
+  .card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    border: none;
+  }
+  h2 { font-size: 18px; color: var(--text-dark); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  h2::before { content: '•'; color: var(--secondary-color); font-size: 24px; }
+
+  /* --- 입력창 & 버튼 --- */
+  .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+  input, textarea {
+    flex: 1; padding: 12px 15px; border: 1px solid #eee;
+    border-radius: 10px; outline: none; transition: 0.3s;
+    background: #fcfcfc;
+  }
+  input:focus, textarea:focus { border-color: var(--primary-color); background: #fff; }
+  
+  button {
+    padding: 12px 24px; border: none; border-radius: 10px;
+    cursor: pointer; font-weight: 600; transition: 0.2s;
+    background: var(--primary-color); color: white;
+  }
+  button:hover { opacity: 0.8; transform: translateY(-1px); }
+  .btn-secondary { background: var(--secondary-color); }
+  .btn-outline { background: #eee; color: #777; font-size: 12px; padding: 5px 10px; }
+
+  /* --- 검색 결과 & 리스트 --- */
+  .list-item { 
+    padding: 15px; background: #fff; border-bottom: 1px solid #f1f1f1;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .list-item:last-child { border-bottom: none; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: bold; background: var(--accent-color); color: #4a90e2;
+    width: fit-content;
+  }
+  .content-text { font-size: 15px; color: var(--text-dark); }
+
+  /* --- 관리자 모드 --- */
+  #admin-controls { 
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
+    background: #fdf2f5; padding: 20px; border-radius: 12px;
+  }
+  .full-width { grid-column: span 2; }
+
+  /* --- 휴지통 --- */
+  #trash-list { font-size: 14px; color: #888; }
+
+  /* 애니메이션 */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn 0.4s ease-out; }
 </style>
 </head>
 <body>
-<header>업무처리 가이드 & 오늘의 공유</header>
+
+<header>
+  <h1>WorkHub</h1>
+  <p>업무 가이드 및 오늘의 실시간 공유</p>
+</header>
+
 <main>
-
-<!-- 로그인 -->
-<div id="login-section">
-  <h2>관리자 로그인</h2>
-  <input id="admin-pass" type="password" placeholder="비밀번호 입력">
-  <button onclick="loginAdmin()">로그인</button>
-  <p id="login-msg" style="color:red;"></p>
-</div>
-
-<!-- 메인 섹션 -->
-<div id="guide-section" style="display:none;">
-
-<h2>업무 가이드 검색</h2>
-<div class="search-box">
-  <input id="q" placeholder="업무 검색..." onkeydown="if(event.key==='Enter'){searchGuide();}">
-  <button onclick="searchGuide()">검색</button>
-</div>
-<div id="result"></div>
-
-<h3>가이드 관리</h3>
-<div id="admin-panel">
-  <input id="new-category" placeholder="카테고리">
-  <input id="new-keywords" placeholder="키워드(콤마로 구분)">
-  <textarea id="new-text" placeholder="내용"></textarea>
-  <button onclick="addGuide()">등록</button>
-</div>
-
-<h3>오늘의 공유창</h3>
-<div id="today-share-section">
-  <div id="today-share"></div>
-  <div id="admin-panel">
-    <textarea id="share-text" placeholder="오늘의 공유 작성"></textarea>
-    <button onclick="addShare()">공유 등록</button>
+  <div id="login-section" class="card fade-in">
+    <h2>Admin Access</h2>
+    <div class="input-group">
+      <input id="admin-pass" type="password" placeholder="비밀번호를 입력하세요">
+      <button onclick="loginAdmin()">접속</button>
+    </div>
+    <p id="login-msg" style="color:#ff8787; font-size:13px;"></p>
   </div>
-</div>
 
-<h3>휴지통</h3>
-<div id="trash-list"></div>
+  <div id="guide-section" style="display:none;">
+    
+    <div class="card fade-in">
+      <h2>가이드 검색</h2>
+      <div class="input-group">
+        <input id="q" placeholder="키워드나 업무 내용을 입력하세요..." onkeyup="searchGuide()">
+        <button onclick="searchGuide()">검색</button>
+      </div>
+      <div id="result" class="list-container"></div>
+    </div>
 
-</div>
+    <div class="card fade-in">
+      <h2>오늘의 공유사항</h2>
+      <div id="today-share" style="margin-bottom: 20px;"></div>
+      <div class="input-group">
+        <textarea id="share-text" placeholder="공유할 내용을 입력하세요..."></textarea>
+        <button onclick="addShare()" class="btn-secondary">등록</button>
+      </div>
+    </div>
+
+    <div class="card fade-in">
+      <h2>새 가이드 등록</h2>
+      <div id="admin-controls">
+        <input id="new-category" placeholder="카테고리 (예: 오류)">
+        <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
+        <textarea id="new-text" class="full-width" placeholder="가이드 상세 내용"></textarea>
+        <button onclick="addGuide()" class="full-width">데이터베이스 저장</button>
+      </div>
+    </div>
+
+    <div class="card fade-in">
+      <h2>휴지통</h2>
+      <div id="trash-list"></div>
+    </div>
+  </div>
+</main>
 
 <script>
-/* 초기 데이터 */
-let GUIDE = [
-  {category:"재응시", text:"GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내", keywords:["재응시","GS건설","과락","GS"]},
-  {category:"오류", text:"에러코드 224002: 캐시삭제로 해결", keywords:["에러코드","오류코드","오류"]},
-  {category:"오류", text:"포트 사용중: 기기 재부팅 필요", keywords:["에러코드","어플"]},
-  {category:"가입", text:"지해로 개인가입 2월 말 오픈 예정", keywords:["지해로","가입"]}
+/* --- 데이터 및 로직 --- */
+let GUIDE = JSON.parse(localStorage.getItem("guide")) || [
+  {category:"재응시", text:"GS건설 온보딩 과정 재응시는 담당자에게 개별 문의 바랍니다.", keywords:["재응시","GS","과락"]},
+  {category:"오류", text:"에러코드 224002 발생 시 브라우저 캐시를 삭제해 주세요.", keywords:["에러","캐시"]},
+  {category:"가입", text:"지해로 개인가입 서비스는 2월 말 오픈 예정입니다.", keywords:["지해로","가입"]}
 ];
 
 let shares = JSON.parse(localStorage.getItem("shares")||"[]");
 let trash = JSON.parse(localStorage.getItem("trash")||"[]");
 
-/* 로그인 */
 function loginAdmin(){
-  const pass=document.getElementById("admin-pass").value;
-  if(pass==="6559"){
+  const pass = document.getElementById("admin-pass").value;
+  if(pass === "6559"){
     document.getElementById("login-section").style.display="none";
     document.getElementById("guide-section").style.display="block";
-    renderGuides();
     renderShares();
     renderTrash();
-  } else { document.getElementById("login-msg").innerText="비밀번호가 틀렸습니다."; }
+  } else {
+    document.getElementById("login-msg").innerText="비밀번호가 올바르지 않습니다.";
+  }
 }
 
-/* 검색 */
 function searchGuide(){
-  const q=document.getElementById("q").value.toLowerCase();
-  const result=document.getElementById("result");
-  if(!q){ result.innerHTML=""; return; }
-  const found=GUIDE.filter(item=>
+  const q = document.getElementById("q").value.toLowerCase();
+  const result = document.getElementById("result");
+  if(!q) { result.innerHTML=""; return; }
+
+  const found = GUIDE.filter(item => 
     item.text.toLowerCase().includes(q) ||
-    item.keywords.some(k=>k.toLowerCase().includes(q))
+    item.keywords.some(k=>k.toLowerCase().includes(q)) ||
+    item.category.includes(q)
   );
-  if(found.length){
-    result.innerHTML=found.map((i,idx)=>`
-      <div class="list-item">
-        <span class="list-text">[${i.category}] ${i.text}</span>
-        <span>${i.keywords.join(", ")}</span>
-        <button onclick="editGuide(${idx})">수정</button>
-        <button class="delete" onclick="deleteGuide(${idx})">삭제</button>
-      </div>
-    `).join("");
-  } else { result.innerHTML="관련 내용 없음"; }
+
+  result.innerHTML = found.map(i=>`
+    <div class="list-item">
+      <span class="badge">${i.category}</span>
+      <div class="content-text">${i.text}</div>
+    </div>
+  `).join("") || "<div style='padding:20px; color:#999;'>검색 결과가 없습니다.</div>";
 }
 
-/* 등록/수정/삭제 */
 function addGuide(){
-  const cat=document.getElementById("new-category").value;
-  const txt=document.getElementById("new-text").value;
-  const kw=document.getElementById("new-keywords").value.split(",").map(k=>k.trim());
-  if(cat && txt){ GUIDE.push({category:cat,text:txt,keywords:kw}); renderGuides(); alert("등록 완료!"); }
+  const cat = document.getElementById("new-category").value;
+  const txt = document.getElementById("new-text").value;
+  const kw = document.getElementById("new-keywords").value.split(",").map(k=>k.trim());
+  
+  if(cat && txt){
+    GUIDE.push({category:cat, text:txt, keywords:kw});
+    localStorage.setItem("guide", JSON.stringify(GUIDE));
+    alert("새 가이드가 등록되었습니다.");
+    document.getElementById("new-category").value = "";
+    document.getElementById("new-text").value = "";
+    document.getElementById("new-keywords").value = "";
+  }
 }
 
-function editGuide(idx){
-  const g=GUIDE[idx];
-  const newTxt=prompt("내용 수정:", g.text);
-  if(newTxt!==null){ g.text=newTxt; renderGuides(); }
-}
-
-function deleteGuide(idx){
-  trash.push(GUIDE.splice(idx,1)[0]);
-  renderGuides(); renderTrash();
-}
-
-/* 오늘의 공유창 */
 function addShare(){
-  const txt=document.getElementById("share-text").value;
+  const txt = document.getElementById("share-text").value;
   if(!txt) return;
   shares.push({text:txt, created:Date.now(), status:"active"});
+  localStorage.setItem("shares", JSON.stringify(shares));
   renderShares();
   document.getElementById("share-text").value="";
 }
 
 function renderShares(){
-  const container=document.getElementById("today-share");
-  const now=Date.now();
-  shares=shares.filter(s=>{
-    if(s.status==="completed" && now-s.created>86400000){ trash.push(s); return false; }
-    if(s.status==="active" && now-s.created>172800000){ return false; }
-    return true;
-  });
-  container.innerHTML=shares.map((s,i)=>`<div class="list-item">
-    ${s.text} 
-    <button class="complete" onclick="completeShare(${i})">완료</button>
-  </div>`).join("")||"현재 공유글 없음";
+  const container = document.getElementById("today-share");
+  container.innerHTML = shares.map(s=>`
+    <div class="list-item" style="border-left: 4px solid var(--secondary-color);">
+      <div class="content-text">${s.text}</div>
+      <div style="font-size:11px; color:#bbb;">${new Date(s.created).toLocaleString()}</div>
+    </div>
+  `).join("") || "<div style='color:#ccc;'>공유된 내용이 없습니다.</div>";
 }
 
-function completeShare(i){
-  shares[i].status="completed";
-  shares[i].created=Date.now();
+function renderTrash(){
+  const container = document.getElementById("trash-list");
+  container.innerHTML = trash.map((t,i)=>`
+    <div class="list-item" style="opacity:0.7">
+      <span>${t.text}</span>
+      <div>
+        <button class="btn-outline" onclick="restoreTrash(${i})">복원</button>
+        <button class="btn-outline" onclick="deleteTrash(${i})">삭제</button>
+      </div>
+    </div>
+  `).join("") || "휴지통이 비어있습니다.";
+}
+
+// 복원/삭제 로직은 기존과 동일하게 유지...
+function restoreTrash(i){
+  shares.push(trash.splice(i,1)[0]);
+  saveAndRender();
+}
+function deleteTrash(i){
+  trash.splice(i,1);
+  saveAndRender();
+}
+function saveAndRender(){
+  localStorage.setItem("shares", JSON.stringify(shares));
+  localStorage.setItem("trash", JSON.stringify(trash));
   renderShares();
   renderTrash();
-}
-
-/* 휴지통 */
-function renderTrash(){
-  const container=document.getElementById("trash-list");
-  container.innerHTML=trash.map((t,i)=>`<div class="list-item">
-    ${t.text}
-    <button class="restore" onclick="restoreTrash(${i})">복원</button>
-    <button class="delete" onclick="deleteTrash(${i})">완전삭제</button>
-  </div>`).join("")||"휴지통 비어있음";
-}
-
-function restoreTrash(i){
-  shares.push(trash.splice(i,1)[0]); renderShares(); renderTrash();
-}
-
-function deleteTrash(i){
-  trash.splice(i,1); renderTrash();
 }
 </script>
 </body>
