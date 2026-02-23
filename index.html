@@ -24,41 +24,143 @@ button { padding:14px 20px; font-size:16px; border:none; background:black; color
 <h1>업무처리 가이드 검색</h1>
 
 <div class="search-box">
-<input id="q" placeholder="궁금한 업무를 입력하세요">
-<button onclick="ask()">검색</button>
+  <input id="q" placeholder="궁금한 업무를 입력하세요" onkeydown="enterSearch(event)">
+  <button onclick="ask()">검색</button>
 </div>
 
 <div id="result"></div>
 
 <script>
+// GUIDE 배열 (말씀해주신 키워드와 내용 모두 반영)
 const GUIDE = [
-{
-  category: "재응시",
-  text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내",
-  keywords: ["재응시","GS건설","과락","GS"]
-},
-{
-  category: "재응시",
-  text: "GS리테일 재응시 가능",
-  keywords: ["GS","GS리테일","재응시","과락"]
-},
-{
-  category: "가입",
-  text: "지해로 개인가입 2월 말 오픈 예정",
-  keywords: ["지해로","가입","해양수산부"]
-},
-{
-  category: "학습",
-  text: "차그룹 안전보건교육 기간연장 불가",
-  keywords: ["차그룹","연장","기간연장","안전"]
-},
-{
-  category: "학습",
-  text: "차그룹 신청일 포함 3일 이내 취소 가능",
-  keywords: ["차그룹","신청","수강신청","취소"]
-}
+  {
+    category: "재응시",
+    text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내",
+    keywords: ["재응시","GS건설","과락","GS"]
+  },
+  {
+    category: "재응시",
+    text: "GS리테일 재응시 가능",
+    keywords: ["GS","GS리테일","재응시","과락"]
+  },
+  {
+    category: "가입",
+    text: "지해로 개인가입 2월 말 오픈 예정",
+    keywords: ["지해로","가입","해양수산부"]
+  },
+  {
+    category: "학습",
+    text: "차그룹 안전보건교육 기간연장 불가",
+    keywords: ["차그룹","연장","기간연장","안전"]
+  },
+  {
+    category: "학습",
+    text: "차그룹 신청일 포함 3일 이내 취소 가능",
+    keywords: ["차그룹","신청","수강신청","취소"]
+  },
+  {
+    category: "대관",
+    text: "휴넷캠퍼스 대관은 임재훈님 문의",
+    keywords: ["문의","대관","휴넷캠퍼스"]
+  },
+  {
+    category: "학습",
+    text: "네이버커넥트 부스트캠프 OT 및 학습 관련 문의 시 boost_help@naver.com",
+    keywords: ["네이버","부스트캠프","커넥트","네이버커넥트"]
+  },
+  {
+    category: "재응시",
+    text: "국립암센터 재응시 문의 시 교육수련팀 안내",
+    keywords: ["국립암센터","암센터","재응시","과락"]
+  },
+  {
+    category: "학습",
+    text: "국립암센터 취소 문의 시 교육훈련팀 안내",
+    keywords: ["국립암센터","암센터","취소","신청"]
+  },
+  {
+    category: "재응시",
+    text: "국민건강보험공단[특별안전보건교육]_4.폭발성물질, 인화성액체의 취급작업 등 과정 재응시 문의 시 사내 송정아 대리 안내",
+    keywords: ["국민건강보험공단","건보","재응시","과락"]
+  },
+  {
+    category: "학습",
+    text: "국민건강보험공단 수시과정 취소 불가",
+    keywords: ["국민건강보험공단","건보","신청","취소"]
+  },
+  {
+    category: "재응시",
+    text: "국민연금공단 노후준비지원실 기업 재응시 모두 사내문의",
+    keywords: ["국민연금공단","노후준비지원실","재응시","과락"]
+  },
+  {
+    category: "재응시",
+    text: "대한적십자사 인재개발원 재응시 사내문의",
+    keywords: ["대한적십자사 인재개발원","적십자","재응시"]
+  },
+  {
+    category: "학습",
+    text: "건강보험심사평가원 밀리의서재 수료기준 1개월 1권 완독",
+    keywords: ["수료","수료기준","밀리의서재"]
+  },
+  {
+    category: "학습",
+    text: "클리드아카데미 경상북도 울진군 교재 미제공 연수원",
+    keywords: ["클리드","지역정보개발원","교재"]
+  },
+  {
+    category: "학습",
+    text: "클리드아카데미 인천광역시 중구 홀수달에만 수강 가능",
+    keywords: ["클리드","지역정보개발원","신청"]
+  },
+  {
+    category: "학습",
+    text: "클리드아카데미 강원특별자치도 인제군 월별 신청과정수 제한 없음",
+    keywords: ["클리드","지역정보개발원","신청"]
+  },
+  {
+    category: "학습",
+    text: "여신금융 시험접수사이트 허용 문자 { } [ ] ( ) / | ? ! . * ~ ‘ ^ - _ + # $ % =",
+    keywords: ["여신","여신금융협회","가입"]
+  },
+  {
+    category: "학습",
+    text: "여신금융 시험 4지선다형 40문항, 진위형(O/X) 10문항으로 총50문항",
+    keywords: ["여신","여신금융협회","시험"]
+  },
+  {
+    category: "학습",
+    text: "맥스 AI 구독권 수료기준 학습완료티켓 8회",
+    keywords: ["맥스","구독권","수료"]
+  },
+  {
+    category: "학습",
+    text: "부커스 구독권 수료기준 1권 기준 80%이상 열람",
+    keywords: ["부커스","구독권","수료"]
+  },
+  {
+    category: "학습",
+    text: "성희롱예방교육 문의처 고용노동부 1350",
+    keywords: ["법정교육","필수","문의"]
+  },
+  {
+    category: "학습",
+    text: "개인정보보호교육 문의처 한국인터넷진흥원 1544-5118",
+    keywords: ["법정교육","필수교육","문의"]
+  },
+  {
+    category: "학습",
+    text: "장애인인식개선교육 문의처 한국장애인고용공단 1588-1519",
+    keywords: ["법정교육","필수교육","문의"]
+  },
+  {
+    category: "학습",
+    text: "퇴직연금교육 문의처 근로복지공단 1661-0075",
+    keywords: ["법정교육","필수교육","문의"]
+  }
 ];
 
+// 검색 함수
 function ask(){
   const q = document.getElementById("q").value.toLowerCase();
   const result = document.getElementById("result");
@@ -74,33 +176,18 @@ function ask(){
     result.innerText =
       "관련 내용 발견:\n\n" +
       found.map(i => `[${i.category}] ${i.text}`).join("\n");
-  }else{
+  } else {
     result.innerText = "관련 내용 없음";
   }
 }
-</script>
 
-function ask(){
-  const q = document.getElementById("q").value;
-  const result = document.getElementById("result");
-
-  if(!q) return;
-
-  const text = GUIDE.toLowerCase();
-  const keyword = q.toLowerCase();
-
-  if(text.includes(keyword)){
-    result.innerText = "관련 내용 발견:\n\n" + GUIDE.split("\n").filter(v=>v.toLowerCase().includes(keyword)).join("\n");
-  }else{
-    result.innerText = "관련 내용 없음";
+// 엔터 입력 시 검색
+function enterSearch(e){
+  if(e.key === "Enter"){
+    ask();
   }
 }
 </script>
 
 </body>
-
 </html>
-
-
-
-
