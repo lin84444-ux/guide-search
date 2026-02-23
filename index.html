@@ -3,286 +3,275 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub v2 | 업무 가이드 & 실시간 공유</title>
+<title>WorkHub | 업무 가이드 & 공유</title>
 <style>
   :root {
-    --bg-color: #f4f7f9;
-    --primary-color: #4a69bd; /* 차분한 블루 */
-    --admin-color: #607d8b;  /* 관리자 그레이 */
-    --accent-color: #78e08f; /* 완료/성공 그린 */
-    --text-main: #2f3640;
-    --text-muted: #7f8c8d;
+    --bg-color: #f8f9fa;
+    --primary-color: #a2d2ff; /* 파스텔 블루 */
+    --secondary-color: #d1d8e0; /* 핑크 대신 차분한 그레이톤 블루 */
+    --accent-color: #bde0fe;
+    --text-main: #495057;
+    --text-dark: #212529;
     --white: #ffffff;
-    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow: 0 4px 15px rgba(0,0,0,0.05);
   }
 
   body {
-    font-family: 'Pretendard', system-ui, sans-serif;
+    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
     margin: 0; padding: 0;
     background-color: var(--bg-color);
     color: var(--text-main);
+    line-height: 1.6;
   }
 
-  /* --- 헤더 & 모드 전환 --- */
+  /* --- 헤더 --- */
   header {
-    background: var(--white);
-    padding: 15px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    position: sticky; top: 0; z-index: 100;
-  }
-  header h1 { margin: 0; font-size: 20px; color: var(--primary-color); }
-  
-  .mode-badge {
-    padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;
-    margin-right: 10px;
-  }
-  .mode-user { background: #e1f5fe; color: #0288d1; }
-  .mode-admin { background: #eceff1; color: #455a64; }
-
-  main { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-
-  /* --- 카드 및 리스트 --- */
-  .card {
-    background: var(--white);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--primary-color), #92a8d1);
+    padding: 40px 20px 60px;
+    text-align: center;
+    color: var(--white);
     position: relative;
   }
-  h2 { font-size: 16px; margin-top: 0; color: var(--admin-color); border-bottom: 1px solid #f1f1f1; padding-bottom: 10px; }
-
-  .list-item {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    padding: 12px 0; border-bottom: 1px solid #f9f9f9;
+  header h1 { margin: 0; font-size: 32px; letter-spacing: -1px; }
+  header .admin-toggle-btn {
+    position: absolute; top: 20px; right: 20px;
+    background: rgba(255,255,255,0.2); border: 1px solid white;
+    padding: 5px 12px; border-radius: 20px; color: white; cursor: pointer; font-size: 12px;
   }
-  .list-item:last-child { border-bottom: none; }
+
+  main { max-width: 900px; margin: -40px auto 50px; padding: 0 20px; position: relative; }
+
+  /* --- 공통 카드 스타일 --- */
+  .card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    animation: fadeIn 0.5s ease-out;
+  }
+  h2 { font-size: 18px; color: var(--text-dark); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  h2::before { content: '•'; color: var(--primary-color); font-size: 24px; }
+
+  /* --- 입력창 & 버튼 --- */
+  .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+  input, textarea {
+    flex: 1; padding: 12px 15px; border: 1px solid #eee;
+    border-radius: 10px; outline: none; transition: 0.3s; background: #fcfcfc; font-family: inherit;
+  }
+  input:focus { border-color: var(--primary-color); }
   
-  .item-body { flex: 1; }
-  .category-tag { font-size: 11px; font-weight: bold; color: var(--primary-color); margin-bottom: 4px; display: block; }
-  .keyword-tag { font-size: 11px; background: #f0f0f0; color: #888; padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
-  .item-text { font-size: 14.5px; line-height: 1.5; }
-  .item-date { font-size: 11px; color: #ccc; margin-top: 5px; }
-  .status-done { text-decoration: line-through; color: #bbb; }
-
-  /* --- 메뉴 버튼 (점 세개) --- */
-  .menu-btn {
-    background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; padding: 0 5px;
+  button {
+    padding: 12px 24px; border: none; border-radius: 10px;
+    cursor: pointer; font-weight: 600; transition: 0.2s;
+    background: var(--primary-color); color: white;
   }
-  .menu-btn:hover { color: var(--text-main); }
+  button:hover { opacity: 0.8; transform: translateY(-1px); }
+  .btn-done { background: #6c757d; } /* 완료 버튼 색상 */
+
+  /* --- 리스트 아이템 & 점세개 메뉴 --- */
+  .list-item { 
+    padding: 15px; background: #fff; border-bottom: 1px solid #f1f1f1;
+    display: flex; justify-content: space-between; align-items: flex-start; position: relative;
+  }
+  .item-content { flex: 1; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: bold; background: #eef6ff; color: #4a90e2; margin-bottom: 8px;
+  }
+  .keyword-area { margin-top: 8px; }
+  .kw-tag { font-size: 11px; color: #999; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
+
+  .more-menu { position: relative; }
+  .dot-btn { background: none; color: #ccc; padding: 5px; font-size: 20px; line-height: 1; }
   .dropdown {
-    display: none; position: absolute; right: 20px; background: white;
-    border: 1px solid #eee; border-radius: 8px; box-shadow: var(--shadow); z-index: 10;
+    display: none; position: absolute; right: 0; top: 30px; 
+    background: white; box-shadow: var(--shadow); border-radius: 8px; z-index: 10; min-width: 100px;
   }
   .dropdown button {
-    display: block; width: 100%; padding: 8px 15px; border: none; background: none;
-    font-size: 13px; text-align: left; cursor: pointer;
+    display: block; width: 100%; background: none; color: #666; padding: 10px; font-size: 13px; text-align: left; border-radius: 0;
   }
-  .dropdown button:hover { background: #f5f5f5; }
+  .dropdown button:hover { background: #f8f9fa; }
 
-  /* --- 입력 폼 --- */
-  .input-group { display: flex; gap: 8px; margin-bottom: 10px; }
-  input, textarea {
-    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
-  }
-  .btn-main { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-  
-  /* --- 관리자 전용 요소 --- */
   .admin-only { display: none; }
+  .completed { opacity: 0.5; text-decoration: line-through; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
 <header>
+  <button class="admin-toggle-btn" onclick="toggleAdmin()">관리자 전환</button>
   <h1>WorkHub</h1>
-  <div>
-    <span id="current-mode" class="mode-badge mode-user">사용자 모드</span>
-    <button id="toggle-admin-btn" onclick="toggleAdmin()" style="font-size:12px; cursor:pointer;">관리자 전환</button>
-  </div>
+  <p id="mode-text">사용자 모드입니다</p>
 </header>
 
 <main>
   <div class="card">
+    <h2>가이드 검색</h2>
     <div class="input-group">
-      <input id="search-input" placeholder="업무 가이드 검색..." onkeyup="renderGuides()">
+      <input id="q" placeholder="키워드나 내용을 입력하세요..." onkeyup="renderGuides()">
     </div>
-    <div id="guide-list"></div>
+    <div id="guide-result"></div>
   </div>
 
   <div class="card">
     <h2>오늘의 공유사항</h2>
-    <div id="share-list"></div>
-    <div class="admin-only" style="margin-top:15px; border-top:1px dashed #eee; padding-top:15px;">
-      <textarea id="share-input" placeholder="실시간 공유 내용을 입력하세요..."></textarea>
-      <button onclick="addShare()" class="btn-main" style="width:100%; margin-top:5px;">공유 등록</button>
+    <div id="share-result"></div>
+    <div class="admin-only" style="margin-top:20px; padding-top:20px; border-top: 1px dashed #eee;">
+      <div class="input-group">
+        <textarea id="share-text" placeholder="공유할 내용을 입력하세요..."></textarea>
+        <button onclick="addShare()">등록</button>
+      </div>
     </div>
   </div>
 
   <div class="card admin-only">
     <h2>새 가이드 등록</h2>
     <div class="input-group">
-      <input id="new-cat" placeholder="카테고리">
-      <input id="new-key" placeholder="키워드 (쉼표 구분)">
+      <input id="new-category" placeholder="카테고리">
+      <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
     </div>
-    <textarea id="new-txt" placeholder="상세 내용 입력" style="margin-bottom:8px;"></textarea>
-    <button onclick="addGuide()" class="btn-main" style="width:100%;">DB 저장</button>
+    <textarea id="new-text" placeholder="가이드 상세 내용" style="width:100%; margin-bottom:10px;"></textarea>
+    <button onclick="addGuide()" style="width:100%;">데이터베이스에 저장</button>
   </div>
 
   <div class="card admin-only">
-    <h2>휴지통</h2>
-    <div id="trash-list" style="font-size: 13px; color:#999;"></div>
+    <h2>휴지통 (완료된 항목 보관)</h2>
+    <div id="trash-list" style="font-size:14px; color:#888;"></div>
   </div>
 </main>
 
 <script>
-/* --- 데이터 구조 --- */
-let guides = JSON.parse(localStorage.getItem("guides")) || [
-  {id: 1, category:"오류", text:"에러코드 224002: 캐시삭제로 해결", keywords:["에러","캐시"]}
-];
+let GUIDE = JSON.parse(localStorage.getItem("guide")) || [];
 let shares = JSON.parse(localStorage.getItem("shares")) || [];
 let trash = JSON.parse(localStorage.getItem("trash")) || [];
 let isAdmin = false;
 
-/* --- 모드 전환 --- */
+// 관리자 전환
 function toggleAdmin() {
   if(!isAdmin) {
-    const pass = prompt("관리자 비밀번호를 입력하세요.");
-    if(pass === "6559") {
+    if(prompt("관리자 암호를 입력하세요") === "6559") {
       isAdmin = true;
-      document.getElementById("current-mode").innerText = "관리자 모드";
-      document.getElementById("current-mode").className = "mode-badge mode-admin";
-      document.getElementById("toggle-admin-btn").innerText = "사용자 모드 전환";
+      document.getElementById("mode-text").innerText = "관리자 모드 (수정 가능)";
       document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
-    } else { alert("비밀번호가 틀렸습니다."); }
+    }
   } else {
     isAdmin = false;
-    document.getElementById("current-mode").innerText = "사용자 모드";
-    document.getElementById("current-mode").className = "mode-badge mode-user";
-    document.getElementById("toggle-admin-btn").innerText = "관리자 전환";
+    document.getElementById("mode-text").innerText = "사용자 모드입니다";
     document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
   }
   renderGuides();
   renderShares();
 }
 
-/* --- 가이드 로직 --- */
+// 가이드 렌더링
 function renderGuides() {
-  const q = document.getElementById("search-input").value.toLowerCase();
-  const container = document.getElementById("guide-list");
-  
-  const filtered = guides.filter(g => 
-    g.text.toLowerCase().includes(q) || g.keywords.some(k => k.toLowerCase().includes(q))
-  );
+  const q = document.getElementById("q").value.toLowerCase();
+  const container = document.getElementById("guide-result");
+  const filtered = GUIDE.filter(i => i.text.toLowerCase().includes(q) || i.keywords.some(k => k.toLowerCase().includes(q)));
 
-  container.innerHTML = filtered.map(g => `
+  container.innerHTML = filtered.map((i, idx) => `
     <div class="list-item">
-      <div class="item-body">
-        <span class="category-tag">${g.category}</span>
-        <div class="item-text">${g.text}</div>
-        ${isAdmin ? `<div style="margin-top:5px;">${g.keywords.map(k=>`<span class="keyword-tag">${k}</span>`).join('')}</div>` : ''}
+      <div class="item-content">
+        <span class="badge">${i.category}</span>
+        <div class="content-text">${i.text}</div>
+        ${isAdmin ? `<div class="keyword-area">${i.keywords.map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>` : ''}
       </div>
       ${isAdmin ? `
-        <button class="menu-btn" onclick="toggleDrop('drop-g-${g.id}')">⋮</button>
-        <div id="drop-g-${g.id}" class="dropdown">
-          <button onclick="deleteGuide(${g.id})">삭제</button>
+        <div class="more-menu">
+          <button class="dot-btn" onclick="toggleDrop('g-${idx}')">⋮</button>
+          <div id="g-${idx}" class="dropdown">
+            <button onclick="deleteGuide(${idx})">삭제하기</button>
+          </div>
         </div>
       ` : ''}
     </div>
   `).join('');
 }
 
-function addGuide() {
-  const cat = document.getElementById("new-cat").value;
-  const txt = document.getElementById("new-txt").value;
-  const key = document.getElementById("new-key").value.split(",").map(k=>k.trim());
-  if(!cat || !txt) return;
-  guides.push({id: Date.now(), category: cat, text: txt, keywords: key});
-  save(); renderGuides();
-}
-
-function deleteGuide(id) {
-  guides = guides.filter(g => g.id !== id);
-  save(); renderGuides();
-}
-
-/* --- 오늘의 공유 로직 (자동 관리 포함) --- */
+// 오늘의 공유 렌더링 (자동 삭제 로직 포함)
 function renderShares() {
-  const container = document.getElementById("share-list");
+  const container = document.getElementById("share-result");
   const now = Date.now();
-  
-  // 1. 자동 관리 로직
+
+  // 자동 관리: 완료 후 1일 뒤 휴지통 / 미완료 2일 뒤 자동 삭제
   shares = shares.filter(s => {
-    const ageDay = (now - s.created) / (1000 * 60 * 60 * 24);
-    if (s.status === 'completed' && ageDay >= 1) { trash.push(s); return false; } // 완료 후 1일 뒤 휴지통
-    if (ageDay >= 2) return false; // 2일 지나면 자동 소멸
+    const hours = (now - s.created) / (1000 * 60 * 60);
+    if (s.status === 'completed' && hours >= 24) { trash.push(s); return false; }
+    if (hours >= 48) return false;
     return true;
   });
 
-  container.innerHTML = shares.map(s => `
-    <div class="list-item">
-      <div class="item-body ${s.status === 'completed' ? 'status-done' : ''}">
-        <div class="item-text">${s.text}</div>
-        <div class="item-date">${new Date(s.created).toLocaleString()} ${s.status === 'completed' ? '(완료됨)' : ''}</div>
+  container.innerHTML = shares.map((s, idx) => `
+    <div class="list-item" style="border-left: 4px solid ${s.status === 'completed' ? '#ddd' : 'var(--primary-color)'}">
+      <div class="item-content ${s.status === 'completed' ? 'completed' : ''}">
+        <div class="content-text">${s.text}</div>
+        <div style="font-size:11px; color:#bbb; margin-top:5px;">${new Date(s.created).toLocaleString()}</div>
       </div>
       ${isAdmin ? `
-        <button class="menu-btn" onclick="toggleDrop('drop-s-${s.created}')">⋮</button>
-        <div id="drop-s-${s.created}" class="dropdown">
-          <button onclick="statusShare(${s.created})">${s.status === 'active' ? '완료로 표시' : '진행중으로 변경'}</button>
-          <button onclick="deleteShare(${s.created})">즉시 삭제</button>
+        <div class="more-menu">
+          <button class="dot-btn" onclick="toggleDrop('s-${idx}')">⋮</button>
+          <div id="s-${idx}" class="dropdown">
+            <button onclick="completeShare(${idx})">${s.status === 'active' ? '완료 처리' : '진행으로 변경'}</button>
+            <button onclick="deleteShare(${idx})">즉시 삭제</button>
+          </div>
         </div>
       ` : ''}
     </div>
-  `).join('') || "<div style='color:#ccc; font-size:13px;'>현재 공유사항이 없습니다.</div>";
+  `).join('') || "<div style='color:#ccc; text-align:center; padding:20px;'>공유된 내용이 없습니다.</div>";
   
   renderTrash();
   save();
 }
 
+function addGuide() {
+  const cat = document.getElementById("new-category").value;
+  const txt = document.getElementById("new-text").value;
+  const kw = document.getElementById("new-keywords").value.split(",").map(k => k.trim());
+  if(cat && txt) {
+    GUIDE.push({category: cat, text: txt, keywords: kw});
+    save(); renderGuides();
+    document.getElementById("new-text").value = "";
+  }
+}
+
 function addShare() {
-  const txt = document.getElementById("share-input").value;
+  const txt = document.getElementById("share-text").value;
   if(!txt) return;
-  shares.push({text: txt, created: Date.now(), status: 'active'});
-  document.getElementById("share-input").value = "";
+  shares.push({text: txt, created: Date.now(), status: "active"});
+  document.getElementById("share-text").value = "";
   renderShares();
 }
 
-function statusShare(time) {
-  const item = shares.find(s => s.created === time);
-  if(item) item.status = (item.status === 'active' ? 'completed' : 'active');
+function completeShare(idx) {
+  shares[idx].status = shares[idx].status === 'active' ? 'completed' : 'active';
   renderShares();
 }
 
-function deleteShare(time) {
-  shares = shares.filter(s => s.created !== time);
-  renderShares();
-}
+function deleteGuide(idx) { GUIDE.splice(idx, 1); save(); renderGuides(); }
+function deleteShare(idx) { shares.splice(idx, 1); save(); renderShares(); }
 
-/* --- 공통 기능 --- */
 function toggleDrop(id) {
   const el = document.getElementById(id);
-  const isVisible = el.style.display === "block";
-  document.querySelectorAll('.dropdown').forEach(d => d.style.display = "none");
-  if(!isVisible) el.style.display = "block";
+  const isShow = el.style.display === 'block';
+  document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
+  if(!isShow) el.style.display = 'block';
 }
 
 function renderTrash() {
-  const container = document.getElementById("trash-list");
-  container.innerHTML = trash.map(t => `<div>• ${t.text}</div>`).join('') || "비어있음";
+  document.getElementById("trash-list").innerHTML = trash.map(t => `<div>• ${t.text}</div>`).join('') || "비어있음";
 }
 
 function save() {
-  localStorage.setItem("guides", JSON.stringify(guides));
+  localStorage.setItem("guide", JSON.stringify(GUIDE));
   localStorage.setItem("shares", JSON.stringify(shares));
   localStorage.setItem("trash", JSON.stringify(trash));
 }
 
-// 클릭 시 드롭다운 닫기
-window.onclick = function(e) { if(!e.target.matches('.menu-btn')) document.querySelectorAll('.dropdown').forEach(d => d.style.display = "none"); }
-
-// 초기 실행
+// 초기화
+window.onclick = (e) => { if(!e.target.matches('.dot-btn')) document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); }
 renderGuides();
 renderShares();
 </script>
