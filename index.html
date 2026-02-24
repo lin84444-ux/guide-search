@@ -9,7 +9,6 @@
     --bg-color: #f8f9fa;
     --primary-color: #a2d2ff;
     --secondary-color: #d1d8e0;
-    --accent-color: #bde0fe;
     --text-main: #495057;
     --text-dark: #212529;
     --white: #ffffff;
@@ -24,7 +23,6 @@
     line-height: 1.6;
   }
 
-  /* --- 헤더 --- */
   header {
     background: linear-gradient(135deg, var(--primary-color), #92a8d1);
     padding: 40px 20px 60px;
@@ -41,56 +39,48 @@
 
   main { max-width: 900px; margin: -40px auto 50px; padding: 0 20px; position: relative; }
 
-  /* --- 카드 스타일 --- */
   .card {
     background: var(--white);
     padding: 25px;
     border-radius: 16px;
     box-shadow: var(--shadow);
     margin-bottom: 25px;
-    animation: fadeIn 0.5s ease-out;
+    animation: fadeIn 0.4s ease-out;
   }
-  h2 { font-size: 18px; color: var(--text-dark); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  h2 { font-size: 18px; color: var(--text-dark); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
   h2::before { content: '•'; color: var(--primary-color); font-size: 24px; }
 
-  /* --- 입력창 & 버튼 --- */
-  .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+  .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
   input, textarea {
     flex: 1; padding: 12px 15px; border: 1px solid #eee;
-    border-radius: 10px; outline: none; transition: 0.3s; background: #fcfcfc; font-family: inherit;
+    border-radius: 10px; outline: none; background: #fcfcfc; font-size: 15px;
   }
-  input:focus { border-color: var(--primary-color); }
+  input:focus { border-color: var(--primary-color); background: #fff; }
   
   button {
-    padding: 12px 24px; border: none; border-radius: 10px;
-    cursor: pointer; font-weight: 600; transition: 0.2s;
-    background: var(--primary-color); color: white;
+    padding: 12px 20px; border: none; border-radius: 10px;
+    cursor: pointer; font-weight: 600; background: var(--primary-color); color: white;
   }
-  button:hover { opacity: 0.8; transform: translateY(-1px); }
 
-  /* --- 리스트 아이템 --- */
   .list-item { 
-    padding: 18px; background: #fff; border-bottom: 1px solid #f1f1f1;
-    display: flex; justify-content: space-between; align-items: flex-start; position: relative;
+    padding: 15px; border-bottom: 1px solid #f1f1f1;
+    display: flex; justify-content: space-between; align-items: flex-start;
   }
-  .item-content { flex: 1; }
   .badge {
-    display: inline-block; padding: 3px 12px; border-radius: 20px;
-    font-size: 11px; font-weight: bold; background: #eef6ff; color: #4a90e2; margin-bottom: 8px;
+    display: inline-block; padding: 2px 10px; border-radius: 15px;
+    font-size: 11px; font-weight: bold; background: #eef6ff; color: #4a90e2; margin-bottom: 5px;
   }
-  .content-text { font-size: 15px; color: var(--text-dark); word-break: keep-all; }
-  .keyword-area { margin-top: 10px; border-top: 1px dashed #f1f1f1; padding-top: 8px; }
-  .kw-tag { font-size: 11px; color: #aaa; background: #f8f9fa; padding: 2px 8px; border-radius: 4px; margin-right: 5px; border: 1px solid #f1f1f1; }
+  .content-text { font-size: 14.5px; color: var(--text-dark); word-break: break-all; }
+  .kw-area { margin-top: 5px; }
+  .kw-tag { font-size: 11px; color: #bbb; margin-right: 5px; }
 
-  /* --- 메뉴(점세개) --- */
-  .dot-btn { background: none; color: #ccc; padding: 5px; font-size: 20px; line-height: 1; transition: 0.2s; }
-  .dot-btn:hover { color: var(--primary-color); }
+  .dot-btn { background: none; color: #ccc; font-size: 20px; cursor: pointer; padding: 0 5px; }
   .dropdown {
-    display: none; position: absolute; right: 10px; top: 40px; 
-    background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px; z-index: 100; min-width: 100px;
+    display: none; position: absolute; right: 30px; background: white;
+    box-shadow: var(--shadow); border-radius: 8px; z-index: 10;
   }
   .dropdown button {
-    display: block; width: 100%; background: none; color: #ff6b6b; padding: 10px 15px; font-size: 13px; text-align: left; border-radius: 0;
+    display: block; width: 100%; background: none; color: #ff6b6b; padding: 10px; font-size: 13px; text-align: left;
   }
 
   .admin-only { display: none; }
@@ -111,7 +101,7 @@
   <div class="card">
     <h2>가이드 검색</h2>
     <div class="input-group">
-      <input id="q" placeholder="검색어를 입력하세요 (엔터 시 전체 데이터 노출)" onkeydown="if(event.key==='Enter') renderGuides()">
+      <input id="q" placeholder="검색어를 입력하세요 (미입력 시 전체 노출)" onkeyup="if(event.key==='Enter') renderGuides(); else if(this.value==='') renderGuides();">
       <button onclick="renderGuides()">검색</button>
     </div>
     <div id="guide-result"></div>
@@ -131,22 +121,22 @@
   <div class="card admin-only">
     <h2>새 가이드 등록</h2>
     <div class="input-group">
-      <input id="new-category" placeholder="카테고리 (예: 오류)">
+      <input id="new-category" placeholder="카테고리">
       <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
     </div>
-    <textarea id="new-text" placeholder="상세 내용을 입력하세요..." style="width:100%; margin-bottom:10px; height: 80px;"></textarea>
+    <textarea id="new-text" placeholder="상세 내용을 입력하세요..." style="width:100%; margin-bottom:10px;"></textarea>
     <button onclick="addGuide()" style="width:100%;">DB 저장하기</button>
   </div>
 
   <div class="card admin-only">
-    <h2>휴지통 (완료된 공유 보관)</h2>
-    <div id="trash-list" style="font-size:13px; color:#999; line-height: 1.8;"></div>
+    <h2>휴지통</h2>
+    <div id="trash-list" style="font-size:13px; color:#999;"></div>
   </div>
 </main>
 
 <script>
-/* --- 기본 데이터 (제공된 리스트 적용) --- */
-const DEFAULT_GUIDE = [
+/* --- 기본 데이터 세팅 --- */
+const DEFAULT_DATA = [
   { category: "재응시", text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내", keywords: ["재응시","GS건설","과락","GS"] },
   { category: "오류", text: "에러코드 224002: 캐시삭제로 해결", keywords: ["에러코드","오류코드","오류"] },
   { category: "오류", text: "에러코드 232011, 102630: 네트워크 불안정(사내망 보안 설정이나 와이파이 문제), 데이터누적사유(캐시), 브라우저 버전 문제", keywords: ["에러코드","오류코드","오류"] },
@@ -180,124 +170,105 @@ const DEFAULT_GUIDE = [
   { category: "학습", text: "퇴직연금교육 문의처 근로복지공단 1661-0075", keywords: ["법정교육","필수교육","문의"] }
 ];
 
-let GUIDE = JSON.parse(localStorage.getItem("guide")) || DEFAULT_GUIDE;
-let shares = JSON.parse(localStorage.getItem("shares")) || [];
-let trash = JSON.parse(localStorage.getItem("trash")) || [];
+// 로컬스토리지에 데이터가 없거나 비어있으면 기본 데이터로 강제 초기화
+if(!localStorage.getItem("guide") || JSON.parse(localStorage.getItem("guide")).length === 0) {
+  localStorage.setItem("guide", JSON.stringify(DEFAULT_DATA));
+}
+
+let GUIDE = JSON.parse(localStorage.getItem("guide"));
+let shares = JSON.parse(localStorage.getItem("shares") || "[]");
+let trash = JSON.parse(localStorage.getItem("trash") || "[]");
 let isAdmin = false;
 
-// 관리자 전환
 function toggleAdmin() {
   if(!isAdmin) {
-    if(prompt("관리자 암호를 입력하세요") === "6559") {
+    if(prompt("관리자 암호: 6559") === "6559") {
       isAdmin = true;
-      document.getElementById("mode-text").innerText = "관리자 모드 (수정 가능)";
+      document.getElementById("mode-text").innerText = "관리자 모드";
       document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
     }
   } else {
     isAdmin = false;
-    document.getElementById("mode-text").innerText = "사용자 모드입니다";
+    document.getElementById("mode-text").innerText = "사용자 모드";
     document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
   }
   renderGuides();
-  renderShares();
 }
 
-// 가이드 렌더링 (아무것도 입력 안하고 검색 시 전체 노출)
 function renderGuides() {
   const q = document.getElementById("q").value.trim().toLowerCase();
   const container = document.getElementById("guide-result");
   
-  // 검색어가 없으면 전체 출력, 있으면 필터링
-  const filtered = q === "" 
-    ? GUIDE 
-    : GUIDE.filter(i => 
-        i.text.toLowerCase().includes(q) || 
-        i.category.toLowerCase().includes(q) ||
-        i.keywords.some(k => k.toLowerCase().includes(q))
-      );
+  // 검색어가 없으면 전체, 있으면 필터링
+  const filtered = q === "" ? GUIDE : GUIDE.filter(item => 
+    item.text.toLowerCase().includes(q) || 
+    item.category.toLowerCase().includes(q) ||
+    (item.keywords && item.keywords.some(k => k.toLowerCase().includes(q)))
+  );
 
-  container.innerHTML = filtered.map((i, idx) => `
+  container.innerHTML = filtered.map((item, idx) => `
     <div class="list-item">
-      <div class="item-content">
-        <span class="badge">${i.category}</span>
-        <div class="content-text">${i.text}</div>
-        ${isAdmin ? `<div class="keyword-area">${i.keywords.map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>` : ''}
+      <div style="flex:1">
+        <span class="badge">${item.category}</span>
+        <div class="content-text">${item.text}</div>
+        ${isAdmin ? `<div class="kw-area">${item.keywords.map(k=>`<span class="kw-tag">#${k}</span>`).join('')}</div>` : ''}
       </div>
       ${isAdmin ? `
-        <div class="more-menu">
+        <div style="position:relative">
           <button class="dot-btn" onclick="toggleDrop('g-${idx}')">⋮</button>
           <div id="g-${idx}" class="dropdown">
-            <button onclick="deleteGuide(${idx})">항목 삭제</button>
+            <button onclick="deleteGuide(${idx})">삭제</button>
           </div>
         </div>
       ` : ''}
     </div>
-  `).join('') || "<div style='padding:40px; text-align:center; color:#ccc;'>검색 결과가 없습니다.</div>";
+  `).join('');
 }
 
-// 오늘의 공유 렌더링 (2일 자동삭제 / 완료 후 1일 뒤 휴지통)
 function renderShares() {
   const container = document.getElementById("share-result");
-  const now = Date.now();
-
-  shares = shares.filter(s => {
-    const ageHours = (now - s.created) / (1000 * 60 * 60);
-    if (s.status === 'completed' && ageHours >= 24) { trash.push(s); return false; }
-    if (ageHours >= 48) return false;
-    return true;
-  });
-
   container.innerHTML = shares.map((s, idx) => `
-    <div class="list-item" style="border-left: 4px solid ${s.status === 'completed' ? '#ddd' : 'var(--primary-color)'}">
-      <div class="item-content ${s.status === 'completed' ? 'completed' : ''}">
+    <div class="list-item" style="border-left:4px solid #a2d2ff">
+      <div style="flex:1" class="${s.status === 'completed' ? 'completed' : ''}">
         <div class="content-text">${s.text}</div>
-        <div style="font-size:11px; color:#bbb; margin-top:5px;">${new Date(s.created).toLocaleString()}</div>
       </div>
-      ${isAdmin ? `
-        <div class="more-menu">
-          <button class="dot-btn" onclick="toggleDrop('s-${idx}')">⋮</button>
-          <div id="s-${idx}" class="dropdown">
-            <button onclick="completeShare(${idx})" style="color:#4a90e2">${s.status === 'active' ? '완료 처리' : '진행중으로 복구'}</button>
-            <button onclick="deleteShare(${idx})">즉시 삭제</button>
-          </div>
-        </div>
-      ` : ''}
+      ${isAdmin ? `<button onclick="deleteShare(${idx})" style="background:#eee; color:#666; padding:5px 10px; font-size:11px;">삭제</button>` : ''}
     </div>
-  `).join('') || "<div style='color:#ccc; text-align:center; padding:20px; font-size:13px;'>공유된 내용이 없습니다.</div>";
-  
-  renderTrash();
-  save();
+  `).join('') || "<div style='color:#ccc; text-align:center; padding:10px;'>공유사항 없음</div>";
 }
 
 function addGuide() {
   const cat = document.getElementById("new-category").value;
   const txt = document.getElementById("new-text").value;
-  const kw = document.getElementById("new-keywords").value.split(",").map(k => k.trim()).filter(k => k !== "");
+  const kw = document.getElementById("new-keywords").value.split(",").map(k=>k.trim());
   if(cat && txt) {
     GUIDE.unshift({category: cat, text: txt, keywords: kw});
-    save(); renderGuides();
-    document.getElementById("new-text").value = "";
-    alert("새 가이드가 등록되었습니다.");
-  } else {
-    alert("카테고리와 내용을 모두 입력해주세요.");
+    localStorage.setItem("guide", JSON.stringify(GUIDE));
+    renderGuides();
+    alert("등록되었습니다.");
   }
+}
+
+function deleteGuide(idx) {
+  GUIDE.splice(idx, 1);
+  localStorage.setItem("guide", JSON.stringify(GUIDE));
+  renderGuides();
 }
 
 function addShare() {
   const txt = document.getElementById("share-text").value;
   if(!txt) return;
-  shares.unshift({text: txt, created: Date.now(), status: "active"});
+  shares.unshift({text: txt, created: Date.now(), status: 'active'});
+  localStorage.setItem("shares", JSON.stringify(shares));
+  renderShares();
   document.getElementById("share-text").value = "";
-  renderShares();
 }
 
-function completeShare(idx) {
-  shares[idx].status = shares[idx].status === 'active' ? 'completed' : 'active';
+function deleteShare(idx) {
+  shares.splice(idx, 1);
+  localStorage.setItem("shares", JSON.stringify(shares));
   renderShares();
 }
-
-function deleteGuide(idx) { if(confirm("이 가이드를 영구 삭제하시겠습니까?")) { GUIDE.splice(idx, 1); save(); renderGuides(); } }
-function deleteShare(idx) { shares.splice(idx, 1); save(); renderShares(); }
 
 function toggleDrop(id) {
   const el = document.getElementById(id);
@@ -306,24 +277,13 @@ function toggleDrop(id) {
   if(!isShow) el.style.display = 'block';
 }
 
-function renderTrash() {
-  document.getElementById("trash-list").innerHTML = trash.map(t => `<div style="margin-bottom:5px;">• ${t.text} (${new Date(t.created).toLocaleDateString()})</div>`).join('') || "휴지통이 비어있습니다.";
-}
-
-function save() {
-  localStorage.setItem("guide", JSON.stringify(GUIDE));
-  localStorage.setItem("shares", JSON.stringify(shares));
-  localStorage.setItem("trash", JSON.stringify(trash));
-}
-
-// 클릭 시 드롭다운 닫기
 window.onclick = (e) => { if(!e.target.matches('.dot-btn')) document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); }
 
-// 초기 실행 (페이지 로드 시 전체 데이터 로딩)
-document.addEventListener('DOMContentLoaded', () => {
+// 실행 시 즉시 렌더링
+window.onload = () => {
   renderGuides();
   renderShares();
-});
+};
 </script>
 </body>
 </html>
