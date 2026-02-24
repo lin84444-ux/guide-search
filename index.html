@@ -7,8 +7,8 @@
 <style>
   :root {
     --bg-color: #f8f9fa;
-    --primary-color: #a2d2ff; /* 파스텔 블루 */
-    --secondary-color: #d1d8e0; /* 핑크 대신 차분한 그레이톤 블루 */
+    --primary-color: #a2d2ff;
+    --secondary-color: #d1d8e0;
     --accent-color: #bde0fe;
     --text-main: #495057;
     --text-dark: #212529;
@@ -41,7 +41,7 @@
 
   main { max-width: 900px; margin: -40px auto 50px; padding: 0 20px; position: relative; }
 
-  /* --- 공통 카드 스타일 --- */
+  /* --- 카드 스타일 --- */
   .card {
     background: var(--white);
     padding: 25px;
@@ -67,31 +67,31 @@
     background: var(--primary-color); color: white;
   }
   button:hover { opacity: 0.8; transform: translateY(-1px); }
-  .btn-done { background: #6c757d; } /* 완료 버튼 색상 */
 
-  /* --- 리스트 아이템 & 점세개 메뉴 --- */
+  /* --- 리스트 아이템 --- */
   .list-item { 
-    padding: 15px; background: #fff; border-bottom: 1px solid #f1f1f1;
+    padding: 18px; background: #fff; border-bottom: 1px solid #f1f1f1;
     display: flex; justify-content: space-between; align-items: flex-start; position: relative;
   }
   .item-content { flex: 1; }
   .badge {
-    display: inline-block; padding: 3px 10px; border-radius: 20px;
-    font-size: 12px; font-weight: bold; background: #eef6ff; color: #4a90e2; margin-bottom: 8px;
+    display: inline-block; padding: 3px 12px; border-radius: 20px;
+    font-size: 11px; font-weight: bold; background: #eef6ff; color: #4a90e2; margin-bottom: 8px;
   }
-  .keyword-area { margin-top: 8px; }
-  .kw-tag { font-size: 11px; color: #999; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
+  .content-text { font-size: 15px; color: var(--text-dark); word-break: keep-all; }
+  .keyword-area { margin-top: 10px; border-top: 1px dashed #f1f1f1; padding-top: 8px; }
+  .kw-tag { font-size: 11px; color: #aaa; background: #f8f9fa; padding: 2px 8px; border-radius: 4px; margin-right: 5px; border: 1px solid #f1f1f1; }
 
-  .more-menu { position: relative; }
-  .dot-btn { background: none; color: #ccc; padding: 5px; font-size: 20px; line-height: 1; }
+  /* --- 메뉴(점세개) --- */
+  .dot-btn { background: none; color: #ccc; padding: 5px; font-size: 20px; line-height: 1; transition: 0.2s; }
+  .dot-btn:hover { color: var(--primary-color); }
   .dropdown {
-    display: none; position: absolute; right: 0; top: 30px; 
-    background: white; box-shadow: var(--shadow); border-radius: 8px; z-index: 10; min-width: 100px;
+    display: none; position: absolute; right: 10px; top: 40px; 
+    background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px; z-index: 100; min-width: 100px;
   }
   .dropdown button {
-    display: block; width: 100%; background: none; color: #666; padding: 10px; font-size: 13px; text-align: left; border-radius: 0;
+    display: block; width: 100%; background: none; color: #ff6b6b; padding: 10px 15px; font-size: 13px; text-align: left; border-radius: 0;
   }
-  .dropdown button:hover { background: #f8f9fa; }
 
   .admin-only { display: none; }
   .completed { opacity: 0.5; text-decoration: line-through; }
@@ -111,7 +111,8 @@
   <div class="card">
     <h2>가이드 검색</h2>
     <div class="input-group">
-      <input id="q" placeholder="키워드나 내용을 입력하세요..." onkeyup="renderGuides()">
+      <input id="q" placeholder="검색어를 입력하세요 (엔터 시 전체 데이터 노출)" onkeydown="if(event.key==='Enter') renderGuides()">
+      <button onclick="renderGuides()">검색</button>
     </div>
     <div id="guide-result"></div>
   </div>
@@ -130,21 +131,56 @@
   <div class="card admin-only">
     <h2>새 가이드 등록</h2>
     <div class="input-group">
-      <input id="new-category" placeholder="카테고리">
+      <input id="new-category" placeholder="카테고리 (예: 오류)">
       <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
     </div>
-    <textarea id="new-text" placeholder="가이드 상세 내용" style="width:100%; margin-bottom:10px;"></textarea>
-    <button onclick="addGuide()" style="width:100%;">데이터베이스에 저장</button>
+    <textarea id="new-text" placeholder="상세 내용을 입력하세요..." style="width:100%; margin-bottom:10px; height: 80px;"></textarea>
+    <button onclick="addGuide()" style="width:100%;">DB 저장하기</button>
   </div>
 
   <div class="card admin-only">
-    <h2>휴지통 (완료된 항목 보관)</h2>
-    <div id="trash-list" style="font-size:14px; color:#888;"></div>
+    <h2>휴지통 (완료된 공유 보관)</h2>
+    <div id="trash-list" style="font-size:13px; color:#999; line-height: 1.8;"></div>
   </div>
 </main>
 
 <script>
-let GUIDE = JSON.parse(localStorage.getItem("guide")) || [];
+/* --- 기본 데이터 (제공된 리스트 적용) --- */
+const DEFAULT_GUIDE = [
+  { category: "재응시", text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내", keywords: ["재응시","GS건설","과락","GS"] },
+  { category: "오류", text: "에러코드 224002: 캐시삭제로 해결", keywords: ["에러코드","오류코드","오류"] },
+  { category: "오류", text: "에러코드 232011, 102630: 네트워크 불안정(사내망 보안 설정이나 와이파이 문제), 데이터누적사유(캐시), 브라우저 버전 문제", keywords: ["에러코드","오류코드","오류"] },
+  { category: "오류", text: "포트가 사용중입니다. 기기를 재부팅하세요.: 어플삭제, 기기재부팅, 어플재설치 하면 대부분 해결", keywords: ["에러코드","오류코드","어플"] },
+  { category: "오류", text: "플레이어에서 오류가 발생하여 종료합니다.: 데이터환경불안정, 기기 메모리 부족 등의 문제", keywords: ["에러코드","오류코드","오류"] },
+  { category: "오류", text: "우호! 뭔가 잘못되었습니다. 파일을 열 수 없습니다.: PDF Reader 앱이 APK 파일을 잘못된 형식의 문서로 인식했을 때 뜨는 오류", keywords: ["에러코드","오류코드","오류"] },
+  { category: "오류", text: "패키지 파싱오류: 학습자 휴대폰 캐시 삭제로 해결", keywords: ["에러코드","오류코드","파싱"] },
+  { category: "재응시", text: "GS리테일 재응시 가능", keywords: ["GS","GS리테일","재응시","과락"] },
+  { category: "가입", text: "지해로 개인가입 2월 말 오픈 예정", keywords: ["지해로","가입","해양수산부"] },
+  { category: "학습", text: "차그룹 안전보건교육 기간연장 불가", keywords: ["차그룹","연장","기간연장","안전"] },
+  { category: "학습", text: "차그룹 신청일 포함 3일 이내 취소 가능", keywords: ["차그룹","신청","수강신청","취소"] },
+  { category: "대관", text: "휴넷캠퍼스 대관은 임재훈님 문의", keywords: ["문의","대관","휴넷캠퍼스"] },
+  { category: "학습", text: "네이버커넥트 부스트캠프 OT 및 학습 관련 문의 시 boost_help@naver.com", keywords: ["네이버","부스트캠프","커넥트","네이버커넥트"] },
+  { category: "재응시", text: "국립암센터 재응시 문의 시 교육수련팀 안내", keywords: ["국립암센터","암센터","재응시","과락"] },
+  { category: "학습", text: "국립암센터 취소 문의 시 교육훈련팀 안내", keywords: ["국립암센터","암센터","취소","신청"] },
+  { category: "재응시", text: "국민건강보험공단[특별안전보건교육]_4.폭발성물질, 인화성액체의 취급작업 등 과정 재응시 문의 시 사내 송정아 대리 안내", keywords: ["국민건강보험공단","건보","재응시","과락"] },
+  { category: "학습", text: "국민건강보험공단 수시과정 취소 불가", keywords: ["국민건강보험공단","건보","신청","취소"] },
+  { category: "재응시", text: "국민연금공단 노후준비지원실 기업 재응시 모두 사내문의", keywords: ["국민연금공단","노후준비지원실","재응시","과락"] },
+  { category: "재응시", text: "대한적십자사 인재개발원 재응시 사내문의", keywords: ["대한적십자사 인재개발원","적십자","재응시"] },
+  { category: "학습", text: "건강보험심사평가원 밀리의서재 수료기준 1개월 1권 완독", keywords: ["수료","수료기준","밀리의서재"] },
+  { category: "학습", text: "클리드아카데미 경상북도 울진군 교재 미제공 연수원", keywords: ["클리드","지역정보개발원","교재"] },
+  { category: "학습", text: "클리드아카데미 인천광역시 중구 홀수달에만 수강 가능", keywords: ["클리드","지역정보개발원","신청"] },
+  { category: "학습", text: "클리드아카데미 강원특별자치도 인제군 월별 신청과정수 제한 없음", keywords: ["클리드","지역정보개발원","신청"] },
+  { category: "학습", text: "여신금융 시험접수사이트 허용 문자 { } [ ] ( ) / | ? ! . * ~ ‘ ^ - _ + # $ % =", keywords: ["여신","여신금융협회","가입"] },
+  { category: "학습", text: "여신금융 시험 4지선다형 40문항, 진위형(O/X) 10문항으로 총50문항", keywords: ["여신","여신금융협회","시험"] },
+  { category: "학습", text: "맥스 AI 구독권 수료기준 학습완료티켓 8회", keywords: ["맥스","구독권","수료"] },
+  { category: "학습", text: "부커스 구독권 수료기준 1권 기준 80%이상 열람", keywords: ["부커스","구독권","수료"] },
+  { category: "학습", text: "성희롱예방교육 문의처 고용노동부 1350", keywords: ["법정교육","필수","문의"] },
+  { category: "학습", text: "개인정보보호교육 문의처 한국인터넷진흥원 1544-5118", keywords: ["법정교육","필수교육","문의"] },
+  { category: "학습", text: "장애인인식개선교육 문의처 한국장애인고용공단 1588-1519", keywords: ["법정교육","필수교육","문의"] },
+  { category: "학습", text: "퇴직연금교육 문의처 근로복지공단 1661-0075", keywords: ["법정교육","필수교육","문의"] }
+];
+
+let GUIDE = JSON.parse(localStorage.getItem("guide")) || DEFAULT_GUIDE;
 let shares = JSON.parse(localStorage.getItem("shares")) || [];
 let trash = JSON.parse(localStorage.getItem("trash")) || [];
 let isAdmin = false;
@@ -166,11 +202,19 @@ function toggleAdmin() {
   renderShares();
 }
 
-// 가이드 렌더링
+// 가이드 렌더링 (아무것도 입력 안하고 검색 시 전체 노출)
 function renderGuides() {
-  const q = document.getElementById("q").value.toLowerCase();
+  const q = document.getElementById("q").value.trim().toLowerCase();
   const container = document.getElementById("guide-result");
-  const filtered = GUIDE.filter(i => i.text.toLowerCase().includes(q) || i.keywords.some(k => k.toLowerCase().includes(q)));
+  
+  // 검색어가 없으면 전체 출력, 있으면 필터링
+  const filtered = q === "" 
+    ? GUIDE 
+    : GUIDE.filter(i => 
+        i.text.toLowerCase().includes(q) || 
+        i.category.toLowerCase().includes(q) ||
+        i.keywords.some(k => k.toLowerCase().includes(q))
+      );
 
   container.innerHTML = filtered.map((i, idx) => `
     <div class="list-item">
@@ -183,24 +227,23 @@ function renderGuides() {
         <div class="more-menu">
           <button class="dot-btn" onclick="toggleDrop('g-${idx}')">⋮</button>
           <div id="g-${idx}" class="dropdown">
-            <button onclick="deleteGuide(${idx})">삭제하기</button>
+            <button onclick="deleteGuide(${idx})">항목 삭제</button>
           </div>
         </div>
       ` : ''}
     </div>
-  `).join('');
+  `).join('') || "<div style='padding:40px; text-align:center; color:#ccc;'>검색 결과가 없습니다.</div>";
 }
 
-// 오늘의 공유 렌더링 (자동 삭제 로직 포함)
+// 오늘의 공유 렌더링 (2일 자동삭제 / 완료 후 1일 뒤 휴지통)
 function renderShares() {
   const container = document.getElementById("share-result");
   const now = Date.now();
 
-  // 자동 관리: 완료 후 1일 뒤 휴지통 / 미완료 2일 뒤 자동 삭제
   shares = shares.filter(s => {
-    const hours = (now - s.created) / (1000 * 60 * 60);
-    if (s.status === 'completed' && hours >= 24) { trash.push(s); return false; }
-    if (hours >= 48) return false;
+    const ageHours = (now - s.created) / (1000 * 60 * 60);
+    if (s.status === 'completed' && ageHours >= 24) { trash.push(s); return false; }
+    if (ageHours >= 48) return false;
     return true;
   });
 
@@ -214,13 +257,13 @@ function renderShares() {
         <div class="more-menu">
           <button class="dot-btn" onclick="toggleDrop('s-${idx}')">⋮</button>
           <div id="s-${idx}" class="dropdown">
-            <button onclick="completeShare(${idx})">${s.status === 'active' ? '완료 처리' : '진행으로 변경'}</button>
+            <button onclick="completeShare(${idx})" style="color:#4a90e2">${s.status === 'active' ? '완료 처리' : '진행중으로 복구'}</button>
             <button onclick="deleteShare(${idx})">즉시 삭제</button>
           </div>
         </div>
       ` : ''}
     </div>
-  `).join('') || "<div style='color:#ccc; text-align:center; padding:20px;'>공유된 내용이 없습니다.</div>";
+  `).join('') || "<div style='color:#ccc; text-align:center; padding:20px; font-size:13px;'>공유된 내용이 없습니다.</div>";
   
   renderTrash();
   save();
@@ -229,18 +272,21 @@ function renderShares() {
 function addGuide() {
   const cat = document.getElementById("new-category").value;
   const txt = document.getElementById("new-text").value;
-  const kw = document.getElementById("new-keywords").value.split(",").map(k => k.trim());
+  const kw = document.getElementById("new-keywords").value.split(",").map(k => k.trim()).filter(k => k !== "");
   if(cat && txt) {
-    GUIDE.push({category: cat, text: txt, keywords: kw});
+    GUIDE.unshift({category: cat, text: txt, keywords: kw});
     save(); renderGuides();
     document.getElementById("new-text").value = "";
+    alert("새 가이드가 등록되었습니다.");
+  } else {
+    alert("카테고리와 내용을 모두 입력해주세요.");
   }
 }
 
 function addShare() {
   const txt = document.getElementById("share-text").value;
   if(!txt) return;
-  shares.push({text: txt, created: Date.now(), status: "active"});
+  shares.unshift({text: txt, created: Date.now(), status: "active"});
   document.getElementById("share-text").value = "";
   renderShares();
 }
@@ -250,7 +296,7 @@ function completeShare(idx) {
   renderShares();
 }
 
-function deleteGuide(idx) { GUIDE.splice(idx, 1); save(); renderGuides(); }
+function deleteGuide(idx) { if(confirm("이 가이드를 영구 삭제하시겠습니까?")) { GUIDE.splice(idx, 1); save(); renderGuides(); } }
 function deleteShare(idx) { shares.splice(idx, 1); save(); renderShares(); }
 
 function toggleDrop(id) {
@@ -261,7 +307,7 @@ function toggleDrop(id) {
 }
 
 function renderTrash() {
-  document.getElementById("trash-list").innerHTML = trash.map(t => `<div>• ${t.text}</div>`).join('') || "비어있음";
+  document.getElementById("trash-list").innerHTML = trash.map(t => `<div style="margin-bottom:5px;">• ${t.text} (${new Date(t.created).toLocaleDateString()})</div>`).join('') || "휴지통이 비어있습니다.";
 }
 
 function save() {
@@ -270,10 +316,14 @@ function save() {
   localStorage.setItem("trash", JSON.stringify(trash));
 }
 
-// 초기화
+// 클릭 시 드롭다운 닫기
 window.onclick = (e) => { if(!e.target.matches('.dot-btn')) document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); }
-renderGuides();
-renderShares();
+
+// 초기 실행 (페이지 로드 시 전체 데이터 로딩)
+document.addEventListener('DOMContentLoaded', () => {
+  renderGuides();
+  renderShares();
+});
 </script>
 </body>
 </html>
