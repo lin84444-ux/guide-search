@@ -1,64 +1,312 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkHub | 업무 가이드 & 공유</title>
+<style>
+  :root {
+    --bg-color: #f8f9fa;
+    --primary-color: #a2d2ff;
+    --secondary-color: #d1d8e0;
+    --text-main: #495057;
+    --text-dark: #212529;
+    --white: #ffffff;
+    --shadow: 0 4px 15px rgba(0,0,0,0.05);
+  }
 
-<div class="card admin-only">
-  <h2>엑셀 데이터 등록</h2>
-  <div class="file-upload-box">
-    <p style="font-size: 13px; margin-bottom: 10px; color: #888;">
-      엑셀 파일(.xlsx)을 업로드하여 데이터를 일괄 추가합니다.<br>
-      (열 제목: <b>category, text, keywords</b> 가 반드시 포함되어야 합니다.)
-    </p>
-    <input type="file" id="file-input" accept=".xlsx, .xls" style="display: none;">
-    <button onclick="document.getElementById('file-input').click()" style="background: var(--secondary-color); color: #666; margin-right: 5px;">엑셀 선택</button>
-    <button onclick="uploadExcel()">데이터 병합하기</button>
+  body {
+    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+    margin: 0; padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.6;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--primary-color), #92a8d1);
+    padding: 40px 20px 60px;
+    text-align: center;
+    color: var(--white);
+    position: relative;
+  }
+  header h1 { margin: 0; font-size: 32px; letter-spacing: -1px; }
+  header .admin-toggle-btn {
+    position: absolute; top: 20px; right: 20px;
+    background: rgba(255,255,255,0.2); border: 1px solid white;
+    padding: 5px 12px; border-radius: 20px; color: white; cursor: pointer; font-size: 12px;
+  }
+
+  main { max-width: 900px; margin: -40px auto 50px; padding: 0 20px; position: relative; }
+
+  .card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    animation: fadeIn 0.4s ease-out;
+  }
+  h2 { font-size: 18px; color: var(--text-dark); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+  h2::before { content: '•'; color: var(--primary-color); font-size: 24px; }
+
+  .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
+  input, textarea {
+    flex: 1; padding: 12px 15px; border: 1px solid #eee;
+    border-radius: 10px; outline: none; background: #fcfcfc; font-size: 15px;
+  }
+  input:focus { border-color: var(--primary-color); background: #fff; }
+  
+  button {
+    padding: 12px 20px; border: none; border-radius: 10px;
+    cursor: pointer; font-weight: 600; background: var(--primary-color); color: white;
+  }
+  button:hover { opacity: 0.9; }
+
+  .list-item { 
+    padding: 15px; border-bottom: 1px solid #f1f1f1;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 15px;
+    font-size: 11px; font-weight: bold; background: #eef6ff; color: #4a90e2; margin-bottom: 5px;
+  }
+  .content-text { font-size: 14.5px; color: var(--text-dark); word-break: break-all; }
+  .kw-area { margin-top: 5px; }
+  .kw-tag { font-size: 11px; color: #bbb; margin-right: 5px; }
+
+  .dot-btn { background: none; color: #ccc; font-size: 20px; cursor: pointer; padding: 0 5px; }
+  .dropdown {
+    display: none; position: absolute; right: 30px; background: white;
+    box-shadow: var(--shadow); border-radius: 8px; z-index: 10;
+  }
+  .dropdown button {
+    display: block; width: 100%; background: none; color: #ff6b6b; padding: 10px; font-size: 13px; text-align: left;
+  }
+
+  .admin-only { display: none; }
+  .completed { opacity: 0.5; text-decoration: line-through; }
+
+  /* 파일 업로드 스타일 */
+  .file-upload-box {
+    border: 2px dashed var(--secondary-color);
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="admin-toggle-btn" onclick="toggleAdmin()">관리자 전환</button>
+  <h1>WorkHub</h1>
+  <p id="mode-text">사용자 모드입니다</p>
+</header>
+
+<main>
+  <div class="card">
+    <h2>가이드 검색</h2>
+    <div class="input-group">
+      <input id="q" placeholder="검색어 입력 후 엔터 (미입력 시 전체 노출)" 
+             onkeyup="if(event.key==='Enter') renderGuides();">
+      <button onclick="renderGuides()">검색</button>
+    </div>
+    <div id="guide-result"></div>
   </div>
-</div>
+
+  <div class="card">
+    <h2>오늘의 공유사항</h2>
+    <div id="share-result"></div>
+    <div class="admin-only" style="margin-top:20px; padding-top:20px; border-top: 1px dashed #eee;">
+      <div class="input-group">
+        <textarea id="share-text" placeholder="공유할 내용을 입력하세요..."></textarea>
+        <button onclick="addShare()">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card admin-only">
+    <h2>데이터 파일 등록</h2>
+    <div class="file-upload-box">
+      <p style="font-size: 13px; margin-bottom: 10px; color: #888;">JSON 형식의 파일을 업로드하여 데이터를 추가합니다.</p>
+      <input type="file" id="file-input" accept=".json" style="display: none;">
+      <button onclick="document.getElementById('file-input').click()" style="background: var(--secondary-color); color: #666; margin-right: 5px;">파일 선택</button>
+      <button onclick="uploadFile()">데이터 병합하기</button>
+    </div>
+  </div>
+
+  <div class="card admin-only">
+    <h2>새 가이드 등록</h2>
+    <div class="input-group">
+      <input id="new-category" placeholder="카테고리">
+      <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
+    </div>
+    <textarea id="new-text" placeholder="상세 내용을 입력하세요..." style="width:100%; margin-bottom:10px;"></textarea>
+    <button onclick="addGuide()" style="width:100%;">DB 저장하기</button>
+  </div>
+
+</main>
 
 <script>
-/* ... (기존 변수 설정 동일) ... */
+/* --- 기본 데이터 세팅 (이전과 동일) --- */
+const DEFAULT_DATA = [
+  { category: "재응시", text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내", keywords: ["재응시","GS건설","과락","GS"] },
+  { category: "오류", text: "에러코드 224002: 캐시삭제로 해결", keywords: ["에러코드","오류코드","오류"] },
+  // ... (중략 - 기존 데이터 유지됨)
+  { category: "학습", text: "퇴직연금교육 문의처 근로복지공단 1661-0075", keywords: ["법정교육","필수교육","문의"] }
+];
 
-// 3. 엑셀 업로드 처리 함수 (새로 작성)
-function uploadExcel() {
+if(!localStorage.getItem("guide") || JSON.parse(localStorage.getItem("guide")).length === 0) {
+  localStorage.setItem("guide", JSON.stringify(DEFAULT_DATA));
+}
+
+let GUIDE = JSON.parse(localStorage.getItem("guide"));
+let shares = JSON.parse(localStorage.getItem("shares") || "[]");
+let isAdmin = false;
+
+function toggleAdmin() {
+  if(!isAdmin) {
+    if(prompt("관리자 암호: 6559") === "6559") {
+      isAdmin = true;
+      document.getElementById("mode-text").innerText = "관리자 모드";
+      document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
+    }
+  } else {
+    isAdmin = false;
+    document.getElementById("mode-text").innerText = "사용자 모드";
+    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+  }
+  renderGuides();
+}
+
+// 검색 엔진: 엔터를 치거나 버튼을 눌렀을 때만 작동
+function renderGuides() {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const container = document.getElementById("guide-result");
+  
+  const filtered = q === "" ? GUIDE : GUIDE.filter(item => 
+    item.text.toLowerCase().includes(q) || 
+    item.category.toLowerCase().includes(q) ||
+    (item.keywords && item.keywords.some(k => k.toLowerCase().includes(q)))
+  );
+
+  container.innerHTML = filtered.map((item, idx) => `
+    <div class="list-item">
+      <div style="flex:1">
+        <span class="badge">${item.category}</span>
+        <div class="content-text">${item.text}</div>
+        ${isAdmin ? `<div class="kw-area">${item.keywords.map(k=>`<span class="kw-tag">#${k}</span>`).join('')}</div>` : ''}
+      </div>
+      ${isAdmin ? `
+        <div style="position:relative">
+          <button class="dot-btn" onclick="toggleDrop('g-${idx}')">⋮</button>
+          <div id="g-${idx}" class="dropdown">
+            <button onclick="deleteGuide(${idx})">삭제</button>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+// 파일 업로드 처리 함수
+function uploadFile() {
   const fileInput = document.getElementById('file-input');
   const file = fileInput.files[0];
 
   if (!file) {
-    alert("먼저 엑셀 파일을 선택해주세요.");
+    alert("먼저 파일을 선택해주세요.");
     return;
   }
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-
-    // 첫 번째 시트 선택
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-
-    // 시트 데이터를 JSON으로 변환
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-    if (jsonData.length > 0) {
-      // 엑셀의 데이터를 가공 (keywords가 콤마로 구분된 문자열일 경우 배열로 변환)
-      const formattedData = jsonData.map(item => ({
-        category: item.category || "미분류",
-        text: item.text || "",
-        keywords: item.keywords ? String(item.keywords).split(",").map(k => k.trim()) : []
-      }));
-
-      // 기존 데이터와 병합 (새 데이터를 맨 위로)
-      GUIDE = [...formattedData, ...GUIDE];
-      localStorage.setItem("guide", JSON.stringify(GUIDE));
-      renderGuides();
-      
-      alert(`${formattedData.length}개의 데이터가 엑셀에서 추가되었습니다.`);
-      fileInput.value = ""; // 초기화
-    } else {
-      alert("엑셀 파일에 데이터가 없거나 형식이 잘못되었습니다.");
+    try {
+      const uploadedData = JSON.parse(e.target.result);
+      if (Array.isArray(uploadedData)) {
+        // 기존 데이터에 합치기 (최신 데이터를 앞으로)
+        GUIDE = [...uploadedData, ...GUIDE];
+        localStorage.setItem("guide", JSON.stringify(GUIDE));
+        renderGuides();
+        alert(`${uploadedData.length}개의 데이터가 추가되었습니다.`);
+        fileInput.value = ""; // 초기화
+      } else {
+        alert("JSON 형식이 올바르지 않습니다. (배열 형태여야 합니다)");
+      }
+    } catch (err) {
+      alert("파일을 읽는 중 오류가 발생했습니다. 올바른 JSON 파일인지 확인하세요.");
     }
   };
-  reader.readAsArrayBuffer(file);
+  reader.readAsText(file);
 }
 
-/* ... (나머지 renderGuides, addGuide 등 기존 함수 동일) ... */
+function renderShares() {
+  const container = document.getElementById("share-result");
+  container.innerHTML = shares.map((s, idx) => `
+    <div class="list-item" style="border-left:4px solid #a2d2ff">
+      <div style="flex:1" class="${s.status === 'completed' ? 'completed' : ''}">
+        <div class="content-text">${s.text}</div>
+      </div>
+      ${isAdmin ? `<button onclick="deleteShare(${idx})" style="background:#eee; color:#666; padding:5px 10px; font-size:11px;">삭제</button>` : ''}
+    </div>
+  `).join('') || "<div style='color:#ccc; text-align:center; padding:10px;'>공유사항 없음</div>";
+}
+
+function addGuide() {
+  const cat = document.getElementById("new-category").value;
+  const txt = document.getElementById("new-text").value;
+  const kw = document.getElementById("new-keywords").value.split(",").map(k=>k.trim());
+  if(cat && txt) {
+    GUIDE.unshift({category: cat, text: txt, keywords: kw});
+    localStorage.setItem("guide", JSON.stringify(GUIDE));
+    renderGuides();
+    alert("등록되었습니다.");
+    document.getElementById("new-category").value = "";
+    document.getElementById("new-text").value = "";
+    document.getElementById("new-keywords").value = "";
+  }
+}
+
+function deleteGuide(idx) {
+  if(confirm("정말 삭제하시겠습니까?")) {
+    GUIDE.splice(idx, 1);
+    localStorage.setItem("guide", JSON.stringify(GUIDE));
+    renderGuides();
+  }
+}
+
+function addShare() {
+  const txt = document.getElementById("share-text").value;
+  if(!txt) return;
+  shares.unshift({text: txt, created: Date.now(), status: 'active'});
+  localStorage.setItem("shares", JSON.stringify(shares));
+  renderShares();
+  document.getElementById("share-text").value = "";
+}
+
+function deleteShare(idx) {
+  shares.splice(idx, 1);
+  localStorage.setItem("shares", JSON.stringify(shares));
+  renderShares();
+}
+
+function toggleDrop(id) {
+  const el = document.getElementById(id);
+  const isShow = el.style.display === 'block';
+  document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
+  if(!isShow) el.style.display = 'block';
+}
+
+window.onclick = (e) => { if(!e.target.matches('.dot-btn')) document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); }
+
+window.onload = () => {
+  renderGuides();
+  renderShares();
+};
 </script>
+</body>
+</html>
