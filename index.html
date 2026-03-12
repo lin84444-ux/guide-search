@@ -1,289 +1,64 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub | 업무 가이드 & 공유</title>
-<style>
-  :root {
-    --bg-color: #f8f9fa;
-    --primary-color: #a2d2ff;
-    --secondary-color: #d1d8e0;
-    --text-main: #495057;
-    --text-dark: #212529;
-    --white: #ffffff;
-    --shadow: 0 4px 15px rgba(0,0,0,0.05);
-  }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-  body {
-    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
-    margin: 0; padding: 0;
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    line-height: 1.6;
-  }
-
-  header {
-    background: linear-gradient(135deg, var(--primary-color), #92a8d1);
-    padding: 40px 20px 60px;
-    text-align: center;
-    color: var(--white);
-    position: relative;
-  }
-  header h1 { margin: 0; font-size: 32px; letter-spacing: -1px; }
-  header .admin-toggle-btn {
-    position: absolute; top: 20px; right: 20px;
-    background: rgba(255,255,255,0.2); border: 1px solid white;
-    padding: 5px 12px; border-radius: 20px; color: white; cursor: pointer; font-size: 12px;
-  }
-
-  main { max-width: 900px; margin: -40px auto 50px; padding: 0 20px; position: relative; }
-
-  .card {
-    background: var(--white);
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    margin-bottom: 25px;
-    animation: fadeIn 0.4s ease-out;
-  }
-  h2 { font-size: 18px; color: var(--text-dark); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-  h2::before { content: '•'; color: var(--primary-color); font-size: 24px; }
-
-  .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
-  input, textarea {
-    flex: 1; padding: 12px 15px; border: 1px solid #eee;
-    border-radius: 10px; outline: none; background: #fcfcfc; font-size: 15px;
-  }
-  input:focus { border-color: var(--primary-color); background: #fff; }
-  
-  button {
-    padding: 12px 20px; border: none; border-radius: 10px;
-    cursor: pointer; font-weight: 600; background: var(--primary-color); color: white;
-  }
-
-  .list-item { 
-    padding: 15px; border-bottom: 1px solid #f1f1f1;
-    display: flex; justify-content: space-between; align-items: flex-start;
-  }
-  .badge {
-    display: inline-block; padding: 2px 10px; border-radius: 15px;
-    font-size: 11px; font-weight: bold; background: #eef6ff; color: #4a90e2; margin-bottom: 5px;
-  }
-  .content-text { font-size: 14.5px; color: var(--text-dark); word-break: break-all; }
-  .kw-area { margin-top: 5px; }
-  .kw-tag { font-size: 11px; color: #bbb; margin-right: 5px; }
-
-  .dot-btn { background: none; color: #ccc; font-size: 20px; cursor: pointer; padding: 0 5px; }
-  .dropdown {
-    display: none; position: absolute; right: 30px; background: white;
-    box-shadow: var(--shadow); border-radius: 8px; z-index: 10;
-  }
-  .dropdown button {
-    display: block; width: 100%; background: none; color: #ff6b6b; padding: 10px; font-size: 13px; text-align: left;
-  }
-
-  .admin-only { display: none; }
-  .completed { opacity: 0.5; text-decoration: line-through; }
-
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-</style>
-</head>
-<body>
-
-<header>
-  <button class="admin-toggle-btn" onclick="toggleAdmin()">관리자 전환</button>
-  <h1>WorkHub</h1>
-  <p id="mode-text">사용자 모드입니다</p>
-</header>
-
-<main>
-  <div class="card">
-    <h2>가이드 검색</h2>
-    <div class="input-group">
-      <input id="q" placeholder="검색어를 입력하세요 (미입력 시 전체 노출)" onkeyup="if(event.key==='Enter') renderGuides(); else if(this.value==='') renderGuides();">
-      <button onclick="renderGuides()">검색</button>
-    </div>
-    <div id="guide-result"></div>
+<div class="card admin-only">
+  <h2>엑셀 데이터 등록</h2>
+  <div class="file-upload-box">
+    <p style="font-size: 13px; margin-bottom: 10px; color: #888;">
+      엑셀 파일(.xlsx)을 업로드하여 데이터를 일괄 추가합니다.<br>
+      (열 제목: <b>category, text, keywords</b> 가 반드시 포함되어야 합니다.)
+    </p>
+    <input type="file" id="file-input" accept=".xlsx, .xls" style="display: none;">
+    <button onclick="document.getElementById('file-input').click()" style="background: var(--secondary-color); color: #666; margin-right: 5px;">엑셀 선택</button>
+    <button onclick="uploadExcel()">데이터 병합하기</button>
   </div>
-
-  <div class="card">
-    <h2>오늘의 공유사항</h2>
-    <div id="share-result"></div>
-    <div class="admin-only" style="margin-top:20px; padding-top:20px; border-top: 1px dashed #eee;">
-      <div class="input-group">
-        <textarea id="share-text" placeholder="공유할 내용을 입력하세요..."></textarea>
-        <button onclick="addShare()">등록</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card admin-only">
-    <h2>새 가이드 등록</h2>
-    <div class="input-group">
-      <input id="new-category" placeholder="카테고리">
-      <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
-    </div>
-    <textarea id="new-text" placeholder="상세 내용을 입력하세요..." style="width:100%; margin-bottom:10px;"></textarea>
-    <button onclick="addGuide()" style="width:100%;">DB 저장하기</button>
-  </div>
-
-  <div class="card admin-only">
-    <h2>휴지통</h2>
-    <div id="trash-list" style="font-size:13px; color:#999;"></div>
-  </div>
-</main>
+</div>
 
 <script>
-/* --- 기본 데이터 세팅 --- */
-const DEFAULT_DATA = [
-  { category: "재응시", text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내", keywords: ["재응시","GS건설","과락","GS"] },
-  { category: "오류", text: "에러코드 224002: 캐시삭제로 해결", keywords: ["에러코드","오류코드","오류"] },
-  { category: "오류", text: "에러코드 232011, 102630: 네트워크 불안정(사내망 보안 설정이나 와이파이 문제), 데이터누적사유(캐시), 브라우저 버전 문제", keywords: ["에러코드","오류코드","오류"] },
-  { category: "오류", text: "포트가 사용중입니다. 기기를 재부팅하세요.: 어플삭제, 기기재부팅, 어플재설치 하면 대부분 해결", keywords: ["에러코드","오류코드","어플"] },
-  { category: "오류", text: "플레이어에서 오류가 발생하여 종료합니다.: 데이터환경불안정, 기기 메모리 부족 등의 문제", keywords: ["에러코드","오류코드","오류"] },
-  { category: "오류", text: "우호! 뭔가 잘못되었습니다. 파일을 열 수 없습니다.: PDF Reader 앱이 APK 파일을 잘못된 형식의 문서로 인식했을 때 뜨는 오류", keywords: ["에러코드","오류코드","오류"] },
-  { category: "오류", text: "패키지 파싱오류: 학습자 휴대폰 캐시 삭제로 해결", keywords: ["에러코드","오류코드","파싱"] },
-  { category: "재응시", text: "GS리테일 재응시 가능", keywords: ["GS","GS리테일","재응시","과락"] },
-  { category: "가입", text: "지해로 개인가입 2월 말 오픈 예정", keywords: ["지해로","가입","해양수산부"] },
-  { category: "학습", text: "차그룹 안전보건교육 기간연장 불가", keywords: ["차그룹","연장","기간연장","안전"] },
-  { category: "학습", text: "차그룹 신청일 포함 3일 이내 취소 가능", keywords: ["차그룹","신청","수강신청","취소"] },
-  { category: "대관", text: "휴넷캠퍼스 대관은 임재훈님 문의", keywords: ["문의","대관","휴넷캠퍼스"] },
-  { category: "학습", text: "네이버커넥트 부스트캠프 OT 및 학습 관련 문의 시 boost_help@naver.com", keywords: ["네이버","부스트캠프","커넥트","네이버커넥트"] },
-  { category: "재응시", text: "국립암센터 재응시 문의 시 교육수련팀 안내", keywords: ["국립암센터","암센터","재응시","과락"] },
-  { category: "학습", text: "국립암센터 취소 문의 시 교육훈련팀 안내", keywords: ["국립암센터","암센터","취소","신청"] },
-  { category: "재응시", text: "국민건강보험공단[특별안전보건교육]_4.폭발성물질, 인화성액체의 취급작업 등 과정 재응시 문의 시 사내 송정아 대리 안내", keywords: ["국민건강보험공단","건보","재응시","과락"] },
-  { category: "학습", text: "국민건강보험공단 수시과정 취소 불가", keywords: ["국민건강보험공단","건보","신청","취소"] },
-  { category: "재응시", text: "국민연금공단 노후준비지원실 기업 재응시 모두 사내문의", keywords: ["국민연금공단","노후준비지원실","재응시","과락"] },
-  { category: "재응시", text: "대한적십자사 인재개발원 재응시 사내문의", keywords: ["대한적십자사 인재개발원","적십자","재응시"] },
-  { category: "학습", text: "건강보험심사평가원 밀리의서재 수료기준 1개월 1권 완독", keywords: ["수료","수료기준","밀리의서재"] },
-  { category: "학습", text: "클리드아카데미 경상북도 울진군 교재 미제공 연수원", keywords: ["클리드","지역정보개발원","교재"] },
-  { category: "학습", text: "클리드아카데미 인천광역시 중구 홀수달에만 수강 가능", keywords: ["클리드","지역정보개발원","신청"] },
-  { category: "학습", text: "클리드아카데미 강원특별자치도 인제군 월별 신청과정수 제한 없음", keywords: ["클리드","지역정보개발원","신청"] },
-  { category: "학습", text: "여신금융 시험접수사이트 허용 문자 { } [ ] ( ) / | ? ! . * ~ ‘ ^ - _ + # $ % =", keywords: ["여신","여신금융협회","가입"] },
-  { category: "학습", text: "여신금융 시험 4지선다형 40문항, 진위형(O/X) 10문항으로 총50문항", keywords: ["여신","여신금융협회","시험"] },
-  { category: "학습", text: "맥스 AI 구독권 수료기준 학습완료티켓 8회", keywords: ["맥스","구독권","수료"] },
-  { category: "학습", text: "부커스 구독권 수료기준 1권 기준 80%이상 열람", keywords: ["부커스","구독권","수료"] },
-  { category: "학습", text: "성희롱예방교육 문의처 고용노동부 1350", keywords: ["법정교육","필수","문의"] },
-  { category: "학습", text: "개인정보보호교육 문의처 한국인터넷진흥원 1544-5118", keywords: ["법정교육","필수교육","문의"] },
-  { category: "학습", text: "장애인인식개선교육 문의처 한국장애인고용공단 1588-1519", keywords: ["법정교육","필수교육","문의"] },
-  { category: "학습", text: "퇴직연금교육 문의처 근로복지공단 1661-0075", keywords: ["법정교육","필수교육","문의"] }
-];
+/* ... (기존 변수 설정 동일) ... */
 
-// 로컬스토리지에 데이터가 없거나 비어있으면 기본 데이터로 강제 초기화
-if(!localStorage.getItem("guide") || JSON.parse(localStorage.getItem("guide")).length === 0) {
-  localStorage.setItem("guide", JSON.stringify(DEFAULT_DATA));
-}
+// 3. 엑셀 업로드 처리 함수 (새로 작성)
+function uploadExcel() {
+  const fileInput = document.getElementById('file-input');
+  const file = fileInput.files[0];
 
-let GUIDE = JSON.parse(localStorage.getItem("guide"));
-let shares = JSON.parse(localStorage.getItem("shares") || "[]");
-let trash = JSON.parse(localStorage.getItem("trash") || "[]");
-let isAdmin = false;
+  if (!file) {
+    alert("먼저 엑셀 파일을 선택해주세요.");
+    return;
+  }
 
-function toggleAdmin() {
-  if(!isAdmin) {
-    if(prompt("관리자 암호: 6559") === "6559") {
-      isAdmin = true;
-      document.getElementById("mode-text").innerText = "관리자 모드";
-      document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+
+    // 첫 번째 시트 선택
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+
+    // 시트 데이터를 JSON으로 변환
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    if (jsonData.length > 0) {
+      // 엑셀의 데이터를 가공 (keywords가 콤마로 구분된 문자열일 경우 배열로 변환)
+      const formattedData = jsonData.map(item => ({
+        category: item.category || "미분류",
+        text: item.text || "",
+        keywords: item.keywords ? String(item.keywords).split(",").map(k => k.trim()) : []
+      }));
+
+      // 기존 데이터와 병합 (새 데이터를 맨 위로)
+      GUIDE = [...formattedData, ...GUIDE];
+      localStorage.setItem("guide", JSON.stringify(GUIDE));
+      renderGuides();
+      
+      alert(`${formattedData.length}개의 데이터가 엑셀에서 추가되었습니다.`);
+      fileInput.value = ""; // 초기화
+    } else {
+      alert("엑셀 파일에 데이터가 없거나 형식이 잘못되었습니다.");
     }
-  } else {
-    isAdmin = false;
-    document.getElementById("mode-text").innerText = "사용자 모드";
-    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
-  }
-  renderGuides();
+  };
+  reader.readAsArrayBuffer(file);
 }
 
-function renderGuides() {
-  const q = document.getElementById("q").value.trim().toLowerCase();
-  const container = document.getElementById("guide-result");
-  
-  // 검색어가 없으면 전체, 있으면 필터링
-  const filtered = q === "" ? GUIDE : GUIDE.filter(item => 
-    item.text.toLowerCase().includes(q) || 
-    item.category.toLowerCase().includes(q) ||
-    (item.keywords && item.keywords.some(k => k.toLowerCase().includes(q)))
-  );
-
-  container.innerHTML = filtered.map((item, idx) => `
-    <div class="list-item">
-      <div style="flex:1">
-        <span class="badge">${item.category}</span>
-        <div class="content-text">${item.text}</div>
-        ${isAdmin ? `<div class="kw-area">${item.keywords.map(k=>`<span class="kw-tag">#${k}</span>`).join('')}</div>` : ''}
-      </div>
-      ${isAdmin ? `
-        <div style="position:relative">
-          <button class="dot-btn" onclick="toggleDrop('g-${idx}')">⋮</button>
-          <div id="g-${idx}" class="dropdown">
-            <button onclick="deleteGuide(${idx})">삭제</button>
-          </div>
-        </div>
-      ` : ''}
-    </div>
-  `).join('');
-}
-
-function renderShares() {
-  const container = document.getElementById("share-result");
-  container.innerHTML = shares.map((s, idx) => `
-    <div class="list-item" style="border-left:4px solid #a2d2ff">
-      <div style="flex:1" class="${s.status === 'completed' ? 'completed' : ''}">
-        <div class="content-text">${s.text}</div>
-      </div>
-      ${isAdmin ? `<button onclick="deleteShare(${idx})" style="background:#eee; color:#666; padding:5px 10px; font-size:11px;">삭제</button>` : ''}
-    </div>
-  `).join('') || "<div style='color:#ccc; text-align:center; padding:10px;'>공유사항 없음</div>";
-}
-
-function addGuide() {
-  const cat = document.getElementById("new-category").value;
-  const txt = document.getElementById("new-text").value;
-  const kw = document.getElementById("new-keywords").value.split(",").map(k=>k.trim());
-  if(cat && txt) {
-    GUIDE.unshift({category: cat, text: txt, keywords: kw});
-    localStorage.setItem("guide", JSON.stringify(GUIDE));
-    renderGuides();
-    alert("등록되었습니다.");
-  }
-}
-
-function deleteGuide(idx) {
-  GUIDE.splice(idx, 1);
-  localStorage.setItem("guide", JSON.stringify(GUIDE));
-  renderGuides();
-}
-
-function addShare() {
-  const txt = document.getElementById("share-text").value;
-  if(!txt) return;
-  shares.unshift({text: txt, created: Date.now(), status: 'active'});
-  localStorage.setItem("shares", JSON.stringify(shares));
-  renderShares();
-  document.getElementById("share-text").value = "";
-}
-
-function deleteShare(idx) {
-  shares.splice(idx, 1);
-  localStorage.setItem("shares", JSON.stringify(shares));
-  renderShares();
-}
-
-function toggleDrop(id) {
-  const el = document.getElementById(id);
-  const isShow = el.style.display === 'block';
-  document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
-  if(!isShow) el.style.display = 'block';
-}
-
-window.onclick = (e) => { if(!e.target.matches('.dot-btn')) document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); }
-
-// 실행 시 즉시 렌더링
-window.onload = () => {
-  renderGuides();
-  renderShares();
-};
+/* ... (나머지 renderGuides, addGuide 등 기존 함수 동일) ... */
 </script>
-</body>
-</html>
