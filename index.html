@@ -1,47 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkHub | Smart Blue</title>
 <style>
   :root {
     --header-grad: linear-gradient(135deg, #a2d2ff, #92a8d1);
     --main-blue: #4a90e2;
     --sky-blue: #f0f7ff;
     --navy-blue: #34495e;
-    --border-blue: #d1e3f8;
     --white: #ffffff;
   }
 
   body {
     font-family: 'Pretendard', sans-serif;
-    margin: 0; padding: 0; 
-    background-color: #f4f7f9; 
-    color: #2c3e50;
-    line-height: 1.5;
+    margin: 0; padding: 0; background-color: #f4f7f9; color: #2c3e50;
   }
 
-  /* 헤더: 높이를 적절히 조절하여 잘림 방지 */
   header {
     background: var(--header-grad);
-    padding: 40px 20px; /* 패딩을 약간 줄임 */
+    padding: 40px 20px;
     text-align: center;
     color: var(--white);
     position: relative;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   }
-  header h1 { margin: 0; font-size: 32px; font-weight: 800; }
-  header #mode-text { margin-top: 8px; font-size: 14px; opacity: 0.9; }
+  header h1 { margin: 0; font-size: 32px; }
   header .admin-toggle-btn {
     position: absolute; top: 15px; right: 20px;
-    background: rgba(255,255,255,0.25); border: 1px solid white;
-    padding: 6px 14px; border-radius: 20px; color: white; cursor: pointer; font-size: 12px;
+    background: rgba(255,255,255,0.2); border: 1px solid white;
+    padding: 6px 12px; border-radius: 20px; color: white; cursor: pointer;
   }
 
-  /* 메인 컨텐츠: 간격 최적화 */
   main {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
     gap: 20px;
     max-width: 1200px;
-    margin: 20px auto; /* 상단 여백을 줄여 전체가 보이게 함 */
+    margin: 20px auto;
     padding: 0 20px;
-    box-sizing: border-box;
   }
 
   .card {
@@ -49,36 +46,135 @@
     padding: 20px;
     border-radius: 16px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    height: fit-content; /* 내용에 맞게 높이 조절 */
   }
 
-  /* 가이드 검색 영역이 길어질 수 있으므로 grid 배치 조정 */
-  .guide-zone { grid-row: span 2; border-top: 6px solid var(--main-blue); }
-  .share-zone { background-color: var(--sky-blue); border-top: 6px solid #84b6f4; }
-  .reg-zone { background-color: #f8fafc; border-top: 6px solid var(--navy-blue); }
-
-  /* 입력창 및 공통 스타일 */
   .title-area { font-size: 17px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
   .title-area i { width: 4px; height: 16px; background: var(--main-blue); border-radius: 10px; }
-  
+
+  .guide-zone { grid-row: span 2; border-top: 6px solid var(--main-blue); }
+  .share-zone { background-color: var(--sky-blue); border-top: 6px solid #84b6f4; margin-bottom: 20px; }
+  .reg-zone { border-top: 6px solid var(--navy-blue); }
+
   .input-group { display: flex; flex-direction: column; gap: 10px; }
-  input, textarea { 
-    padding: 12px; 
-    border: 1px solid #d1d9e0; 
-    border-radius: 10px; 
-    outline: none; 
-    font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
-  }
+  input, textarea { padding: 12px; border: 1px solid #d1d9e0; border-radius: 10px; width: 100%; box-sizing: border-box; }
   
-  button { padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; }
+  button { padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.2s; }
   .btn-blue { background: var(--main-blue); color: white; }
   .btn-navy { background: var(--navy-blue); color: white; }
+  
+  .list-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; }
 
-  @media (max-width: 1000px) { 
-    main { grid-template-columns: 1fr; } 
-    .guide-zone { grid-row: auto; }
-    header h1 { font-size: 28px; }
-  }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
 </style>
+</head>
+<body>
+
+<header>
+  <button class="admin-toggle-btn" onclick="toggleAdmin()">관리자 전환</button>
+  <h1>WorkHub</h1>
+  <p id="mode-text">사용자 모드입니다</p>
+</header>
+
+<main>
+  <section class="card guide-zone">
+    <div class="title-area"><i></i> 가이드 검색 및 데이터</div>
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <input id="q" placeholder="검색어를 입력하세요 (Enter)" onkeyup="if(event.key==='Enter') renderGuides();">
+        <button class="btn-blue" onclick="renderGuides()">검색</button>
+    </div>
+    <div id="guide-result">
+        </div>
+  </section>
+
+  <section class="card share-zone">
+    <div class="title-area"><i style="background:#84b6f4"></i> 오늘의 공유사항</div>
+    <div id="share-result" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
+    <div class="input-group">
+        <textarea id="share-text" placeholder="공유할 내용을 입력하세요..." rows="2"></textarea>
+        <button onclick="addShare()" class="btn-blue" style="background:#84b6f4">공유 등록</button>
+    </div>
+  </section>
+
+  <section class="card reg-zone">
+    <div class="title-area"><i style="background:var(--navy-blue)"></i> 가이드 신규 등록</div>
+    <div class="input-group">
+        <input id="new-category" placeholder="카테고리 (예: 업무, 인사)">
+        <textarea id="new-text" placeholder="상세 내용을 입력하세요..." rows="3"></textarea>
+        <button onclick="addGuide()" class="btn-navy">DB 저장하기</button>
+    </div>
+  </section>
+</main>
+
+<script>
+  // 초기 데이터 설정 (비어있으면 빈 배열)
+  let GUIDE = JSON.parse(localStorage.getItem("guide") || "[]");
+  let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
+  let isAdmin = false;
+
+  // 페이지 로드 시 즉시 실행하여 화면을 그려줌
+  window.onload = function() {
+    renderGuides();
+    renderShares();
+  };
+
+  function renderGuides() {
+    const q = document.getElementById("q").value.trim().toLowerCase();
+    const container = document.getElementById("guide-result");
+    
+    // 검색어가 없으면 전체 표시
+    const filtered = q === "" ? GUIDE : GUIDE.filter(item => 
+        item.text.toLowerCase().includes(q) || item.category.toLowerCase().includes(q)
+    );
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#999; padding:40px 0;">등록된 데이터가 없습니다.</p>`;
+        return;
+    }
+
+    container.innerHTML = filtered.map((item, idx) => `
+        <div class="list-item">
+            <b style="color:var(--main-blue)">[${item.category}]</b>
+            <div style="margin-top:5px;">${item.text}</div>
+        </div>
+    `).join('');
+  }
+
+  function addGuide() {
+    const cat = document.getElementById("new-category").value;
+    const txt = document.getElementById("new-text").value;
+    if(!cat || !txt) return alert("내용을 입력해주세요!");
+
+    GUIDE.push({ category: cat, text: txt });
+    localStorage.setItem("guide", JSON.stringify(GUIDE));
+    
+    document.getElementById("new-category").value = "";
+    document.getElementById("new-text").value = "";
+    renderGuides();
+    alert("등록되었습니다!");
+  }
+
+  function renderShares() {
+    const container = document.getElementById("share-result");
+    container.innerHTML = SHARES.map(s => `
+        <div style="padding:10px; border-bottom:1px solid #eee; font-size:14px;">• ${s}</div>
+    `).join('') || "공유사항이 없습니다.";
+  }
+
+  function addShare() {
+    const txt = document.getElementById("share-text").value;
+    if(!txt) return;
+    SHARES.push(txt);
+    localStorage.setItem("shares", JSON.stringify(SHARES));
+    document.getElementById("share-text").value = "";
+    renderShares();
+  }
+
+  function toggleAdmin() {
+    isAdmin = !isAdmin;
+    document.getElementById("mode-text").innerText = isAdmin ? "관리자 모드입니다" : "사용자 모드입니다";
+    renderGuides();
+  }
+</script>
+
+</body>
+</html>
