@@ -3,145 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | Smart Workplace</title>
+<title>WorkHub | Smart Blue Office</title>
 <style>
   :root {
-    --main-blue: #4a90e2;
-    --light-blue: #eef6ff;
-    --dark-blue: #2c3e50;
-    --bg-gray: #f4f7f9;
-    --border-color: #dbe2e8;
-    --share-bg: #fff9f9;
-    --share-point: #ff8787;
-    --reg-bg: #f0fff4;
-    --reg-point: #51cf66;
+    --primary-blue: #a2d2ff;
+    --deep-blue: #4a90e2;
+    --navy-blue: #2c3e50;
+    --soft-blue: #eef6ff;
+    --bg-gray: #f8f9fa;
     --white: #ffffff;
-    --shadow: 0 8px 20px rgba(0,0,0,0.06);
+    --shadow: 0 4px 15px rgba(0,0,0,0.05);
   }
 
   body {
     font-family: 'Pretendard', -apple-system, sans-serif;
-    margin: 0; padding: 0; background-color: var(--bg-gray); color: var(--dark-blue);
-    line-height: 1.5;
+    margin: 0; padding: 0; background-color: var(--bg-gray); color: var(--navy-blue);
   }
 
-  /* 헤더 디자인 */
+  /* 1. 요청하신 이전 스타일 헤더 복구 */
   header {
-    background: white; border-bottom: 1px solid var(--border-color);
-    padding: 15px 40px; display: flex; justify-content: space-between; align-items: center;
-    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(135deg, var(--primary-blue), #92a8d1);
+    padding: 40px 20px 60px;
+    text-align: center;
+    color: var(--white);
+    position: relative;
   }
-  header h1 { margin: 0; font-size: 22px; color: var(--main-blue); font-weight: 800; }
-  .admin-btn {
-    background: var(--light-blue); color: var(--main-blue); border: 1px solid var(--main-blue);
-    padding: 6px 15px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: 0.2s;
+  header h1 { margin: 0; font-size: 32px; letter-spacing: -1px; font-weight: 800; }
+  header #mode-text { margin-top: 10px; font-size: 14px; opacity: 0.9; }
+  header .admin-toggle-btn {
+    position: absolute; top: 20px; right: 20px;
+    background: rgba(255,255,255,0.2); border: 1px solid white;
+    padding: 5px 12px; border-radius: 20px; color: white; cursor: pointer; font-size: 12px;
   }
-  .admin-btn.active { background: var(--main-blue); color: white; }
 
   /* 메인 레이아웃 */
   main {
-    display: grid; grid-template-columns: 1.4fr 1fr; gap: 25px;
-    max-width: 1300px; margin: 30px auto; padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 25px;
+    max-width: 1200px;
+    margin: -40px auto 50px; /* 헤더 위로 살짝 올라오게 */
+    padding: 0 20px;
+    position: relative;
   }
 
   .card {
-    background: var(--white); border-radius: 18px; box-shadow: var(--shadow);
-    padding: 25px; border: 1px solid rgba(0,0,0,0.03); overflow: hidden;
+    background: var(--white);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,0.02);
   }
 
-  .section-title {
-    font-size: 17px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
-  }
+  h2 { font-size: 18px; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  h2::before { content: ''; display: inline-block; width: 4px; height: 18px; background: var(--deep-blue); border-radius: 2px; }
 
-  /* 왼쪽: 가이드 검색 결과 (구 검은네모) */
-  .guide-zone { grid-row: span 2; border-top: 5px solid var(--main-blue); }
-  .search-box { display: flex; gap: 8px; margin-bottom: 20px; }
-  .search-box input {
-    flex: 1; padding: 12px 18px; border: 2px solid var(--light-blue); border-radius: 12px;
-    outline: none; transition: 0.3s;
-  }
-  .search-box input:focus { border-color: var(--main-blue); }
+  /* 영역별 블루 포인트 컬러 */
+  .guide-zone { grid-row: span 2; }
+  .share-zone { background-color: var(--soft-blue); border: 1px solid #d0e4ff; }
+  .reg-zone { background-color: #f1f4f9; border: 1px solid #e2e8f0; }
 
-  /* 오른쪽 위: 공유건 (구 빨간네모) */
-  .share-zone { border-top: 5px solid var(--share-point); background: var(--share-bg); }
+  /* 입력 요소 */
+  .input-group { display: flex; flex-direction: column; gap: 10px; }
+  input, textarea {
+    padding: 12px; border: 1px solid #ddd; border-radius: 10px; outline: none; transition: 0.2s;
+  }
+  input:focus { border-color: var(--deep-blue); box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1); }
   
-  /* 오른쪽 아래: 등록창 (구 초록네모) */
-  .reg-zone { border-top: 5px solid var(--reg-point); background: var(--reg-bg); }
-
-  /* 입력 요소 공통 */
-  .input-group { display: flex; flex-direction: column; gap: 12px; }
-  input, textarea { padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; }
   button {
     padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.2s;
   }
-  .btn-blue { background: var(--main-blue); color: white; }
-  .btn-green { background: var(--reg-point); color: white; }
-  button:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-blue { background: var(--deep-blue); color: white; }
+  .btn-navy { background: var(--navy-blue); color: white; }
+  button:hover { opacity: 0.9; transform: translateY(-1px); }
 
-  /* 리스트 아이템 스타일 */
+  /* 리스트 아이템 */
   .list-item {
-    background: white; padding: 18px; border-radius: 12px; margin-bottom: 12px;
-    border: 1px solid var(--light-blue); position: relative;
+    padding: 15px; border-bottom: 1px solid #f1f1f1; background: #fff; margin-bottom: 10px; border-radius: 10px;
   }
-  .badge {
-    font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;
-    background: var(--light-blue); color: var(--main-blue);
-  }
-  .btn-small { padding: 4px 8px; font-size: 11px; margin-left: 5px; border-radius: 5px; }
-  .btn-del { background: #ffeded; color: #ff6b6b; }
-  .btn-edit { background: #f0f0f0; color: #666; }
+  .badge { font-size: 11px; color: var(--deep-blue); background: var(--soft-blue); padding: 3px 8px; border-radius: 5px; font-weight: bold; }
+  
+  .admin-controls { margin-top: 10px; text-align: right; display: flex; gap: 5px; justify-content: flex-end; }
+  .btn-sm { padding: 4px 10px; font-size: 11px; border-radius: 6px; font-weight: 400; }
+  .btn-edit { background: #e2e8f0; color: #475569; }
+  .btn-del { background: #f1f5f9; color: #94a3b8; }
 
-  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } .guide-zone { grid-row: auto; } }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; margin-top: 20px; } .guide-zone { grid-row: auto; } }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>WorkHub <span id="mode-badge" style="font-size:12px; font-weight:400; color:#999; margin-left:10px;">User Mode</span></h1>
-  <button id="admin-toggle" class="admin-btn" onclick="toggleAdmin()">Admin Login</button>
+  <button class="admin-toggle-btn" onclick="toggleAdmin()">관리자 전환</button>
+  <h1>WorkHub</h1>
+  <p id="mode-text">사용자 모드입니다</p>
 </header>
 
 <main>
   <section class="card guide-zone">
-    <div class="section-title">🔍 Knowledge Base</div>
-    <div class="search-box">
-      <input id="q" placeholder="키워드 입력 후 Enter (전체보기는 빈칸에서 Enter)" onkeyup="if(event.key==='Enter') renderGuides();">
-      <button class="btn-blue" onclick="renderGuides()" style="padding:0 20px;">Search</button>
+    <h2>가이드 검색 및 결과</h2>
+    <div style="display:flex; gap:8px; margin-bottom:20px;">
+        <input id="q" style="flex:1" placeholder="검색어 입력 후 엔터 (미입력 시 전체 노출)" 
+               onkeyup="if(event.key==='Enter') renderGuides();">
+        <button class="btn-blue" onclick="renderGuides()" style="padding:0 20px;">검색</button>
     </div>
     <div id="guide-result">
-      <p style="text-align:center; color:#adb5bd; margin-top:40px;">필요한 가이드를 검색해 보세요.</p>
+        <p style="text-align:center; color:#bbb; padding-top:30px;">검색어를 입력하고 엔터를 눌러주세요.</p>
     </div>
   </section>
 
   <section class="card share-zone">
-    <div class="section-title" style="color:var(--share-point)">📢 Today's Briefing</div>
-    <div id="share-result" style="max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
+    <h2 style="color:var(--deep-blue);">오늘의 공유사항</h2>
+    <div id="share-result" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
     <div class="input-group">
-      <textarea id="share-text" placeholder="공유할 짧은 메시지..." rows="2"></textarea>
-      <button onclick="addShare()" style="background:var(--share-point); color:white;">Post Update</button>
+        <textarea id="share-text" placeholder="공유할 내용을 입력하세요..." rows="2"></textarea>
+        <button onclick="addShare()" class="btn-blue">공유사항 등록</button>
     </div>
   </section>
 
   <section class="card reg-zone">
-    <div class="section-title" style="color:var(--reg-point)">✍️ Register Guide</div>
+    <h2 style="color:var(--navy-blue);">새 가이드 등록</h2>
     <div class="input-group">
-      <input id="new-category" placeholder="카테고리 (예: 프로세스, IT지원)">
-      <input id="new-keywords" placeholder="검색용 키워드 (쉼표 구분)">
-      <textarea id="new-text" placeholder="가이드 상세 내용을 작성하세요..." rows="4"></textarea>
-      
-      <div style="font-size: 13px; color:#666;">
-        <label>📎 File Attachment: </label>
-        <input type="file" id="new-file" style="border:none; background:transparent;">
-      </div>
+        <input id="new-category" placeholder="카테고리">
+        <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
+        <textarea id="new-text" placeholder="상세 내용을 입력하세요..." rows="3"></textarea>
+        
+        <div style="font-size: 12px;">
+            <label>📎 파일 첨부: </label>
+            <input type="file" id="new-file" style="border:none; padding:0; font-size:11px;">
+        </div>
 
-      <div style="font-size: 13px; display:flex; align-items:center; gap:8px;">
-        <input type="checkbox" id="sync-share" style="width:auto; cursor:pointer;">
-        <label for="sync-share" style="cursor:pointer;">등록과 동시에 '공유건'에도 게시</label>
-      </div>
+        <div style="font-size: 13px; display:flex; align-items:center; gap:5px;">
+            <input type="checkbox" id="sync-share" style="width:auto;">
+            <label for="sync-share">등록 시 오늘의 공유사항에 게시</label>
+        </div>
 
-      <div id="reg-btn-area">
-        <button onclick="addGuide()" class="btn-green" style="width:100%;">Save to Database</button>
-      </div>
+        <div id="reg-btn-area">
+            <button onclick="addGuide()" class="btn-navy" style="width:100%;">DB 저장하기</button>
+        </div>
     </div>
   </section>
 </main>
@@ -150,9 +149,8 @@
 let GUIDE = JSON.parse(localStorage.getItem("guide") || "[]");
 let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
 let isAdmin = false;
-let editIdx = null; // 수정을 위한 인덱스 저장
+let editIdx = null;
 
-// 1. 가이드 렌더링
 function renderGuides() {
     const q = document.getElementById("q").value.trim().toLowerCase();
     const container = document.getElementById("guide-result");
@@ -163,52 +161,43 @@ function renderGuides() {
         (item.keywords && item.keywords.some(k => k.toLowerCase().includes(q)))
     );
 
-    if(filtered.length === 0) {
-        container.innerHTML = "<p style='text-align:center; padding:20px; color:#ccc;'>검색 결과가 없습니다.</p>";
-        return;
-    }
-
     container.innerHTML = filtered.map((item, idx) => `
         <div class="list-item">
             <span class="badge">${item.category}</span>
-            <div style="margin:10px 0; font-size:15px; color:var(--dark-blue); font-weight:500;">${item.text}</div>
-            ${item.fileName ? `<a href="${item.fileData}" download="${item.fileName}" style="text-decoration:none; font-size:12px; color:var(--main-blue);">📁 ${item.fileName}</a>` : ''}
-            <div style="margin-top:8px; font-size:11px; color:#999;">${item.keywords.map(k=>'#'+k).join(' ')}</div>
+            <div style="margin:10px 0; font-size:15px; color:var(--navy-blue); line-height:1.6;">${item.text}</div>
+            ${item.fileName ? `<a href="${item.fileData}" download="${item.fileName}" style="display:inline-block; font-size:12px; color:var(--deep-blue); text-decoration:none; margin-bottom:5px;">📁 ${item.fileName}</a>` : ''}
+            <div style="font-size:11px; color:#94a3b8;">${item.keywords.map(k=>'#'+k).join(' ')}</div>
             ${isAdmin ? `
-                <div style="margin-top:10px; border-top:1px solid #f8f9fa; pt:8px; text-align:right;">
-                    <button class="btn-small btn-edit" onclick="prepareEdit(${idx})">수정</button>
-                    <button class="btn-small btn-del" onclick="deleteGuide(${idx})">삭제</button>
+                <div class="admin-controls">
+                    <button class="btn-sm btn-edit" onclick="prepareEdit(${idx})">수정</button>
+                    <button class="btn-sm btn-del" onclick="deleteGuide(${idx})">삭제</button>
                 </div>
             ` : ''}
         </div>
-    `).join('');
+    `).join('') || "<p style='text-align:center; padding:20px; color:#ccc;'>데이터가 없습니다.</p>";
 }
 
-// 2. 수정 준비 (데이터를 등록창으로 불러옴)
 function prepareEdit(idx) {
     const item = GUIDE[idx];
     document.getElementById("new-category").value = item.category;
     document.getElementById("new-keywords").value = item.keywords.join(", ");
     document.getElementById("new-text").value = item.text;
-    editIdx = idx; // 수정 모드 전환
+    editIdx = idx;
     
-    // 버튼 문구 변경
     const btnArea = document.getElementById("reg-btn-area");
     btnArea.innerHTML = `
         <div style="display:flex; gap:5px;">
-            <button onclick="addGuide()" class="btn-blue" style="flex:1">수정 완료</button>
-            <button onclick="cancelEdit()" style="background:#ddd; flex:0.4">취소</button>
+            <button onclick="addGuide()" class="btn-blue" style="flex:1">수정 저장</button>
+            <button onclick="cancelEdit()" style="background:#ddd; flex:0.3">취소</button>
         </div>
     `;
-    document.querySelector(".reg-zone").scrollIntoView({ behavior: 'smooth' });
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
 
 function cancelEdit() {
-    editIdx = null;
     location.reload();
 }
 
-// 3. 가이드 등록/수정 저장
 async function addGuide() {
     const cat = document.getElementById("new-category").value;
     const txt = document.getElementById("new-text").value;
@@ -216,10 +205,10 @@ async function addGuide() {
     const fileInput = document.getElementById("new-file");
     const isSync = document.getElementById("sync-share").checked;
 
-    if(!cat || !txt) return alert("내용을 입력해주세요.");
+    if(!cat || !txt) return alert("필수 항목을 입력하세요.");
 
-    let fileData = null;
-    let fileName = null;
+    let fileData = (editIdx !== null) ? GUIDE[editIdx].fileData : null;
+    let fileName = (editIdx !== null) ? GUIDE[editIdx].fileName : null;
 
     if(fileInput.files.length > 0) {
         const file = fileInput.files[0];
@@ -227,27 +216,21 @@ async function addGuide() {
         fileData = await toBase64(file);
     }
 
-    const newEntry = { 
-        category: cat, text: txt, keywords: kw, 
-        fileName: fileName || (editIdx !== null ? GUIDE[editIdx].fileName : null), 
-        fileData: fileData || (editIdx !== null ? GUIDE[editIdx].fileData : null),
-        date: new Date().toLocaleDateString() 
-    };
+    const newEntry = { category: cat, text: txt, keywords: kw, fileName, fileData };
     
     if(editIdx !== null) {
-        GUIDE[editIdx] = newEntry; // 수정 저장
+        GUIDE[editIdx] = newEntry;
         editIdx = null;
     } else {
-        GUIDE.unshift(newEntry); // 신규 저장
+        GUIDE.unshift(newEntry);
         if(isSync) addShare(txt);
     }
 
     localStorage.setItem("guide", JSON.stringify(GUIDE));
-    alert("저장되었습니다.");
+    alert("완료되었습니다.");
     location.reload();
 }
 
-// 4. 공유건 처리
 function addShare(directText = null) {
     const txt = directText || document.getElementById("share-text").value;
     if(!txt) return;
@@ -260,17 +243,16 @@ function addShare(directText = null) {
 function renderShares() {
     const container = document.getElementById("share-result");
     container.innerHTML = SHARES.map((s, idx) => `
-        <div style="padding:10px; background:white; border-radius:10px; margin-bottom:8px; border-left:4px solid var(--share-point);">
-            <div style="font-size:13px; color:var(--dark-blue);">${s.text}</div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-                <span style="font-size:10px; color:#bbb;">${s.date}</span>
-                ${isAdmin ? `<button onclick="deleteShare(${idx})" style="background:none; border:none; color:#ff8787; cursor:pointer; font-size:11px;">삭제</button>` : ''}
+        <div style="padding:10px; background:white; border-radius:10px; margin-bottom:8px; border-left:4px solid var(--deep-blue);">
+            <div style="font-size:13px;">${s.text}</div>
+            <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                <span style="font-size:10px; color:#999;">${s.date}</span>
+                ${isAdmin ? `<span onclick="deleteShare(${idx})" style="cursor:pointer; color:#999; font-size:11px;">삭제</span>` : ''}
             </div>
         </div>
-    `).join('') || "<p style='color:#ccc; font-size:12px; text-align:center;'>현재 공유된 내용이 없습니다.</p>";
+    `).join('') || "<p style='color:#bbb; font-size:12px; text-align:center;'>공유사항이 없습니다.</p>";
 }
 
-// 유틸리티
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -282,22 +264,21 @@ function toggleAdmin() {
     if(!isAdmin) {
         if(prompt("관리자 암호(6559):") === "6559") {
             isAdmin = true;
-            document.getElementById("mode-badge").innerText = "Admin Mode";
-            document.getElementById("mode-badge").style.color = "var(--main-blue)";
-            document.getElementById("admin-toggle").classList.add("active");
-            document.getElementById("admin-toggle").innerText = "Logout Admin";
+            document.getElementById("mode-text").innerText = "관리자 모드";
+            document.querySelectorAll(".admin-toggle-btn").forEach(el => el.style.background = "white");
+            document.querySelectorAll(".admin-toggle-btn").forEach(el => el.style.color = "var(--deep-blue)");
         }
     } else {
         isAdmin = false;
-        document.getElementById("mode-badge").innerText = "User Mode";
-        document.getElementById("admin-toggle").classList.remove("active");
-        document.getElementById("admin-toggle").innerText = "Admin Login";
+        document.getElementById("mode-text").innerText = "사용자 모드";
+        document.querySelectorAll(".admin-toggle-btn").forEach(el => el.style.background = "rgba(255,255,255,0.2)");
+        document.querySelectorAll(".admin-toggle-btn").forEach(el => el.style.color = "white");
     }
     renderGuides();
     renderShares();
 }
 
-function deleteGuide(idx) { if(confirm("삭제하시겠습니까?")) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); } }
+function deleteGuide(idx) { if(confirm("정말 삭제하시겠습니까?")) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); } }
 function deleteShare(idx) { SHARES.splice(idx,1); localStorage.setItem("shares", JSON.stringify(SHARES)); renderShares(); }
 
 window.onload = () => { renderShares(); };
