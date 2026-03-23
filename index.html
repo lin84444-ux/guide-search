@@ -8,304 +8,252 @@
   :root {
     --bg-color: #f8f9fa;
     --primary-color: #a2d2ff;
-    --secondary-color: #d1d8e0;
-    --text-main: #495057;
+    --red-zone: #fff5f5;
+    --green-zone: #f4fff4;
     --text-dark: #212529;
     --white: #ffffff;
     --shadow: 0 4px 15px rgba(0,0,0,0.05);
   }
 
   body {
-    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+    font-family: 'Pretendard', sans-serif;
     margin: 0; padding: 0;
     background-color: var(--bg-color);
-    color: var(--text-main);
-    line-height: 1.6;
   }
 
   header {
     background: linear-gradient(135deg, var(--primary-color), #92a8d1);
-    padding: 40px 20px 60px;
-    text-align: center;
-    color: var(--white);
-    position: relative;
-  }
-  header h1 { margin: 0; font-size: 32px; letter-spacing: -1px; }
-  header .admin-toggle-btn {
-    position: absolute; top: 20px; right: 20px;
-    background: rgba(255,255,255,0.2); border: 1px solid white;
-    padding: 5px 12px; border-radius: 20px; color: white; cursor: pointer; font-size: 12px;
+    padding: 20px; text-align: center; color: white;
   }
 
-  main { max-width: 900px; margin: -40px auto 50px; padding: 0 20px; position: relative; }
+  /* 메인 그리드 레이아웃 */
+  main {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr; /* 왼쪽과 오른쪽 비율 */
+    grid-template-rows: auto auto;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 0 20px;
+  }
+
+  /* 영역별 스타일 */
+  .black-zone { grid-row: span 2; border: 2px solid #333; } /* 검은 네모 */
+  .red-zone { border: 2px solid #ff6b6b; background: var(--red-zone); } /* 빨간 네모 */
+  .green-zone { border: 2px solid #51cf66; background: var(--green-zone); } /* 초록 네모 */
 
   .card {
     background: var(--white);
-    padding: 25px;
-    border-radius: 16px;
+    padding: 20px;
+    border-radius: 12px;
     box-shadow: var(--shadow);
-    margin-bottom: 25px;
-    animation: fadeIn 0.4s ease-out;
+    overflow-y: auto;
+    max-height: 80vh;
   }
-  h2 { font-size: 18px; color: var(--text-dark); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-  h2::before { content: '•'; color: var(--primary-color); font-size: 24px; }
 
-  .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
-  input, textarea {
-    flex: 1; padding: 12px 15px; border: 1px solid #eee;
-    border-radius: 10px; outline: none; background: #fcfcfc; font-size: 15px;
-  }
-  input:focus { border-color: var(--primary-color); background: #fff; }
+  h2 { font-size: 1.1rem; margin-top: 0; display: flex; align-items: center; gap: 8px; }
   
+  .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+  input, textarea, select {
+    padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;
+  }
+
   button {
-    padding: 12px 20px; border: none; border-radius: 10px;
-    cursor: pointer; font-weight: 600; background: var(--primary-color); color: white;
+    padding: 10px; border: none; border-radius: 8px; cursor: pointer;
+    background: var(--primary-color); color: white; font-weight: bold;
   }
-  button:hover { opacity: 0.9; }
 
-  .list-item { 
-    padding: 15px; border-bottom: 1px solid #f1f1f1;
-    display: flex; justify-content: space-between; align-items: flex-start;
+  .list-item {
+    padding: 12px; border-bottom: 1px solid #eee; background: #fff;
+    margin-bottom: 8px; border-radius: 6px;
   }
-  .badge {
-    display: inline-block; padding: 2px 10px; border-radius: 15px;
-    font-size: 11px; font-weight: bold; background: #eef6ff; color: #4a90e2; margin-bottom: 5px;
-  }
-  .content-text { font-size: 14.5px; color: var(--text-dark); word-break: break-all; }
-  .kw-area { margin-top: 5px; }
-  .kw-tag { font-size: 11px; color: #bbb; margin-right: 5px; }
-
-  .dot-btn { background: none; color: #ccc; font-size: 20px; cursor: pointer; padding: 0 5px; }
-  .dropdown {
-    display: none; position: absolute; right: 30px; background: white;
-    box-shadow: var(--shadow); border-radius: 8px; z-index: 10;
-  }
-  .dropdown button {
-    display: block; width: 100%; background: none; color: #ff6b6b; padding: 10px; font-size: 13px; text-align: left;
+  
+  .file-link {
+    display: inline-block; margin-top: 5px; font-size: 12px;
+    color: #007bff; text-decoration: none;
   }
 
   .admin-only { display: none; }
-  .completed { opacity: 0.5; text-decoration: line-through; }
-
-  /* 파일 업로드 스타일 */
-  .file-upload-box {
-    border: 2px dashed var(--secondary-color);
-    padding: 20px;
-    text-align: center;
-    border-radius: 10px;
-    margin-bottom: 15px;
+  
+  /* 반응형 */
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    .black-zone { grid-row: auto; }
   }
-
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
 <header>
-  <button class="admin-toggle-btn" onclick="toggleAdmin()">관리자 전환</button>
+  <button style="float:right; background:rgba(255,255,255,0.3)" onclick="toggleAdmin()">관리자 전환</button>
   <h1>WorkHub</h1>
-  <p id="mode-text">사용자 모드입니다</p>
+  <p id="mode-text" style="font-size: 0.9rem; opacity: 0.8;">사용자 모드입니다</p>
 </header>
 
 <main>
-  <div class="card">
-    <h2>가이드 검색</h2>
-    <div class="input-group">
-      <input id="q" placeholder="검색어 입력 후 엔터 (미입력 시 전체 노출)" 
-             onkeyup="if(event.key==='Enter') renderGuides();">
-      <button onclick="renderGuides()">검색</button>
+  <section class="card black-zone">
+    <h2>🔍 가이드 검색 / 전체보기</h2>
+    <div style="display:flex; gap:5px; margin-bottom:20px;">
+        <input id="q" style="flex:1" placeholder="검색어를 입력하고 'Enter'를 누르세요" 
+               onkeyup="if(event.key==='Enter') renderGuides();">
+        <button onclick="renderGuides()">검색</button>
     </div>
-    <div id="guide-result"></div>
-  </div>
+    <div id="guide-result">
+        <p style="text-align:center; color:#999; margin-top:50px;">검색어를 입력하거나 빈칸에서 엔터를 치면 데이터가 나타납니다.</p>
+    </div>
+  </section>
 
-  <div class="card">
-    <h2>오늘의 공유사항</h2>
+  <section class="card red-zone">
+    <h2 style="color:#e03131;">📢 오늘의 공유건</h2>
     <div id="share-result"></div>
-    <div class="admin-only" style="margin-top:20px; padding-top:20px; border-top: 1px dashed #eee;">
-      <div class="input-group">
-        <textarea id="share-text" placeholder="공유할 내용을 입력하세요..."></textarea>
-        <button onclick="addShare()">등록</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card admin-only">
-    <h2>데이터 파일 등록</h2>
-    <div class="file-upload-box">
-      <p style="font-size: 13px; margin-bottom: 10px; color: #888;">JSON 형식의 파일을 업로드하여 데이터를 추가합니다.</p>
-      <input type="file" id="file-input" accept=".json" style="display: none;">
-      <button onclick="document.getElementById('file-input').click()" style="background: var(--secondary-color); color: #666; margin-right: 5px;">파일 선택</button>
-      <button onclick="uploadFile()">데이터 병합하기</button>
-    </div>
-  </div>
-
-  <div class="card admin-only">
-    <h2>새 가이드 등록</h2>
+    <hr style="border: 0.5px dashed #ffc9c9; margin: 15px 0;">
     <div class="input-group">
-      <input id="new-category" placeholder="카테고리">
-      <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
+        <textarea id="share-text" placeholder="공유사항 직접 등록 (공유창 전용)" rows="2"></textarea>
+        <button onclick="addShare()" style="background:#ff6b6b;">공유 등록</button>
     </div>
-    <textarea id="new-text" placeholder="상세 내용을 입력하세요..." style="width:100%; margin-bottom:10px;"></textarea>
-    <button onclick="addGuide()" style="width:100%;">DB 저장하기</button>
-  </div>
+  </section>
 
+  <section class="card green-zone">
+    <h2 style="color:#2f9e44;">✍️ 새 가이드 등록</h2>
+    <div class="input-group">
+        <input id="new-category" placeholder="카테고리 (예: 업무팁, 인사)">
+        <input id="new-keywords" placeholder="키워드 (쉼표로 구분)">
+        <textarea id="new-text" placeholder="상세 내용을 입력하세요" rows="3"></textarea>
+        
+        <div style="font-size: 13px;">
+            <label>📎 파일 첨부: </label>
+            <input type="file" id="new-file" style="border:none; padding:0;">
+        </div>
+
+        <div style="font-size: 13px; display:flex; align-items:center; gap:5px;">
+            <input type="checkbox" id="sync-share" style="width:auto;">
+            <label for="sync-share">등록 시 '오늘의 공유사항'에도 올리기</label>
+        </div>
+
+        <button onclick="addGuide()" style="background:#51cf66;">DB 저장하기</button>
+    </div>
+    
+    <div class="admin-only" style="margin-top:10px; border-top:1px solid #ddd; pt:10px;">
+        <p style="font-size:11px; color:#666;">데이터 가져오기(JSON)</p>
+        <input type="file" id="json-upload" accept=".json" onchange="uploadJSON()" style="font-size:11px;">
+    </div>
+  </section>
 </main>
 
 <script>
-/* --- 기본 데이터 세팅 (이전과 동일) --- */
-const DEFAULT_DATA = [
-  { category: "재응시", text: "GS건설 신규입사자 온보딩 과정 재응시는 사내 담당자 안내", keywords: ["재응시","GS건설","과락","GS"] },
-  { category: "오류", text: "에러코드 224002: 캐시삭제로 해결", keywords: ["에러코드","오류코드","오류"] },
-  // ... (중략 - 기존 데이터 유지됨)
-  { category: "학습", text: "퇴직연금교육 문의처 근로복지공단 1661-0075", keywords: ["법정교육","필수교육","문의"] }
-];
-
-if(!localStorage.getItem("guide") || JSON.parse(localStorage.getItem("guide")).length === 0) {
-  localStorage.setItem("guide", JSON.stringify(DEFAULT_DATA));
-}
-
-let GUIDE = JSON.parse(localStorage.getItem("guide"));
-let shares = JSON.parse(localStorage.getItem("shares") || "[]");
+let GUIDE = JSON.parse(localStorage.getItem("guide") || "[]");
+let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
 let isAdmin = false;
 
-function toggleAdmin() {
-  if(!isAdmin) {
-    if(prompt("관리자 암호: 6559") === "6559") {
-      isAdmin = true;
-      document.getElementById("mode-text").innerText = "관리자 모드";
-      document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
-    }
-  } else {
-    isAdmin = false;
-    document.getElementById("mode-text").innerText = "사용자 모드";
-    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
-  }
-  renderGuides();
-}
-
-// 검색 엔진: 엔터를 치거나 버튼을 눌렀을 때만 작동
+// 1. 가이드 렌더링 (엔터 시에만 작동)
 function renderGuides() {
-  const q = document.getElementById("q").value.trim().toLowerCase();
-  const container = document.getElementById("guide-result");
-  
-  const filtered = q === "" ? GUIDE : GUIDE.filter(item => 
-    item.text.toLowerCase().includes(q) || 
-    item.category.toLowerCase().includes(q) ||
-    (item.keywords && item.keywords.some(k => k.toLowerCase().includes(q)))
-  );
+    const q = document.getElementById("q").value.trim().toLowerCase();
+    const container = document.getElementById("guide-result");
+    
+    // 필터링 (빈값이면 전체)
+    const filtered = q === "" ? GUIDE : GUIDE.filter(item => 
+        item.text.toLowerCase().includes(q) || 
+        item.category.toLowerCase().includes(q) ||
+        (item.keywords && item.keywords.some(k => k.toLowerCase().includes(q)))
+    );
 
-  container.innerHTML = filtered.map((item, idx) => `
-    <div class="list-item">
-      <div style="flex:1">
-        <span class="badge">${item.category}</span>
-        <div class="content-text">${item.text}</div>
-        ${isAdmin ? `<div class="kw-area">${item.keywords.map(k=>`<span class="kw-tag">#${k}</span>`).join('')}</div>` : ''}
-      </div>
-      ${isAdmin ? `
-        <div style="position:relative">
-          <button class="dot-btn" onclick="toggleDrop('g-${idx}')">⋮</button>
-          <div id="g-${idx}" class="dropdown">
-            <button onclick="deleteGuide(${idx})">삭제</button>
-          </div>
+    if(filtered.length === 0) {
+        container.innerHTML = "<p style='text-align:center; padding:20px;'>결과가 없습니다.</p>";
+        return;
+    }
+
+    container.innerHTML = filtered.map((item, idx) => `
+        <div class="list-item">
+            <span style="font-size:11px; background:#eef6ff; color:#4a90e2; padding:2px 6px; border-radius:4px;">${item.category}</span>
+            <div style="margin-top:5px; color:#333;">${item.text}</div>
+            ${item.fileName ? `<a href="${item.fileData}" download="${item.fileName}" class="file-link">📁 ${item.fileName} 다운로드</a>` : ''}
+            <div style="margin-top:5px; font-size:11px; color:#bbb;">${item.keywords.map(k=>'#'+k).join(' ')}</div>
+            ${isAdmin ? `<button onclick="deleteGuide(${idx})" style="padding:2px 5px; font-size:10px; background:#ff8787; margin-top:5px;">삭제</button>` : ''}
         </div>
-      ` : ''}
-    </div>
-  `).join('');
+    `).join('');
 }
 
-// 파일 업로드 처리 함수
-function uploadFile() {
-  const fileInput = document.getElementById('file-input');
-  const file = fileInput.files[0];
+// 2. 가이드 등록 (파일 첨부 로직 포함)
+async function addGuide() {
+    const cat = document.getElementById("new-category").value;
+    const txt = document.getElementById("new-text").value;
+    const kw = document.getElementById("new-keywords").value.split(",").map(k=>k.trim());
+    const fileInput = document.getElementById("new-file");
+    const isSync = document.getElementById("sync-share").checked;
 
-  if (!file) {
-    alert("먼저 파일을 선택해주세요.");
-    return;
-  }
+    if(!cat || !txt) return alert("카테고리와 내용을 입력하세요.");
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const uploadedData = JSON.parse(e.target.result);
-      if (Array.isArray(uploadedData)) {
-        // 기존 데이터에 합치기 (최신 데이터를 앞으로)
-        GUIDE = [...uploadedData, ...GUIDE];
-        localStorage.setItem("guide", JSON.stringify(GUIDE));
-        renderGuides();
-        alert(`${uploadedData.length}개의 데이터가 추가되었습니다.`);
-        fileInput.value = ""; // 초기화
-      } else {
-        alert("JSON 형식이 올바르지 않습니다. (배열 형태여야 합니다)");
-      }
-    } catch (err) {
-      alert("파일을 읽는 중 오류가 발생했습니다. 올바른 JSON 파일인지 확인하세요.");
+    let fileData = null;
+    let fileName = null;
+
+    if(fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        fileName = file.name;
+        fileData = await toBase64(file); // 파일을 텍스트로 변환하여 저장
     }
-  };
-  reader.readAsText(file);
+
+    const newEntry = { category: cat, text: txt, keywords: kw, fileName, fileData, date: new Date().toLocaleDateString() };
+    
+    GUIDE.unshift(newEntry);
+    localStorage.setItem("guide", JSON.stringify(GUIDE));
+
+    if(isSync) {
+        addShare(txt); // 공유사항 동시 등록
+    }
+
+    alert("등록되었습니다.");
+    location.reload(); // 간편한 UI 갱신을 위해 리로드
+}
+
+// 3. 공유사항 등록/렌더링
+function addShare(directText = null) {
+    const txt = directText || document.getElementById("share-text").value;
+    if(!txt) return;
+
+    SHARES.unshift({ text: txt, date: new Date().toLocaleTimeString() });
+    localStorage.setItem("shares", JSON.stringify(SHARES));
+    renderShares();
+    if(!directText) document.getElementById("share-text").value = "";
 }
 
 function renderShares() {
-  const container = document.getElementById("share-result");
-  container.innerHTML = shares.map((s, idx) => `
-    <div class="list-item" style="border-left:4px solid #a2d2ff">
-      <div style="flex:1" class="${s.status === 'completed' ? 'completed' : ''}">
-        <div class="content-text">${s.text}</div>
-      </div>
-      ${isAdmin ? `<button onclick="deleteShare(${idx})" style="background:#eee; color:#666; padding:5px 10px; font-size:11px;">삭제</button>` : ''}
-    </div>
-  `).join('') || "<div style='color:#ccc; text-align:center; padding:10px;'>공유사항 없음</div>";
+    const container = document.getElementById("share-result");
+    container.innerHTML = SHARES.map((s, idx) => `
+        <div style="font-size:13px; margin-bottom:8px; border-left:3px solid #ff8787; padding-left:8px;">
+            <div>${s.text}</div>
+            <span style="font-size:10px; color:#999;">${s.date}</span>
+            ${isAdmin ? `<span onclick="deleteShare(${idx})" style="cursor:pointer; color:red; margin-left:5px;">[x]</span>` : ''}
+        </div>
+    `).join('') || "<p style='color:#ccc; font-size:12px;'>오늘의 공유사항이 없습니다.</p>";
 }
 
-function addGuide() {
-  const cat = document.getElementById("new-category").value;
-  const txt = document.getElementById("new-text").value;
-  const kw = document.getElementById("new-keywords").value.split(",").map(k=>k.trim());
-  if(cat && txt) {
-    GUIDE.unshift({category: cat, text: txt, keywords: kw});
-    localStorage.setItem("guide", JSON.stringify(GUIDE));
-    renderGuides();
-    alert("등록되었습니다.");
-    document.getElementById("new-category").value = "";
-    document.getElementById("new-text").value = "";
-    document.getElementById("new-keywords").value = "";
-  }
+// 유틸리티: 파일을 Base64로 변환
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
+// 관리자 모드
+function toggleAdmin() {
+    if(!isAdmin && prompt("비밀번호를 입력하세요(6559)") === "6559") {
+        isAdmin = true;
+        document.getElementById("mode-text").innerText = "관리자 모드";
+        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
+    } else {
+        isAdmin = false;
+        document.getElementById("mode-text").innerText = "사용자 모드";
+        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+    }
+    renderShares();
 }
 
-function deleteGuide(idx) {
-  if(confirm("정말 삭제하시겠습니까?")) {
-    GUIDE.splice(idx, 1);
-    localStorage.setItem("guide", JSON.stringify(GUIDE));
-    renderGuides();
-  }
-}
-
-function addShare() {
-  const txt = document.getElementById("share-text").value;
-  if(!txt) return;
-  shares.unshift({text: txt, created: Date.now(), status: 'active'});
-  localStorage.setItem("shares", JSON.stringify(shares));
-  renderShares();
-  document.getElementById("share-text").value = "";
-}
-
-function deleteShare(idx) {
-  shares.splice(idx, 1);
-  localStorage.setItem("shares", JSON.stringify(shares));
-  renderShares();
-}
-
-function toggleDrop(id) {
-  const el = document.getElementById(id);
-  const isShow = el.style.display === 'block';
-  document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
-  if(!isShow) el.style.display = 'block';
-}
-
-window.onclick = (e) => { if(!e.target.matches('.dot-btn')) document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); }
+function deleteGuide(idx) { if(confirm("삭제할까요?")) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); } }
+function deleteShare(idx) { SHARES.splice(idx,1); localStorage.setItem("shares", JSON.stringify(SHARES)); renderShares(); }
 
 window.onload = () => {
-  renderGuides();
-  renderShares();
+    renderShares();
 };
 </script>
 </body>
