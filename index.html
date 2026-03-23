@@ -40,21 +40,21 @@
   .share-item { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--point-orange); position: relative; }
   .share-time { display: block; font-size: 11px; color: #999; margin-top: 5px; }
 
-  .reg-zone { border-top: 6px solid var(--navy-blue); background: var(--bg-reg); transition: 0.3s; }
-  .reg-zone.edit-mode { border-top-color: var(--red); background-color: #FFF4E6; }
+  .reg-zone { border-top: 6px solid var(--navy-blue); background: var(--bg-reg); }
 
   .input-group { display: flex; flex-direction: column; gap: 12px; }
   input, textarea { padding: 13px; border: 1px solid var(--border-gray); border-radius: 12px; outline: none; font-size: 14px; width: 100%; box-sizing: border-box; background: white; }
   
   button { padding: 13px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; }
   .btn-blue { background: var(--main-blue); color: white; }
-  .btn-blue:hover { background: #357ABD; }
   .btn-navy { background: var(--navy-blue); color: white; }
   .btn-red { background: var(--red); color: white; }
   .btn-orange { background: var(--point-orange); color: white; }
   .btn-gray { background: #adb5bd; color: white; }
 
-  .list-item { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #edf2f7; position: relative; }
+  .list-item { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #edf2f7; position: relative; transition: 0.3s; }
+  .list-item.editing { border: 2px solid var(--main-blue); background: #fff; box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2); }
+  
   .badge { font-size: 11px; font-weight: 700; color: var(--main-blue); background: #e8f2ff; padding: 4px 10px; border-radius: 8px; }
   .file-link { display: inline-block; margin-top: 8px; font-size: 13px; color: var(--main-blue); text-decoration: none; font-weight: 600; }
   .admin-btns { margin-top: 15px; display: flex; gap: 8px; }
@@ -75,7 +75,7 @@
   <section class="card guide-zone">
     <div class="title-area"><i></i> 가이드 검색 및 데이터</div>
     <div style="display:flex; gap:10px; margin-bottom:25px;">
-        <input id="q" placeholder="검색어 입력 후 Enter (전체보기는 빈칸에서 Enter)" onkeyup="if(event.key==='Enter') renderGuides();">
+        <input id="q" placeholder="검색어 입력 후 Enter..." onkeyup="if(event.key==='Enter') renderGuides();">
         <button class="btn-blue" onclick="renderGuides()" style="padding:0 25px;">검색</button>
     </div>
     <div id="guide-result"></div>
@@ -91,14 +91,15 @@
   </section>
 
   <section id="reg-card" class="card reg-zone">
-    <div class="title-area"><i id="reg-icon"></i> <span id="reg-title">가이드 신규 등록</span></div>
+    <div class="title-area"><i id="reg-icon" style="background:var(--navy-blue)"></i> <span>신규 등록 (파일만 올려도 등록 가능)</span></div>
     <div class="input-group">
-        <input id="new-category" placeholder="카테고리 (예: 프로세스, IT지원)">
+        <input id="new-category" placeholder="카테고리">
         <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
         <textarea id="new-text" placeholder="상세 내용을 작성하세요" rows="3"></textarea>
         
         <div id="file-area" style="font-size: 13px; color:#64748b; background: white; padding: 10px; border-radius: 10px; border: 1px solid var(--border-gray);">
-            📎 <b>파일:</b> <input type="file" id="new-file" style="border:none; background:transparent; font-size:12px;">
+            📎 <b>파일 첨부 시 자동 카테고리 설정:</b> 
+            <input type="file" id="new-file" onchange="handleFileSelect(this)" style="border:none; background:transparent; font-size:12px; margin-top:5px;">
         </div>
 
         <div id="sync-area" style="font-size: 13px; display:flex; align-items:center; gap:8px;">
@@ -106,26 +107,32 @@
             <label for="sync-share">등록 시 공유사항에도 게시</label>
         </div>
         
-        <div id="btn-group" style="display:flex; gap:10px;">
-          <button id="main-reg-btn" onclick="addGuide()" class="btn-navy" style="flex:1;">Save to Database</button>
-          <button id="cancel-edit-btn" onclick="cancelEdit()" class="btn-gray" style="display:none; flex:0.4;">취소</button>
-        </div>
+        <button onclick="addGuide()" class="btn-navy">Save to Database</button>
     </div>
   </section>
 </main>
 
 <script>
-  // --- 데이터 초기화 로직 (data.js 연결) ---
   let GUIDE = (typeof INITIAL_GUIDE !== 'undefined') ? INITIAL_GUIDE : JSON.parse(localStorage.getItem("guide") || "[]");
   let SHARES = (typeof INITIAL_SHARES !== 'undefined') ? INITIAL_SHARES : JSON.parse(localStorage.getItem("shares") || "[]");
-
-  // 데이터가 브라우저에 아예 없으면 파일 데이터로 채워줌
+  
   if (!localStorage.getItem("guide") && typeof INITIAL_GUIDE !== 'undefined') {
       localStorage.setItem("guide", JSON.stringify(INITIAL_GUIDE));
   }
 
   let isAdmin = false;
-  let editIdx = null;
+  let editingId = null; 
+
+  // 파일 선택 시 텍스트가 없으면 파일명으로 카테고리 자동 입력
+  function handleFileSelect(input) {
+      if (input.files.length > 0) {
+          const fileName = input.files[0].name;
+          const catField = document.getElementById("new-category");
+          if (!catField.value) {
+              catField.value = fileName.split('.')[0]; // 파일명을 카테고리로 추천
+          }
+      }
+  }
 
   function renderGuides() {
     const q = document.getElementById("q").value.trim().toLowerCase();
@@ -140,20 +147,65 @@
         return;
     }
 
-    container.innerHTML = filtered.map((item, idx) => `
-        <div class="list-item">
-            <span class="badge">${item.category}</span>
-            <div style="margin:12px 0; font-size:15px; line-height:1.6; white-space:pre-wrap;">${item.text}</div>
-            ${item.fileName ? `<a href="${item.fileData}" download="${item.fileName}" class="file-link">📁 ${item.fileName}</a>` : ''}
-            <div style="margin-top:10px; font-size:12px; color:#adb5bd;">${item.keywords ? item.keywords.map(k => '#' + k).join(' ') : ''}</div>
-            ${isAdmin ? `
-              <div class="admin-btns">
-                <button class="btn-sm btn-navy" onclick="startEdit(${idx})">수정</button>
-                <button class="btn-sm btn-red" onclick="deleteGuide(${idx})">삭제</button>
-              </div>
-            ` : ''}
-        </div>
-    `).join('');
+    container.innerHTML = filtered.map((item, idx) => {
+        if (editingId === idx) {
+            // 수정 모드 UI
+            return `
+                <div class="list-item editing">
+                    <div class="input-group">
+                        <input id="edit-cat-${idx}" value="${item.category}" placeholder="카테고리">
+                        <textarea id="edit-txt-${idx}" rows="4" placeholder="내용">${item.text}</textarea>
+                        <input id="edit-kw-${idx}" value="${item.keywords.join(', ')}" placeholder="키워드">
+                        <div class="admin-btns">
+                            <button class="btn-sm btn-blue" onclick="saveEdit(${idx})">저장</button>
+                            <button class="btn-sm btn-gray" onclick="cancelEdit()">취소</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        // 일반 모드 UI
+        return `
+            <div class="list-item">
+                <span class="badge">${item.category}</span>
+                <div style="margin:12px 0; font-size:15px; line-height:1.6; white-space:pre-wrap;">${item.text}</div>
+                ${item.fileName ? `<a href="${item.fileData}" download="${item.fileName}" class="file-link">📁 ${item.fileName}</a>` : ''}
+                <div style="margin-top:10px; font-size:12px; color:#adb5bd;">${item.keywords ? item.keywords.map(k => '#' + k).join(' ') : ''}</div>
+                ${isAdmin ? `
+                  <div class="admin-btns">
+                    <button class="btn-sm btn-navy" onclick="startInlineEdit(${idx})">수정</button>
+                    <button class="btn-sm btn-red" onclick="deleteGuide(${idx})">삭제</button>
+                  </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+  }
+
+  // 인라인 수정 시작
+  function startInlineEdit(idx) {
+      editingId = idx;
+      renderGuides();
+  }
+
+  function cancelEdit() {
+      editingId = null;
+      renderGuides();
+  }
+
+  function saveEdit(idx) {
+      const newCat = document.getElementById(`edit-cat-${idx}`).value;
+      const newTxt = document.getElementById(`edit-txt-${idx}`).value;
+      const newKw = document.getElementById(`edit-kw-${idx}`).value.split(',').map(k => k.trim());
+
+      GUIDE[idx].category = newCat;
+      GUIDE[idx].text = newTxt;
+      GUIDE[idx].keywords = newKw;
+
+      localStorage.setItem("guide", JSON.stringify(GUIDE));
+      editingId = null;
+      renderGuides();
+      alert("수정되었습니다.");
   }
 
   async function addGuide() {
@@ -163,10 +215,11 @@
     const fileInput = document.getElementById("new-file");
     const isSync = document.getElementById("sync-share").checked;
 
-    if(!cat || !txt) return alert("필수 내용을 입력해주세요.");
+    // 파일이 있으면 텍스트가 없어도 진행 가능
+    if(!cat && !fileInput.files.length) return alert("카테고리 또는 파일을 입력해주세요.");
 
-    let fileData = (editIdx !== null) ? GUIDE[editIdx].fileData : null;
-    let fileName = (editIdx !== null) ? GUIDE[editIdx].fileName : null;
+    let fileData = null;
+    let fileName = null;
 
     if(fileInput.files.length > 0) {
         const file = fileInput.files[0];
@@ -175,43 +228,18 @@
     }
 
     const kw = kwInput ? kwInput.split(",").map(k => k.trim()) : [];
-    const newData = { category: cat, text: txt, keywords: kw, fileName, fileData };
+    const finalCat = cat || (fileName ? fileName.split('.')[0] : "미분류");
+    const finalTxt = txt || (fileName ? `${fileName} 파일이 등록되었습니다.` : "");
 
-    if(editIdx !== null) {
-        GUIDE[editIdx] = newData;
-        cancelEdit();
-    } else {
-        GUIDE.unshift(newData);
-        if(isSync) addShare(txt);
-    }
+    const newData = { category: finalCat, text: finalTxt, keywords: kw, fileName, fileData };
+
+    GUIDE.unshift(newData);
+    if(isSync) addShare(finalTxt);
 
     localStorage.setItem("guide", JSON.stringify(GUIDE));
     clearInputs();
     renderGuides();
-  }
-
-  function startEdit(idx) {
-    editIdx = idx;
-    const item = GUIDE[idx];
-    document.getElementById("reg-title").innerText = "가이드 수정하기";
-    document.getElementById("reg-card").classList.add("edit-mode");
-    document.getElementById("main-reg-btn").innerText = "수정 완료";
-    document.getElementById("main-reg-btn").className = "btn-red";
-    document.getElementById("cancel-edit-btn").style.display = "block";
-    document.getElementById("new-category").value = item.category;
-    document.getElementById("new-keywords").value = item.keywords.join(", ");
-    document.getElementById("new-text").value = item.text;
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  }
-
-  function cancelEdit() {
-    editIdx = null;
-    document.getElementById("reg-title").innerText = "가이드 신규 등록";
-    document.getElementById("reg-card").classList.remove("edit-mode");
-    document.getElementById("main-reg-btn").innerText = "Save to Database";
-    document.getElementById("main-reg-btn").className = "btn-navy";
-    document.getElementById("cancel-edit-btn").style.display = "none";
-    clearInputs();
+    alert("등록되었습니다.");
   }
 
   function clearInputs() {
@@ -252,7 +280,7 @@
       }
     } else {
       isAdmin = false;
-      cancelEdit();
+      editingId = null;
     }
     document.getElementById("mode-text").innerText = isAdmin ? "관리자 모드입니다" : "사용자 모드입니다";
     renderGuides();
