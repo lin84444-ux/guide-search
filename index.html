@@ -4,19 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WorkHub | Smart Blue & Gold</title>
+<script src="data.js"></script>
 <style>
   :root {
     --header-grad: linear-gradient(135deg, #a2d2ff, #92a8d1);
     --main-blue: #4a90e2;
     --sub-blue: #84b6f4;
-    --bg-left: #F5F9FF;     /* 좌측 가이드 배경 */
-    --bg-share: #FFF6E5;    /* 공지사항 배경 (오렌지 톤) */
-    --bg-reg: #F8FAFC;      /* 등록 영역 배경 */
+    --bg-left: #F5F9FF;
+    --bg-share: #FFF6E5;
+    --bg-reg: #F8FAFC;
     --navy-blue: #34495e;
     --white: #ffffff;
     --red: #ff6b6b;
     --border-gray: #E5E7EB;
-    --point-orange: #FFB74D; /* 공지사항 포인트 색상 */
+    --point-orange: #FFB74D;
   }
 
   body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background-color: #f4f7f9; color: #2c3e50; }
@@ -28,25 +29,20 @@
 
   main { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; max-width: 1300px; margin: 20px auto; padding: 0 20px; }
 
-  /* 공통 카드 스타일 */
   .card { background: var(--white); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); height: fit-content; }
   .title-area { font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
   .title-area i { width: 4px; height: 18px; background: var(--main-blue); border-radius: 10px; }
 
-  /* 좌측 가이드 영역 */
   .guide-zone { grid-row: span 2; border-top: 6px solid var(--main-blue); background: var(--bg-left); }
   
-  /* 우측 상단 공지 영역 */
   .share-zone { background-color: var(--bg-share); border-top: 6px solid var(--point-orange); margin-bottom: 20px; }
   .share-zone .title-area i { background: var(--point-orange); }
   .share-item { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--point-orange); position: relative; }
   .share-time { display: block; font-size: 11px; color: #999; margin-top: 5px; }
 
-  /* 우측 하단 등록 영역 */
   .reg-zone { border-top: 6px solid var(--navy-blue); background: var(--bg-reg); transition: 0.3s; }
   .reg-zone.edit-mode { border-top-color: var(--red); background-color: #FFF4E6; }
 
-  /* 입력창 및 버튼 */
   .input-group { display: flex; flex-direction: column; gap: 12px; }
   input, textarea { padding: 13px; border: 1px solid var(--border-gray); border-radius: 12px; outline: none; font-size: 14px; width: 100%; box-sizing: border-box; background: white; }
   
@@ -79,7 +75,7 @@
   <section class="card guide-zone">
     <div class="title-area"><i></i> 가이드 검색 및 데이터</div>
     <div style="display:flex; gap:10px; margin-bottom:25px;">
-        <input id="q" placeholder="검색어 입력 후 Enter..." onkeyup="if(event.key==='Enter') renderGuides();">
+        <input id="q" placeholder="검색어 입력 후 Enter (전체보기는 빈칸에서 Enter)" onkeyup="if(event.key==='Enter') renderGuides();">
         <button class="btn-blue" onclick="renderGuides()" style="padding:0 25px;">검색</button>
     </div>
     <div id="guide-result"></div>
@@ -119,8 +115,15 @@
 </main>
 
 <script>
-  let GUIDE = JSON.parse(localStorage.getItem("guide") || "[]");
-  let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
+  // --- 데이터 초기화 로직 (data.js 연결) ---
+  let GUIDE = (typeof INITIAL_GUIDE !== 'undefined') ? INITIAL_GUIDE : JSON.parse(localStorage.getItem("guide") || "[]");
+  let SHARES = (typeof INITIAL_SHARES !== 'undefined') ? INITIAL_SHARES : JSON.parse(localStorage.getItem("shares") || "[]");
+
+  // 데이터가 브라우저에 아예 없으면 파일 데이터로 채워줌
+  if (!localStorage.getItem("guide") && typeof INITIAL_GUIDE !== 'undefined') {
+      localStorage.setItem("guide", JSON.stringify(INITIAL_GUIDE));
+  }
+
   let isAdmin = false;
   let editIdx = null;
 
