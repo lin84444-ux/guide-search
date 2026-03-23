@@ -52,8 +52,8 @@
   .btn-orange { background: var(--point-orange); color: white; }
   .btn-gray { background: #adb5bd; color: white; }
 
-  .list-item { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #edf2f7; position: relative; transition: 0.3s; }
-  .list-item.editing { border: 2px solid var(--main-blue); background: #fff; box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2); }
+  .list-item { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #edf2f7; position: relative; }
+  .list-item.editing { border: 2px solid var(--main-blue); box-shadow: 0 5px 15px rgba(74, 144, 226, 0.15); }
   
   .badge { font-size: 11px; font-weight: 700; color: var(--main-blue); background: #e8f2ff; padding: 4px 10px; border-radius: 8px; }
   .file-link { display: inline-block; margin-top: 8px; font-size: 13px; color: var(--main-blue); text-decoration: none; font-weight: 600; }
@@ -91,18 +91,18 @@
   </section>
 
   <section id="reg-card" class="card reg-zone">
-    <div class="title-area"><i id="reg-icon" style="background:var(--navy-blue)"></i> <span>신규 등록 (파일만 올려도 등록 가능)</span></div>
+    <div class="title-area"><i style="background:var(--navy-blue)"></i> <span>신규 가이드 등록</span></div>
     <div class="input-group">
-        <input id="new-category" placeholder="카테고리">
+        <input id="new-category" placeholder="카테고리 (파일 올리면 자동 입력)">
         <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
         <textarea id="new-text" placeholder="상세 내용을 작성하세요" rows="3"></textarea>
         
-        <div id="file-area" style="font-size: 13px; color:#64748b; background: white; padding: 10px; border-radius: 10px; border: 1px solid var(--border-gray);">
-            📎 <b>파일 첨부 시 자동 카테고리 설정:</b> 
+        <div style="font-size: 13px; color:#64748b; background: white; padding: 10px; border-radius: 10px; border: 1px solid var(--border-gray);">
+            📎 <b>파일 즉시 등록:</b> 
             <input type="file" id="new-file" onchange="handleFileSelect(this)" style="border:none; background:transparent; font-size:12px; margin-top:5px;">
         </div>
 
-        <div id="sync-area" style="font-size: 13px; display:flex; align-items:center; gap:8px;">
+        <div style="font-size: 13px; display:flex; align-items:center; gap:8px;">
             <input type="checkbox" id="sync-share" style="width:auto; cursor:pointer;">
             <label for="sync-share">등록 시 공유사항에도 게시</label>
         </div>
@@ -123,14 +123,12 @@
   let isAdmin = false;
   let editingId = null; 
 
-  // 파일 선택 시 텍스트가 없으면 파일명으로 카테고리 자동 입력
+  // 파일 선택 시 카테고리 자동 입력
   function handleFileSelect(input) {
       if (input.files.length > 0) {
           const fileName = input.files[0].name;
           const catField = document.getElementById("new-category");
-          if (!catField.value) {
-              catField.value = fileName.split('.')[0]; // 파일명을 카테고리로 추천
-          }
+          if (!catField.value) catField.value = fileName.split('.')[0];
       }
   }
 
@@ -149,13 +147,12 @@
 
     container.innerHTML = filtered.map((item, idx) => {
         if (editingId === idx) {
-            // 수정 모드 UI
             return `
                 <div class="list-item editing">
                     <div class="input-group">
-                        <input id="edit-cat-${idx}" value="${item.category}" placeholder="카테고리">
-                        <textarea id="edit-txt-${idx}" rows="4" placeholder="내용">${item.text}</textarea>
-                        <input id="edit-kw-${idx}" value="${item.keywords.join(', ')}" placeholder="키워드">
+                        <input id="edit-cat-${idx}" value="${item.category}" style="margin-bottom:5px;">
+                        <textarea id="edit-txt-${idx}" rows="4">${item.text}</textarea>
+                        <input id="edit-kw-${idx}" value="${item.keywords.join(', ')}">
                         <div class="admin-btns">
                             <button class="btn-sm btn-blue" onclick="saveEdit(${idx})">저장</button>
                             <button class="btn-sm btn-gray" onclick="cancelEdit()">취소</button>
@@ -164,7 +161,6 @@
                 </div>
             `;
         }
-        // 일반 모드 UI
         return `
             <div class="list-item">
                 <span class="badge">${item.category}</span>
@@ -182,10 +178,10 @@
     }).join('');
   }
 
-  // 인라인 수정 시작
+  // 화면 이동 없이 즉시 수정 시작
   function startInlineEdit(idx) {
       editingId = idx;
-      renderGuides();
+      renderGuides(); // 스크롤 이동 코드 없음
   }
 
   function cancelEdit() {
@@ -194,20 +190,15 @@
   }
 
   function saveEdit(idx) {
-      const newCat = document.getElementById(`edit-cat-${idx}`).value;
-      const newTxt = document.getElementById(`edit-txt-${idx}`).value;
-      const newKw = document.getElementById(`edit-kw-${idx}`).value.split(',').map(k => k.trim());
-
-      GUIDE[idx].category = newCat;
-      GUIDE[idx].text = newTxt;
-      GUIDE[idx].keywords = newKw;
-
+      GUIDE[idx].category = document.getElementById(`edit-cat-${idx}`).value;
+      GUIDE[idx].text = document.getElementById(`edit-txt-${idx}`).value;
+      GUIDE[idx].keywords = document.getElementById(`edit-kw-${idx}`).value.split(',').map(k => k.trim());
       localStorage.setItem("guide", JSON.stringify(GUIDE));
       editingId = null;
       renderGuides();
-      alert("수정되었습니다.");
   }
 
+  // 1번 수정: 파일만 있어도 등록되게 변경
   async function addGuide() {
     const cat = document.getElementById("new-category").value;
     const txt = document.getElementById("new-text").value;
@@ -215,13 +206,14 @@
     const fileInput = document.getElementById("new-file");
     const isSync = document.getElementById("sync-share").checked;
 
-    // 파일이 있으면 텍스트가 없어도 진행 가능
-    if(!cat && !fileInput.files.length) return alert("카테고리 또는 파일을 입력해주세요.");
+    // 파일이 있으면 텍스트 입력 없이도 통과
+    const hasFile = fileInput.files.length > 0;
+    if(!cat && !hasFile) return alert("카테고리 또는 파일을 등록해주세요.");
 
     let fileData = null;
     let fileName = null;
 
-    if(fileInput.files.length > 0) {
+    if(hasFile) {
         const file = fileInput.files[0];
         fileName = file.name;
         fileData = await toBase64(file);
@@ -229,17 +221,14 @@
 
     const kw = kwInput ? kwInput.split(",").map(k => k.trim()) : [];
     const finalCat = cat || (fileName ? fileName.split('.')[0] : "미분류");
-    const finalTxt = txt || (fileName ? `${fileName} 파일이 등록되었습니다.` : "");
+    const finalTxt = txt || (fileName ? `${fileName} 파일이 등록되었습니다.` : "내용 없음");
 
-    const newData = { category: finalCat, text: finalTxt, keywords: kw, fileName, fileData };
-
-    GUIDE.unshift(newData);
+    GUIDE.unshift({ category: finalCat, text: finalTxt, keywords: kw, fileName, fileData });
     if(isSync) addShare(finalTxt);
 
     localStorage.setItem("guide", JSON.stringify(GUIDE));
     clearInputs();
     renderGuides();
-    alert("등록되었습니다.");
   }
 
   function clearInputs() {
