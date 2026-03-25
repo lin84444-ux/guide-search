@@ -3,118 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub | Smart Blue & Gold</title>
+<title>WorkHub Pro | Corporate Archive</title>
 <script src="data.js"></script>
 <style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
   :root {
-    --header-grad: linear-gradient(135deg, #a2d2ff, #92a8d1);
-    --main-blue: #4a90e2;
-    --sub-blue: #84b6f4;
-    --bg-left: #F5F9FF;
-    --bg-share: #FFF6E5;
-    --bg-reg: #F8FAFC;
-    --navy-blue: #34495e;
-    --white: #ffffff;
-    --red: #ff6b6b;
-    --border-gray: #E5E7EB;
-    --point-orange: #FFB74D;
+    --bg-main: #f0f4f8;
+    --card-bg: #ffffff;
+    --primary: #4A90E2;
+    --secondary: #6C5CE7;
+    --accent: #FF7675;
+    --success: #55E6C1;
+    --text-main: #2D3436;
+    --text-sub: #636E72;
+    --border-color: #DFE6ED;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   }
 
-  body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background-color: #f4f7f9; color: #2c3e50; }
+  body { 
+    font-family: 'Pretendard', sans-serif; 
+    margin: 0; 
+    background-color: var(--bg-main); 
+    color: var(--text-main);
+    line-height: 1.6;
+  }
 
-  header { background: var(--header-grad); padding: 40px 20px; text-align: center; color: var(--white); position: relative; }
-  header h1 { margin: 0; font-size: 32px; letter-spacing: -1px; }
-  header .admin-toggle-btn { position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.2); border: 1px solid white; padding: 6px 12px; border-radius: 20px; color: white; cursor: pointer; font-size: 12px; transition: 0.3s; }
-  header .admin-toggle-btn:hover { background: white; color: var(--main-blue); }
-
-  main { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; max-width: 1300px; margin: 20px auto; padding: 0 20px; }
-
-  .card { background: var(--white); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); height: fit-content; }
-  .title-area { font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-  .title-area i { width: 4px; height: 18px; background: var(--main-blue); border-radius: 10px; }
-
-  .guide-zone { grid-row: span 2; border-top: 6px solid var(--main-blue); background: var(--bg-left); }
+  /* 헤더 디자인 */
+  header { 
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 50px 20px; 
+    text-align: center; 
+    color: white; 
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  header h1 { margin: 0; font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+  header p { opacity: 0.9; font-weight: 300; margin-top: 10px; }
   
-  .share-zone { background-color: var(--bg-share); border-top: 6px solid var(--point-orange); margin-bottom: 20px; }
-  .share-zone .title-area i { background: var(--point-orange); }
-  .share-item { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--point-orange); position: relative; }
-  .share-time { display: block; font-size: 11px; color: #999; margin-top: 5px; }
+  .admin-toggle-btn { 
+    position: absolute; top: 20px; right: 30px; 
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); 
+    padding: 8px 16px; border-radius: 30px; color: white; cursor: pointer; 
+    backdrop-filter: blur(5px); transition: 0.3s; font-size: 13px;
+  }
+  .admin-toggle-btn:hover { background: white; color: var(--primary); }
 
-  .reg-zone { border-top: 6px solid var(--navy-blue); background: var(--bg-reg); }
+  main { 
+    display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; 
+    max-width: 1400px; margin: -30px auto 50px; padding: 0 20px; 
+  }
 
-  .input-group { display: flex; flex-direction: column; gap: 12px; }
-  input, textarea { padding: 13px; border: 1px solid var(--border-gray); border-radius: 12px; outline: none; font-size: 14px; width: 100%; box-sizing: border-box; background: white; }
-  
-  button { padding: 13px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; }
-  .btn-blue { background: var(--main-blue); color: white; }
-  .btn-navy { background: var(--navy-blue); color: white; }
-  .btn-red { background: var(--red); color: white; }
-  .btn-orange { background: var(--point-orange); color: white; }
-  .btn-gray { background: #adb5bd; color: white; }
+  /* 공통 카드 디자인 */
+  .card { 
+    background: var(--card-bg); 
+    border-radius: 24px; 
+    padding: 30px; 
+    box-shadow: var(--shadow); 
+    border: 1px solid rgba(255,255,255,0.3);
+    transition: transform 0.3s ease;
+  }
+  .card:hover { transform: translateY(-5px); }
 
-  .list-item { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #edf2f7; position: relative; }
-  .list-item.editing { border: 2px solid var(--main-blue); box-shadow: 0 5px 15px rgba(74, 144, 226, 0.15); }
-  
-  .badge { font-size: 11px; font-weight: 700; color: var(--main-blue); background: #e8f2ff; padding: 4px 10px; border-radius: 8px; }
-  .file-link { display: inline-block; margin-top: 8px; font-size: 13px; color: var(--main-blue); text-decoration: none; font-weight: 600; }
-  .admin-btns { margin-top: 15px; display: flex; gap: 8px; }
-  .btn-sm { padding: 6px 12px; font-size: 11px; border-radius: 8px; }
+  .title-area { 
+    font-size: 20px; font-weight: 700; margin-bottom: 25px; 
+    display: flex; align-items: center; gap: 12px; color: var(--text-main);
+  }
+  .title-area i { width: 6px; height: 20px; border-radius: 10px; }
 
-  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+  /* 각 섹션별 포인트 컬러 */
+  .guide-zone .title-area i { background: var(--primary); }
+  .share-zone .title-area i { background: var(--accent); }
+  .reg-zone .title-area i { background: var(--secondary); }
+
+  /* 입력창 디자인 */
+  .input-group { display: flex; flex-direction: column; gap: 15px; }
+  input, textarea { 
+    padding: 15px; border: 1.5px solid var(--border-color); border-radius: 14px; 
+    outline: none; font-size: 14px; transition: 0.2s; background: #fdfdfd;
+  }
+  input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1); background: white; }
+
+  /* 버튼 디자인 */
+  button { 
+    padding: 14px; border: none; border-radius: 14px; cursor: pointer; 
+    font-weight: 700; font-size: 15px; transition: 0.3s;
+  }
+  .btn-blue { background: var(--primary); color: white; }
+  .btn-blue:hover { background: #357ABD; box-shadow: 0 5px 15px rgba(74,144,226,0.3); }
+  .btn-orange { background: var(--accent); color: white; }
+  .btn-navy { background: var(--secondary); color: white; }
+  .btn-gray { background: #b2bec3; color: white; }
+
+  /* 가이드 리스트 아이템 */
+  .list-item { 
+    background: #f9fbfe; padding: 22px; border-radius: 20px; 
+    margin-bottom: 20px; border: 1px solid var(--border-color); 
+    position: relative; transition: 0.2s;
+  }
+  .list-item:hover { border-color: var(--primary); background: white; }
+  .badge { 
+    font-size: 12px; font-weight: 700; color: var(--primary); 
+    background: rgba(74, 144, 226, 0.1); padding: 5px 12px; border-radius: 10px; 
+  }
+  .file-link { 
+    display: inline-flex; align-items: center; margin-top: 12px; 
+    font-size: 13px; color: var(--secondary); text-decoration: none; 
+    font-weight: 600; background: #eeeafc; padding: 6px 12px; border-radius: 8px;
+  }
+
+  /* 공유사항 아이템 */
+  .share-item { 
+    background: #fffcf6; padding: 15px; border-radius: 16px; 
+    margin-bottom: 12px; border-left: 5px solid var(--accent); 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+  .share-time { font-size: 11px; color: #b2bec3; display: block; margin-top: 8px; }
+
+  /* 반응형 */
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; margin-top: 20px; } }
 </style>
 </head>
 <body>
 
 <header>
-  <button class="admin-toggle-btn" onclick="toggleAdmin()">관리자 전환</button>
-  <h1>WorkHub</h1>
-  <p id="mode-text">사용자 모드입니다</p>
+  <button class="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
+  <h1>WorkHub Pro</h1>
+  <p id="mode-text">팀의 지식을 체계적으로 관리하세요</p>
 </header>
 
 <main>
   <section class="card guide-zone">
-    <div class="title-area"><i></i> 가이드 검색 및 데이터</div>
-    <div style="display:flex; gap:10px; margin-bottom:25px;">
-        <input id="q" placeholder="검색어 입력 후 Enter..." onkeyup="if(event.key==='Enter') renderGuides();">
-        <button class="btn-blue" onclick="renderGuides()" style="padding:0 25px;">검색</button>
+    <div class="title-area"><i></i> 가이드 아카이브</div>
+    <div style="display:flex; gap:12px; margin-bottom:30px;">
+        <input id="q" style="flex:1" placeholder="필요한 정보를 검색하세요 (예: GS건설, 재응시)" onkeyup="if(event.key==='Enter') renderGuides();">
+        <button class="btn-blue" onclick="renderGuides()" style="padding:0 30px;">검색</button>
     </div>
     <div id="guide-result"></div>
   </section>
 
-  <aside style="display: flex; flex-direction: column; gap: 20px;">
-    <section class="card share-zone" style="margin-bottom: 0;">
-      <div class="title-area"><i></i> 오늘의 공유사항</div>
-      <div id="share-result" style="max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
+  <aside style="display: flex; flex-direction: column; gap: 25px;">
+    <section class="card share-zone">
+      <div class="title-area"><i></i> 실시간 공지</div>
+      <div id="share-result" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;"></div>
       <div class="input-group">
-          <textarea id="share-text" placeholder="공유할 메시지 입력" rows="2"></textarea>
-          <button onclick="addShare(null)" class="btn-orange">Post Update</button>
+          <textarea id="share-text" placeholder="새로운 소식을 입력하세요" rows="2"></textarea>
+          <button onclick="addShare(null)" class="btn-orange">공유하기</button>
       </div>
     </section>
 
     <section id="reg-card" class="card reg-zone">
-      <div class="title-area"><i style="background:var(--navy-blue)"></i> <span>신규 가이드 등록</span></div>
+      <div class="title-area"><i></i> 가이드 신규 등록</div>
       <div class="input-group">
-          <input id="new-category" placeholder="카테고리 (파일 올리면 자동 입력)">
-          <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
-          <textarea id="new-text" placeholder="상세 내용을 작성하세요" rows="3"></textarea>
+          <input id="new-category" placeholder="카테고리">
+          <input id="new-keywords" placeholder="키워드 (쉼표로 구분)">
+          <textarea id="new-text" placeholder="상세 가이드 내용을 입력하세요" rows="3"></textarea>
           
-          <div style="font-size: 13px; color:#64748b; background: white; padding: 10px; border-radius: 10px; border: 1px solid var(--border-gray);">
-              📎 <b>파일 즉시 등록:</b> 
-              <input type="file" id="new-file" onchange="handleFileSelect(this)" style="border:none; background:transparent; font-size:12px; margin-top:5px;">
+          <div style="font-size: 13px; color:var(--text-sub); background: #f8f9fa; padding: 15px; border-radius: 14px; border: 1.5px dashed var(--border-color);">
+              <span style="display:block; margin-bottom:8px;">📎 파일 첨부 (선택)</span>
+              <input type="file" id="new-file" onchange="handleFileSelect(this)" style="font-size:12px; width:100%;">
           </div>
 
-          <div style="font-size: 13px; display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" id="sync-share" style="width:auto; cursor:pointer;">
-              <label for="sync-share">등록 시 공유사항에도 게시</label>
+          <div style="font-size: 13px; display:flex; align-items:center; gap:10px; color: var(--text-sub);">
+              <input type="checkbox" id="sync-share" style="width:18px; height:18px; cursor:pointer;">
+              <label for="sync-share" style="cursor:pointer;">등록 시 공지사항에 자동 게시</label>
           </div>
           
-          <button onclick="addGuide()" class="btn-navy">Save to Database</button>
+          <button onclick="addGuide()" class="btn-navy">시스템 저장</button>
       </div>
     </section>
   </aside>
 </main>
 
 <script>
+  // 로직 부분은 이전과 동일하게 유지하되 UI 연결만 유지했습니다.
   let GUIDE = (typeof INITIAL_GUIDE !== 'undefined') ? INITIAL_GUIDE : JSON.parse(localStorage.getItem("guide") || "[]");
   let SHARES = (typeof INITIAL_SHARES !== 'undefined') ? INITIAL_SHARES : JSON.parse(localStorage.getItem("shares") || "[]");
   
@@ -142,7 +204,10 @@
     );
 
     if (filtered.length === 0) {
-        container.innerHTML = `<p style="text-align:center; color:#999; padding:40px 0;">결과가 없습니다.</p>`;
+        container.innerHTML = `<div style="text-align:center; color:#b2bec3; padding:60px 0;">
+            <p style="font-size:40px; margin-bottom:10px;">🔍</p>
+            <p>검색 결과가 없습니다.</p>
+        </div>`;
         return;
     }
 
@@ -151,9 +216,9 @@
             return `
                 <div class="list-item editing">
                     <div class="input-group">
-                        <input id="edit-cat-${idx}" value="${item.category}" style="margin-bottom:5px;">
+                        <input id="edit-cat-${idx}" value="${item.category}" placeholder="카테고리">
                         <textarea id="edit-txt-${idx}" rows="4">${item.text}</textarea>
-                        <input id="edit-kw-${idx}" value="${item.keywords.join(', ')}">
+                        <input id="edit-kw-${idx}" value="${item.keywords.join(', ')}" placeholder="키워드">
                         <div class="admin-btns">
                             <button class="btn-sm btn-blue" onclick="saveEdit(${idx})">저장</button>
                             <button class="btn-sm btn-gray" onclick="cancelEdit()">취소</button>
@@ -165,13 +230,13 @@
         return `
             <div class="list-item">
                 <span class="badge">${item.category}</span>
-                <div style="margin:12px 0; font-size:15px; line-height:1.6; white-space:pre-wrap;">${item.text}</div>
+                <div style="margin:15px 0; font-size:15px; color:var(--text-main); font-weight:500; line-height:1.7; white-space:pre-wrap;">${item.text}</div>
                 ${item.fileName ? `<a href="${item.fileData}" download="${item.fileName}" class="file-link">📁 ${item.fileName}</a>` : ''}
-                <div style="margin-top:10px; font-size:12px; color:#adb5bd;">${item.keywords ? item.keywords.map(k => '#' + k).join(' ') : ''}</div>
+                <div style="margin-top:15px; font-size:12px; color:var(--text-sub);">${item.keywords ? item.keywords.map(k => '#' + k).join(' ') : ''}</div>
                 ${isAdmin ? `
                   <div class="admin-btns">
-                    <button class="btn-sm btn-navy" onclick="startInlineEdit(${idx})">수정</button>
-                    <button class="btn-sm btn-red" onclick="deleteGuide(${idx})">삭제</button>
+                    <button class="btn-sm btn-blue" onclick="startInlineEdit(${idx})">수정</button>
+                    <button class="btn-sm btn-gray" style="color:var(--accent)" onclick="deleteGuide(${idx})">삭제</button>
                   </div>
                 ` : ''}
             </div>
@@ -179,15 +244,8 @@
     }).join('');
   }
 
-  function startInlineEdit(idx) {
-      editingId = idx;
-      renderGuides();
-  }
-
-  function cancelEdit() {
-      editingId = null;
-      renderGuides();
-  }
+  function startInlineEdit(idx) { editingId = idx; renderGuides(); }
+  function cancelEdit() { editingId = null; renderGuides(); }
 
   function saveEdit(idx) {
       GUIDE[idx].category = document.getElementById(`edit-cat-${idx}`).value;
@@ -205,21 +263,18 @@
     const fileInput = document.getElementById("new-file");
     const isSync = document.getElementById("sync-share").checked;
 
-    const hasFile = fileInput.files.length > 0;
-    if(!cat && !hasFile) return alert("카테고리 또는 파일을 등록해주세요.");
+    if(!cat && !fileInput.files.length) return alert("내용을 입력해주세요.");
 
-    let fileData = null;
-    let fileName = null;
-
-    if(hasFile) {
+    let fileData = null; let fileName = null;
+    if(fileInput.files.length > 0) {
         const file = fileInput.files[0];
         fileName = file.name;
         fileData = await toBase64(file);
     }
 
     const kw = kwInput ? kwInput.split(",").map(k => k.trim()) : [];
-    const finalCat = cat || (fileName ? fileName.split('.')[0] : "미분류");
-    const finalTxt = txt || (fileName ? `${fileName} 파일이 등록되었습니다.` : "내용 없음");
+    const finalCat = cat || (fileName ? fileName.split('.')[0] : "기타");
+    const finalTxt = txt || (fileName ? `${fileName} 파일 등록` : "내용 없음");
 
     GUIDE.unshift({ category: finalCat, text: finalTxt, keywords: kw, fileName, fileData });
     if(isSync) addShare(finalTxt);
@@ -239,7 +294,7 @@
   function addShare(directText = null) {
     const txt = directText || document.getElementById("share-text").value;
     if(!txt) return;
-    const timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
     SHARES.unshift({ text: txt, time: timeStr });
     localStorage.setItem("shares", JSON.stringify(SHARES));
     if(!directText) document.getElementById("share-text").value = "";
@@ -250,11 +305,11 @@
     const container = document.getElementById("share-result");
     container.innerHTML = SHARES.map((s, idx) => `
         <div class="share-item">
-            <div>${s.text}</div>
-            <span class="share-time">${s.time}</span>
-            ${isAdmin ? `<span onclick="deleteShare(${idx})" style="cursor:pointer; color:var(--red); font-size:11px; position:absolute; top:10px; right:10px;">삭제</span>` : ''}
+            <div style="font-size:14px; color:var(--text-main);">${s.text}</div>
+            <span class="share-time">🕒 ${s.time}</span>
+            ${isAdmin ? `<span onclick="deleteShare(${idx})" style="cursor:pointer; color:var(--accent); font-size:11px; position:absolute; top:15px; right:15px;">삭제</span>` : ''}
         </div>
-    `).join('') || "<p style='color:#999; font-size:12px; text-align:center;'>공유사항이 없습니다.</p>";
+    `).join('') || "<p style='color:#b2bec3; font-size:13px; text-align:center;'>공지사항이 없습니다.</p>";
   }
 
   function toggleAdmin() {
@@ -265,13 +320,9 @@
         alert("비밀번호가 틀렸습니다.");
         return;
       }
-    } else {
-      isAdmin = false;
-      editingId = null;
-    }
-    document.getElementById("mode-text").innerText = isAdmin ? "관리자 모드입니다" : "사용자 모드입니다";
-    renderGuides();
-    renderShares();
+    } else { isAdmin = false; editingId = null; }
+    document.getElementById("mode-text").innerText = isAdmin ? "관리 도구 활성화됨" : "팀의 지식을 체계적으로 관리하세요";
+    renderGuides(); renderShares();
   }
 
   const toBase64 = file => new Promise((resolve, reject) => {
