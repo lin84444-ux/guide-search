@@ -9,16 +9,17 @@
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
   :root {
-    --bg-main: #f4f7fa;
-    --header-grad: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); /* 힙한 파스텔 블루 */
+    /* 눈이 편안한 저채도 파스텔 & 뮤트톤 조합 */
+    --bg-main: #f8fafc;
+    --header-grad: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%); /* 차분한 연보라 블루 */
     --card-bg: #ffffff;
-    --primary: #5da7fb;
-    --secondary: #8e9efc;
-    --accent: #ff8a9d; /* 중요 공지용 핑크 */
-    --text-main: #334155;
-    --text-sub: #64748b;
-    --border-color: #e2e8f0;
-    --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    --primary: #6366f1; /* 세련된 인디고 블루 */
+    --secondary: #94a3b8; /* 차분한 슬레이트 그레이 */
+    --accent: #f43f5e; /* 포인트 핑크 (눈에 띄지만 부드러움) */
+    --text-main: #1e293b;
+    --text-sub: #475569;
+    --border-color: #f1f5f9;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
   }
 
   body { 
@@ -30,7 +31,7 @@
     word-break: keep-all;
   }
 
-  /* 헤더: 파스텔 블루 & 곡선 */
+  /* 헤더: 대비를 낮춰 눈의 피로도 감소 */
   header { 
     background: var(--header-grad);
     padding: 80px 20px 160px; 
@@ -40,12 +41,12 @@
     z-index: 1;
     clip-path: ellipse(150% 100% at 50% 0%);
   }
-  header h1 { margin: 0; font-size: 42px; font-weight: 900; letter-spacing: -2px; color: #1e293b; }
-  header p { opacity: 0.8; font-weight: 500; margin-top: 12px; font-size: 18px; }
+  header h1 { margin: 0; font-size: 42px; font-weight: 900; letter-spacing: -2px; color: #334155; }
+  header p { opacity: 0.8; font-weight: 500; margin-top: 12px; font-size: 18px; color: #64748b; }
   
   .admin-toggle-btn { 
     position: absolute; top: 30px; right: 40px; 
-    background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.6); 
+    background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); 
     padding: 10px 22px; border-radius: 14px; color: #475569; cursor: pointer; 
     backdrop-filter: blur(10px); transition: 0.3s; font-size: 13px; font-weight: 700;
   }
@@ -65,10 +66,10 @@
     border-radius: 32px; 
     padding: 40px; 
     box-shadow: var(--shadow); 
-    border: 1px solid rgba(255,255,255,0.8);
+    border: 1px solid #ffffff;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  .card:hover { transform: translateY(-10px); }
+  .card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08); }
 
   .title-area { 
     font-size: 22px; font-weight: 800; margin-bottom: 30px; 
@@ -81,11 +82,11 @@
 
   .input-group { display: flex; flex-direction: column; gap: 15px; }
   input, textarea { 
-    padding: 18px; border: 1px solid var(--border-color); border-radius: 20px; 
-    outline: none; font-size: 14px; transition: 0.3s; background: #fcfdfe;
+    padding: 18px; border: 1.5px solid var(--border-color); border-radius: 20px; 
+    outline: none; font-size: 14px; transition: 0.3s; background: #f8fafc;
     color: #334155;
   }
-  input:focus, textarea:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(93, 167, 251, 0.1); }
+  input:focus, textarea:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.05); }
 
   button { 
     padding: 18px; border: none; border-radius: 20px; cursor: pointer; 
@@ -95,26 +96,23 @@
   .btn-orange { background: var(--accent); color: white; }
   .btn-navy { background: var(--secondary); color: white; }
 
-  /* 가이드 아이템 */
   .list-item { 
-    background: #f8fbff; padding: 28px; border-radius: 24px; 
-    margin-bottom: 20px; border: 1px solid #edf2f7; 
+    background: #ffffff; padding: 28px; border-radius: 24px; 
+    margin-bottom: 20px; border: 1.5px solid #f8fafc; 
   }
   .badge { 
     font-size: 12px; font-weight: 800; color: var(--primary); 
-    background: #eef7ff; padding: 6px 14px; border-radius: 12px; 
+    background: #eef2ff; padding: 6px 14px; border-radius: 12px; 
   }
 
-  /* 공유사항 스타일 (노란색 제거 및 중요 강조 추가) */
   .share-item { 
     background: #f8fafc; padding: 20px; border-radius: 22px; 
     margin-bottom: 15px; border: 1px solid #f1f5f9; position: relative;
   }
-  /* 중요 공지 스타일 */
   .share-item.important {
-    background: #fff5f6;
+    background: #fff1f2;
     border: 2px solid var(--accent);
-    box-shadow: 0 4px 15px rgba(255, 138, 157, 0.15);
+    box-shadow: 0 4px 15px rgba(244, 63, 94, 0.08);
     animation: pulse 2s infinite;
   }
   @keyframes pulse {
@@ -221,7 +219,7 @@
             <div style="margin:20px 0; font-size:16px; font-weight:600;">${item.text}</div>
             ${item.fileName ? `<a href="${item.fileData}" download="${item.fileName}" style="color:var(--primary); text-decoration:none; font-size:13px; font-weight:700;">📁 ${item.fileName}</a>` : ''}
             <div style="margin-top:15px; font-size:12px; color:var(--text-sub);">${item.keywords ? item.keywords.map(k => '#' + k).join(' ') : ''}</div>
-            ${isAdmin ? `<button onclick="deleteGuide(${idx})" style="padding:5px 10px; background:none; color:var(--accent); font-size:12px; margin-top:10px;">삭제</button>` : ''}
+            ${isAdmin ? `<button onclick="deleteGuide(${idx})" style="padding:5px 10px; background:none; color:var(--accent); font-size:12px; margin-top:10px; border:none; cursor:pointer;">삭제</button>` : ''}
         </div>
     `).join('');
   }
@@ -265,7 +263,7 @@
             ${s.important ? '<span class="important-badge">URGENT</span>' : ''}
             <div style="font-size:15px; font-weight:600;">${s.text}</div>
             <span class="share-time">🕒 ${s.time}</span>
-            ${isAdmin ? `<span onclick="deleteShare(${idx})" style="cursor:pointer; color:var(--accent); font-size:11px; float:right;">삭제</span>` : ''}
+            ${isAdmin ? `<span onclick="deleteShare(${idx})" style="cursor:pointer; color:var(--accent); font-size:11px; float:right; font-weight:700;">삭제</span>` : ''}
         </div>
     `).join('') || "<p style='text-align:center; color:#94a3b8;'>새로운 소식이 없습니다.</p>";
   }
@@ -273,6 +271,7 @@
   function toggleAdmin() {
     if (prompt("비밀번호 입력") === "6559") {
         isAdmin = !isAdmin;
+        document.getElementById("mode-text").innerText = isAdmin ? "관리자 권한으로 편집 중" : "팀의 지식을 체계적으로 관리하세요";
         renderGuides(); renderShares();
     }
   }
@@ -282,8 +281,8 @@
     reader.onload = () => resolve(reader.result);
   });
 
-  function deleteGuide(idx) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); }
-  function deleteShare(idx) { SHARES.splice(idx,1); localStorage.setItem("shares", JSON.stringify(SHARES)); renderShares(); }
+  function deleteGuide(idx) { if(confirm("삭제하시겠습니까?")) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); } }
+  function deleteShare(idx) { if(confirm("삭제하시겠습니까?")) { SHARES.splice(idx,1); localStorage.setItem("shares", JSON.stringify(SHARES)); renderShares(); } }
 
   window.onload = () => { renderGuides(); renderShares(); };
 </script>
