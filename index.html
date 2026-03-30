@@ -3,71 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub | Smart Blue Office</title>
+<title>WorkHub Pro | 지식 아카이브</title>
+<script src="data.js"></script>
 <style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
   :root {
-    --header-grad: linear-gradient(135deg, #a2d2ff, #92a8d1);
-    --main-blue: #4a90e2;
-    --sky-blue: #f0f7ff;
-    --navy-blue: #34495e;
-    --white: #ffffff;
-    --border-color: #e2e8f0;
+    --bg-main: #f8fafc;
+    --header-grad: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
+    --card-bg: #ffffff;
+    --primary: #6366f1;
+    --secondary: #94a3b8;
+    --accent: #f43f5e;
+    --text-main: #1e293b;
+    --text-sub: #475569;
+    --border-color: #f1f5f9;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
   }
 
-  body {
-    font-family: 'Pretendard', sans-serif;
-    margin: 0; padding: 0; background-color: #f4f7f9; color: #2c3e50;
+  body { 
+    font-family: 'Pretendard', sans-serif; 
+    margin: 0; background-color: var(--bg-main); color: var(--text-main);
+    line-height: 1.6; word-break: keep-all;
   }
 
-  header {
-    background: var(--header-grad);
-    padding: 50px 20px;
-    text-align: center;
-    color: var(--white);
-    position: relative;
+  header { 
+    background: var(--header-grad); padding: 80px 20px 160px; text-align: center; 
+    position: relative; z-index: 1; clip-path: ellipse(150% 100% at 50% 0%);
   }
-  header h1 { margin: 0; font-size: 32px; font-weight: 800; }
-  header .admin-toggle-btn {
-    position: absolute; top: 20px; right: 20px;
-    background: rgba(255,255,255,0.25); border: 1px solid white;
-    padding: 6px 16px; border-radius: 20px; color: white; cursor: pointer; font-size: 13px;
-  }
-
-  main {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 25px;
-    max-width: 1300px;
-    margin: 40px auto;
-    padding: 0 20px;
-  }
-
-  .card {
-    background: var(--white);
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    margin-bottom: 25px;
-  }
-
-  .title-area { font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-  .title-area i { width: 4px; height: 18px; background: var(--main-blue); border-radius: 10px; }
-
-  .guide-zone { grid-row: span 3; border-top: 6px solid var(--main-blue); }
-  .share-zone { background-color: var(--sky-blue); border-top: 6px solid #84b6f4; }
-  .reg-zone { background-color: #f8fafc; border-top: 6px solid var(--navy-blue); }
+  header h1 { margin: 0; font-size: 42px; font-weight: 900; letter-spacing: -2px; color: #334155; }
+  header p { opacity: 0.8; font-weight: 500; margin-top: 12px; font-size: 18px; color: #64748b; }
   
-  /* 일괄 등록 섹션 전용 스타일 */
-  .bulk-zone { border: 2px dashed #cbd5e1; background-color: #ffffff; }
+  .admin-toggle-btn { 
+    position: absolute; top: 30px; right: 40px; 
+    background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); 
+    padding: 10px 22px; border-radius: 14px; color: #475569; cursor: pointer; 
+    backdrop-filter: blur(10px); transition: 0.3s; font-size: 13px; font-weight: 700;
+  }
 
-  input, textarea { padding: 12px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 14px; outline: none; }
-  button { padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.2s; }
-  .btn-blue { background: var(--main-blue); color: white; }
-  .btn-navy { background: var(--navy-blue); color: white; }
-  .btn-outline { background: white; border: 1px solid var(--main-blue); color: var(--main-blue); font-size: 12px; }
+  main { 
+    display: grid; grid-template-columns: 1.8fr 1fr; gap: 35px; max-width: 1400px; 
+    margin: -100px auto 80px; padding: 0 25px; position: relative; z-index: 10; 
+  }
 
-  .list-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #edf2f7; }
-  .badge { font-size: 11px; font-weight: 700; color: var(--main-blue); background: #e8f2ff; padding: 4px 10px; border-radius: 6px; }
+  .card { 
+    background: var(--card-bg); border-radius: 32px; padding: 35px; 
+    box-shadow: var(--shadow); border: 1px solid #ffffff; transition: 0.3s;
+  }
+
+  .title-area { font-size: 22px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; }
+  .title-area i { width: 8px; height: 24px; border-radius: 4px; }
+  .guide-zone .title-area i { background: var(--primary); }
+  .share-zone .title-area i { background: var(--accent); }
+  .reg-zone .title-area i { background: var(--secondary); }
+
+  /* 필터 디자인 */
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+  .filter-select { 
+    padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--border-color);
+    background: white; font-size: 13px; font-weight: 600; color: var(--text-sub); outline: none;
+  }
+
+  .input-group { display: flex; flex-direction: column; gap: 15px; }
+  input, textarea { 
+    padding: 16px; border: 1.5px solid var(--border-color); border-radius: 18px; 
+    outline: none; font-size: 14px; background: #f8fafc; transition: 0.3s;
+  }
+  input:focus, textarea:focus { border-color: var(--primary); background: white; }
+
+  button { padding: 16px; border: none; border-radius: 18px; cursor: pointer; font-weight: 800; transition: 0.2s; }
+  .btn-blue { background: var(--primary); color: white; }
+  .btn-orange { background: var(--accent); color: white; }
+  .btn-navy { background: var(--secondary); color: white; }
+
+  .list-item { background: #ffffff; padding: 25px; border-radius: 24px; margin-bottom: 20px; border: 1.5px solid #f8fafc; }
+  .badge { font-size: 12px; font-weight: 800; color: var(--primary); background: #eef2ff; padding: 6px 14px; border-radius: 12px; }
+
+  /* 공유사항 박스 - 테두리 잘림 방지 보정 */
+  .share-item { 
+    background: #f8fafc; padding: 22px; border-radius: 22px; 
+    margin: 5px 5px 15px 5px; border: 1.5px solid #f1f5f9; position: relative;
+    box-sizing: border-box; 
+  }
+  .share-item.important {
+    background: #fff1f2; border: 2.5px solid var(--accent);
+    box-shadow: 0 4px 15px rgba(244, 63, 94, 0.1);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.01); } 100% { transform: scale(1); } }
+  
+  .important-badge { background: var(--accent); color: white; font-size: 10px; padding: 2px 8px; border-radius: 6px; margin-bottom: 8px; display: inline-block; }
+  .share-time { font-size: 11px; color: #94a3b8; display: block; margin-top: 10px; }
+
+  .admin-btns { margin-top: 15px; display: flex; gap: 8px; }
+  .btn-sm { padding: 6px 14px; font-size: 11px; border-radius: 10px; background: #f1f5f9; color: var(--text-sub); border:none; cursor:pointer; font-weight: 700; }
+  .btn-sm.del { color: var(--accent); }
+
+  .excel-box {
+    background: #f0f4ff; border: 2px dashed #c7d2fe; padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 10px;
+  }
 
   @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
 </style>
@@ -75,161 +109,211 @@
 <body>
 
 <header>
-  <button class="admin-toggle-btn" onclick="toggleAdmin()">관리자 전환</button>
-  <h1>WorkHub</h1>
-  <p id="mode-text">사용자 모드입니다</p>
+  <button class="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
+  <h1>WorkHub Pro</h1>
+  <p id="mode-text">팀의 지식을 체계적으로 관리하세요</p>
 </header>
 
 <main>
   <section class="card guide-zone">
-    <div class="title-area"><i></i> 가이드 지식창고</div>
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <input id="q" style="flex:1" placeholder="키워드를 입력하세요..." onkeyup="if(event.key==='Enter') renderGuides();">
-        <button class="btn-blue" onclick="renderGuides()" style="padding:0 20px;">검색</button>
+    <div class="title-area"><i></i> 가이드 보관함</div>
+    
+    <div style="margin-bottom:25px;">
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input id="q" style="flex:1" placeholder="가이드 내용 또는 키워드로 검색..." onkeyup="if(event.key==='Enter') renderGuides();">
+            <button class="btn-blue" onclick="renderGuides()" style="padding:0 35px;">검색</button>
+        </div>
+        <div class="filter-bar">
+            <select id="filter-cat" class="filter-select" onchange="renderGuides()">
+                <option value="all">🏢 모든 기업명</option>
+            </select>
+            <select id="filter-type" class="filter-select" onchange="renderGuides()">
+                <option value="all">📂 모든 문의유형</option>
+            </select>
+            <select id="filter-sort" class="filter-select" onchange="renderGuides()">
+                <option value="new">🕒 최근 등록순</option>
+                <option value="old">⏳ 오래된순</option>
+            </select>
+        </div>
     </div>
+
     <div id="guide-result"></div>
   </section>
 
-  <section class="card share-zone">
-    <div class="title-area"><i style="background:#84b6f4"></i> 오늘의 공유사항</div>
-    <div id="share-result" style="max-height: 150px; overflow-y: auto; margin-bottom: 15px;"></div>
-    <div style="display:flex; flex-direction:column; gap:8px;">
-        <textarea id="share-text" placeholder="공유 내용..." rows="2"></textarea>
-        <button onclick="addShare()" class="btn-blue" style="background:#84b6f4">공유 등록</button>
-    </div>
-  </section>
+  <aside style="display: flex; flex-direction: column; gap: 30px;">
+    <section class="card share-zone">
+      <div class="title-area"><i></i> 오늘의 공유사항</div>
+      <div id="share-result" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding: 5px;"></div>
+      <div class="input-group">
+          <textarea id="share-text" placeholder="새로운 소식을 공유해보세요..." rows="2"></textarea>
+          <div style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--accent);">
+            <input type="checkbox" id="is-important" style="width:17px; height:17px; cursor:pointer;">
+            <label for="is-important" style="cursor:pointer;">‼️ 중요 공지 강조</label>
+          </div>
+          <button onclick="addShare()" class="btn-orange">공유하기</button>
+      </div>
+    </section>
 
-  <section id="bulk-section" class="card bulk-zone" style="display:none;">
-    <div class="title-area"><i></i> 엑셀/CSV 일괄 등록</div>
-    <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">
-        양식: <b>카테고리, 내용, 키워드</b> (쉼표 구분)<br>
-        <button class="btn-outline" onclick="downloadSample()" style="margin-top:5px;">양식 샘플보기</button>
-    </p>
-    <div style="display:flex; flex-direction:column; gap:10px;">
-        <input type="file" id="bulk-file" accept=".csv, .txt">
-        <button onclick="importFile()" class="btn-blue">파일 데이터 업로드</button>
-    </div>
-  </section>
+    <section id="reg-card" class="card reg-zone">
+      <div class="title-area"><i></i> 데이터 등록 센터</div>
+      
+      <div class="excel-box">
+          <p style="font-size:13px; font-weight:700; color:var(--primary); margin-bottom:10px;">📊 엑셀(CSV) 일괄 등록</p>
+          <button onclick="downloadSample()" style="padding:8px 15px; font-size:11px; background:#fff; border:1px solid #c7d2fe; margin-bottom:12px; border-radius:10px; color:var(--primary);">📁 샘플 양식 다운로드</button>
+          <input type="file" id="excel-file" accept=".csv" style="font-size:11px; width:100%;" onchange="uploadExcel(this)">
+      </div>
 
-  <section class="card reg-zone">
-    <div class="title-area"><i style="background:var(--navy-blue)"></i> 가이드 개별 등록</div>
-    <div style="display:flex; flex-direction:column; gap:10px;">
-        <input id="new-category" placeholder="카테고리 (예: 업무)">
-        <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
-        <textarea id="new-text" placeholder="내용을 입력하세요..." rows="3"></textarea>
-        <button onclick="addGuide()" class="btn-navy">DB 저장</button>
-    </div>
-  </section>
+      <p style="text-align:center; font-size:12px; color:var(--secondary); margin:10px 0;">또는 직접 입력</p>
+
+      <div class="input-group">
+          <input id="new-category" placeholder="기업명 (예: GS건설)">
+          <input id="new-keywords" placeholder="문의유형/태그 (쉼표 구분)">
+          <textarea id="new-text" placeholder="가이드 상세 내용을 입력하세요..." rows="3"></textarea>
+          <button onclick="addGuide()" class="btn-navy">단일 가이드 저장</button>
+      </div>
+    </section>
+  </aside>
 </main>
 
 <script>
-let GUIDE = JSON.parse(localStorage.getItem("guide") || "[]");
-let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
-let isAdmin = false;
+  let GUIDE = JSON.parse(localStorage.getItem("guide") || "[]");
+  let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
+  let isAdmin = false;
 
-// 1. 가이드 렌더링
-function renderGuides() {
+  // 필터 옵션 초기화
+  function initFilters() {
+    const catSelect = document.getElementById("filter-cat");
+    const typeSelect = document.getElementById("filter-type");
+    
+    const cats = [...new Set(GUIDE.map(i => i.category))];
+    const types = [...new Set(GUIDE.flatMap(i => i.keywords || []))];
+
+    catSelect.innerHTML = '<option value="all">🏢 모든 기업명</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    typeSelect.innerHTML = '<option value="all">📂 모든 문의유형</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+  }
+
+  function renderGuides() {
     const q = document.getElementById("q").value.trim().toLowerCase();
+    const cat = document.getElementById("filter-cat").value;
+    const type = document.getElementById("filter-type").value;
+    const sort = document.getElementById("filter-sort").value;
     const container = document.getElementById("guide-result");
-    const filtered = q === "" ? GUIDE : GUIDE.filter(item => 
-        item.text.toLowerCase().includes(q) || item.category.toLowerCase().includes(q)
-    );
+
+    let filtered = GUIDE.filter(item => {
+        const matchQ = item.text.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
+        const matchCat = cat === "all" || item.category === cat;
+        const matchType = type === "all" || (item.keywords && item.keywords.includes(type));
+        return matchQ && matchCat && matchType;
+    });
+
+    if(sort === "old") filtered.reverse();
 
     container.innerHTML = filtered.map((item, idx) => `
         <div class="list-item">
             <span class="badge">${item.category}</span>
-            <div style="margin:10px 0; font-size:14px;">${item.text}</div>
-            <div style="font-size:11px; color:#94a3b8;">${item.keywords.map(k=>'#'+k).join(' ')}</div>
-            ${isAdmin ? `<div style="text-align:right;"><button onclick="deleteGuide(${idx})" style="color:#ff6b6b; background:none; font-size:11px;">삭제</button></div>` : ''}
+            <div style="margin:15px 0; font-weight:600; font-size:15px;">${item.text}</div>
+            <div style="font-size:12px; color:var(--secondary);">${item.keywords ? item.keywords.map(k => '#'+k).join(' ') : ''}</div>
+            ${isAdmin ? `
+              <div class="admin-btns">
+                <button class="btn-sm" onclick="editGuide(${idx})">수정</button>
+                <button class="btn-sm del" onclick="deleteGuide(${idx})">삭제</button>
+              </div>` : ''}
         </div>
-    `).join('') || "<p style='text-align:center; color:#ccc;'>데이터가 없습니다.</p>";
-}
+    `).join('') || "<p style='text-align:center; color:#94a3b8; padding:50px 0;'>데이터가 없습니다.</p>";
+  }
 
-// 2. 파일 일괄 임포트 기능
-function importFile() {
-    const fileInput = document.getElementById("bulk-file");
-    if (!fileInput.files.length) return alert("파일을 선택해주세요.");
+  function renderShares() {
+    const container = document.getElementById("share-result");
+    container.innerHTML = SHARES.map((s, idx) => `
+        <div class="share-item ${s.important ? 'important' : ''}">
+            ${s.important ? '<span class="important-badge">URGENT</span>' : ''}
+            <div style="font-size:15px; font-weight:600;">${s.text}</div>
+            <span class="share-time">🕒 ${s.time}</span>
+            ${isAdmin ? `
+              <div class="admin-btns">
+                <button class="btn-sm" onclick="editShare(${idx})">수정</button>
+                <button class="btn-sm del" onclick="deleteShare(${idx})">삭제</button>
+              </div>` : ''}
+        </div>
+    `).join('') || "<p style='text-align:center; color:#94a3b8;'>소식이 없습니다.</p>";
+  }
 
-    const file = fileInput.files[0];
+  // 엑셀(CSV) 업로드 처리
+  function uploadExcel(input) {
+    const file = input.files[0];
+    if(!file) return;
     const reader = new FileReader();
-
     reader.onload = function(e) {
-        const content = e.target.result;
-        const lines = content.split("\n");
-        let count = 0;
-
-        lines.forEach(line => {
-            const parts = line.split(",");
-            if (parts.length >= 2) {
-                const category = parts[0].trim();
-                const text = parts[1].trim();
-                const keywords = parts[2] ? parts[2].split("|").map(k => k.trim()) : [];
-                
-                if (category && text) {
-                    GUIDE.unshift({ category, text, keywords });
-                    count++;
-                }
+        const text = e.target.result;
+        const rows = text.split('\n').slice(1); // 헤더 제외
+        rows.forEach(row => {
+            const [category, keywords, content] = row.split(',').map(s => s?.trim());
+            if(category && content) {
+                GUIDE.unshift({ 
+                    category, 
+                    text: content, 
+                    keywords: keywords ? keywords.split('|') : [] 
+                });
             }
         });
-
-        if (count > 0) {
-            localStorage.setItem("guide", JSON.stringify(GUIDE));
-            alert(`${count}건의 데이터가 성공적으로 등록되었습니다.`);
-            renderGuides();
-        } else {
-            alert("유효한 데이터 형식이 없습니다.");
-        }
+        localStorage.setItem("guide", JSON.stringify(GUIDE));
+        alert("일괄 등록 완료!");
+        location.reload();
     };
-    reader.readAsText(file, "EUC-KR"); // 한글 깨짐 방지
-}
+    reader.readAsText(file, "EUC-KR");
+  }
 
-// 3. 샘플 양식 알림
-function downloadSample() {
-    alert("메모장이나 엑셀에서 아래 형식으로 작성 후 CSV로 저장하세요:\n\n카테고리, 가이드내용, 키워드1|키워드2\n예: IT지원, 비번 초기화 방법, 비번|보안|초기화");
-}
+  function downloadSample() {
+    const csvContent = "기업명,문의유형(구분자 |),내용\nGS건설,재응시|시스템,시험 점수 미달 시 자동 재응시 제공\n현대모비스,수료증,수료증 날짜 변경 불가 안내";
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "가이드_업로드_양식.csv";
+    link.click();
+  }
 
-// 4. 개별 등록
-function addGuide() {
+  function addShare() {
+    const txt = document.getElementById("share-text").value;
+    const imp = document.getElementById("is-important").checked;
+    if(!txt) return;
+    const time = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    SHARES.unshift({ text: txt, time: time, important: imp });
+    localStorage.setItem("shares", JSON.stringify(SHARES));
+    location.reload();
+  }
+
+  function addGuide() {
     const cat = document.getElementById("new-category").value;
     const txt = document.getElementById("new-text").value;
-    const kw = document.getElementById("new-keywords").value.split(",").map(k=>k.trim());
-    if(!cat || !txt) return alert("내용을 입력하세요.");
-    
-    GUIDE.unshift({ category: cat, text: txt, keywords: kw });
+    const kw = document.getElementById("new-keywords").value;
+    if(!cat || !txt) return alert("내용을 입력해주세요.");
+    GUIDE.unshift({ category: cat, text: txt, keywords: kw.split(',').map(s=>s.trim()) });
     localStorage.setItem("guide", JSON.stringify(GUIDE));
     location.reload();
-}
+  }
 
-function addShare() {
-    const txt = document.getElementById("share-text").value;
-    if(!txt) return;
-    SHARES.unshift({ text: txt, date: new Date().toLocaleTimeString() });
-    localStorage.setItem("shares", JSON.stringify(SHARES));
-    renderShares();
-    document.getElementById("share-text").value = "";
-}
-
-function renderShares() {
-    const container = document.getElementById("share-result");
-    container.innerHTML = SHARES.map(s => `<div style="padding:8px; background:white; border-radius:8px; margin-bottom:8px; border-left:3px solid #84b6f4; font-size:13px;">${s.text}</div>`).join('');
-}
-
-function toggleAdmin() {
-    if(!isAdmin && prompt("비번: 6559") === "6559") {
-        isAdmin = true;
-        document.getElementById("mode-text").innerText = "관리자 모드 (파일 업로드 활성)";
-        document.getElementById("bulk-section").style.display = "block";
-    } else {
-        isAdmin = false;
-        document.getElementById("mode-text").innerText = "사용자 모드";
-        document.getElementById("bulk-section").style.display = "none";
+  function toggleAdmin() {
+    if (prompt("비밀번호 입력") === "6559") {
+      isAdmin = !isAdmin;
+      document.getElementById("mode-text").innerText = isAdmin ? "관리자 권한으로 편집 중" : "팀의 지식을 체계적으로 관리하세요";
+      renderGuides(); renderShares();
     }
-    renderGuides();
-}
+  }
 
-function deleteGuide(idx) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); }
+  function editGuide(idx) {
+    const newTxt = prompt("수정할 가이드 내용을 입력하세요", GUIDE[idx].text);
+    if(newTxt) { GUIDE[idx].text = newTxt; localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); }
+  }
 
-window.onload = () => { renderGuides(); renderShares(); };
+  function editShare(idx) {
+    const newTxt = prompt("수정할 공지 내용을 입력하세요", SHARES[idx].text);
+    if(newTxt) { SHARES[idx].text = newTxt; localStorage.setItem("shares", JSON.stringify(SHARES)); renderShares(); }
+  }
+
+  function deleteGuide(idx) { if(confirm("삭제하시겠습니까?")) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); } }
+  function deleteShare(idx) { if(confirm("삭제하시겠습니까?")) { SHARES.splice(idx,1); localStorage.setItem("shares", JSON.stringify(SHARES)); renderShares(); } }
+
+  window.onload = () => { initFilters(); renderGuides(); renderShares(); };
 </script>
 </body>
 </html>
