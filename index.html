@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WorkHub Pro | 지식 아카이브</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
@@ -21,40 +20,97 @@
     --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
   }
 
-  body { font-family: 'Pretendard', sans-serif; margin: 0; background-color: var(--bg-main); color: var(--text-main); line-height: 1.6; }
-  header { background: var(--header-grad); padding: 80px 20px 160px; text-align: center; position: relative; clip-path: ellipse(150% 100% at 50% 0%); }
-  header h1 { margin: 0; font-size: 42px; font-weight: 900; color: #334155; }
-  
-  .admin-toggle-btn { position: absolute; top: 30px; right: 40px; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); padding: 10px 22px; border-radius: 14px; cursor: pointer; backdrop-filter: blur(10px); transition: 0.3s; font-size: 13px; font-weight: 700; }
+  body { 
+    font-family: 'Pretendard', sans-serif; 
+    margin: 0; background-color: var(--bg-main); color: var(--text-main);
+    line-height: 1.6; word-break: keep-all;
+  }
 
-  main { display: grid; grid-template-columns: 1.8fr 1fr; gap: 35px; max-width: 1400px; margin: -100px auto 80px; padding: 0 25px; position: relative; z-index: 10; }
-  .card { background: var(--card-bg); border-radius: 32px; padding: 35px; box-shadow: var(--shadow); border: 1px solid #ffffff; }
+  header { 
+    background: var(--header-grad); padding: 80px 20px 160px; text-align: center; 
+    position: relative; z-index: 1; clip-path: ellipse(150% 100% at 50% 0%);
+  }
+  header h1 { margin: 0; font-size: 42px; font-weight: 900; letter-spacing: -2px; color: #334155; }
+  header p { opacity: 0.8; font-weight: 500; margin-top: 12px; font-size: 18px; color: #64748b; }
+  
+  .admin-toggle-btn { 
+    position: absolute; top: 30px; right: 40px; 
+    background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); 
+    padding: 10px 22px; border-radius: 14px; color: #475569; cursor: pointer; 
+    backdrop-filter: blur(10px); transition: 0.3s; font-size: 13px; font-weight: 700;
+  }
+
+  main { 
+    display: grid; grid-template-columns: 1.8fr 1fr; gap: 35px; max-width: 1400px; 
+    margin: -100px auto 80px; padding: 0 25px; position: relative; z-index: 10; 
+  }
+
+  .card { 
+    background: var(--card-bg); border-radius: 32px; padding: 35px; 
+    box-shadow: var(--shadow); border: 1px solid #ffffff; transition: 0.3s;
+  }
 
   .title-area { font-size: 22px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; }
-  .title-area i { width: 8px; height: 24px; border-radius: 4px; background: var(--primary); }
+  .title-area i { width: 8px; height: 24px; border-radius: 4px; }
+  .guide-zone .title-area i { background: var(--primary); }
+  .share-zone .title-area i { background: var(--accent); }
+  .reg-zone .title-area i { background: var(--secondary); }
 
   .filter-bar { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
-  .filter-select { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-sub); outline: none; }
+  .filter-select { 
+    padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--border-color);
+    background: white; font-size: 13px; font-weight: 600; color: var(--text-sub); outline: none; cursor: pointer;
+  }
+
+  .input-group { display: flex; flex-direction: column; gap: 15px; }
+  input, textarea { 
+    padding: 16px; border: 1.5px solid var(--border-color); border-radius: 18px; 
+    outline: none; font-size: 14px; background: #f8fafc; transition: 0.3s;
+  }
+  input:focus, textarea:focus { border-color: var(--primary); background: white; }
+
+  button { padding: 16px; border: none; border-radius: 18px; cursor: pointer; font-weight: 800; transition: 0.2s; }
+  .btn-blue { background: var(--primary); color: white; }
+  .btn-orange { background: var(--accent); color: white; }
+  .btn-navy { background: var(--secondary); color: white; }
 
   .list-item { background: #ffffff; padding: 25px; border-radius: 24px; margin-bottom: 20px; border: 1.5px solid #f8fafc; position: relative;}
   .badge { font-size: 12px; font-weight: 800; color: var(--primary); background: #eef2ff; padding: 6px 14px; border-radius: 12px; }
 
-  .excel-box { background: #f0f4ff; border: 2px dashed #c7d2fe; padding: 25px; border-radius: 24px; text-align: center; margin-bottom: 10px; }
-  .sample-btn { display: inline-block; margin-top: 12px; font-size: 12px; color: var(--primary); background: white; border: 1px solid var(--primary); padding: 5px 15px; border-radius: 10px; cursor: pointer; font-weight: 700; }
-
-  .input-group { display: flex; flex-direction: column; gap: 15px; }
-  input, textarea { padding: 16px; border: 1.5px solid var(--border-color); border-radius: 18px; outline: none; font-size: 14px; background: #f8fafc; }
-  button { padding: 16px; border: none; border-radius: 18px; cursor: pointer; font-weight: 800; transition: 0.2s; }
-  .btn-blue { background: var(--primary); color: white; }
-  .btn-navy { background: var(--secondary); color: white; }
-
-  /* 관리자 전용 메뉴 */
-  #admin-only-tools { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
-  .reset-btn { color: var(--accent); font-size: 12px; text-decoration: underline; cursor: pointer; border: none; background: none; font-weight: 700; }
+  .share-item { 
+    background: #f8fafc; padding: 22px; border-radius: 22px; 
+    margin: 5px 5px 15px 5px; border: 1.5px solid #f1f5f9; position: relative;
+    box-sizing: border-box; 
+  }
+  .share-item.important {
+    background: #fff1f2; border: 2.5px solid var(--accent);
+    box-shadow: 0 4px 15px rgba(244, 63, 94, 0.1);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.01); } 100% { transform: scale(1); } }
   
-  /* 휴지통 알림 */
-  #trash-bin { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 15px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 999; align-items: center; gap: 20px; }
-  .restore-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+  .important-badge { background: var(--accent); color: white; font-size: 10px; padding: 2px 8px; border-radius: 6px; margin-bottom: 8px; display: inline-block; }
+  .share-time { font-size: 11px; color: #94a3b8; display: block; margin-top: 10px; }
+
+  .admin-btns { margin-top: 15px; display: flex; gap: 8px; }
+  .btn-sm { padding: 6px 14px; font-size: 11px; border-radius: 10px; background: #f1f5f9; color: var(--text-sub); border:none; cursor:pointer; font-weight: 700; }
+  .btn-sm.del { color: var(--accent); }
+
+  .excel-box {
+    background: #f0f4ff; border: 2px dashed #c7d2fe; padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 10px;
+  }
+  .sample-link { display: inline-block; margin-top: 10px; font-size: 12px; color: var(--primary); text-decoration: underline; cursor: pointer; font-weight: 700; }
+  
+  /* 초기화 및 휴지통 스타일 */
+  .admin-only-tools { display: none; margin-top: 15px; }
+  .reset-link { font-size: 11px; color: #94a3b8; text-decoration: underline; cursor: pointer; }
+  
+  #trash-notif { 
+    display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+    background: #1e293b; color: white; padding: 12px 25px; border-radius: 15px; 
+    z-index: 9999; align-items: center; gap: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  .restore-btn { background: var(--primary); color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
   @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
 </style>
@@ -70,182 +126,219 @@
 <main>
   <section class="card guide-zone">
     <div class="title-area"><i></i> 가이드 보관함</div>
-    <div class="filter-bar">
-        <input id="q" style="flex:1; padding:10px 15px; border-radius:12px; border:1.5px solid var(--border-color);" placeholder="검색어 입력..." onkeyup="if(event.key==='Enter') renderGuides();">
-        <select id="filter-cat" class="filter-select" onchange="renderGuides()"><option value="all">모든 기업</option></select>
-        <button class="btn-blue" onclick="renderGuides()" style="padding:10px 25px; border-radius:12px;">검색</button>
+    
+    <div style="margin-bottom:25px;">
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input id="q" style="flex:1" placeholder="내용 또는 #키워드로 검색..." onkeyup="if(event.key==='Enter') renderGuides();">
+            <button class="btn-blue" onclick="renderGuides()" style="padding:0 35px;">검색</button>
+        </div>
+        <div class="filter-bar">
+            <select id="filter-cat" class="filter-select" onchange="renderGuides()">
+                <option value="all">🏢 모든 기업명</option>
+            </select>
+            <select id="filter-type" class="filter-select" onchange="renderGuides()">
+                <option value="all">📂 모든 키워드</option>
+            </select>
+            <select id="filter-sort" class="filter-select" onchange="renderGuides()">
+                <option value="new">🕒 최근 등록순</option>
+                <option value="old">⏳ 오래된순</option>
+            </select>
+        </div>
     </div>
+
     <div id="guide-result"></div>
   </section>
 
-  <aside>
-    <section class="card reg-zone">
-      <div class="title-area"><i></i> 데이터 센터</div>
+  <aside style="display: flex; flex-direction: column; gap: 30px;">
+    <section class="card share-zone">
+      <div class="title-area"><i></i> 오늘의 공유사항</div>
+      <div id="share-result" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding: 5px;"></div>
+      <div class="input-group">
+          <textarea id="share-text" placeholder="새로운 소식을 공유해보세요..." rows="2"></textarea>
+          <div style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--accent);">
+            <input type="checkbox" id="is-important" style="width:17px; height:17px; cursor:pointer;">
+            <label for="is-important" style="cursor:pointer;">‼️ 중요 공지 강조</label>
+          </div>
+          <button onclick="addShare()" class="btn-orange">공유하기</button>
+      </div>
+    </section>
+
+    <section id="reg-card" class="card reg-zone">
+      <div class="title-area"><i></i> 데이터 등록 센터</div>
       
       <div class="excel-box">
-          <p style="font-size:14px; font-weight:800; color:var(--primary);">📊 엑셀 파일(.xlsx) 업로드</p>
-          <p style="font-size:11px; color:var(--text-sub); margin-bottom:15px;">수정한 엑셀 파일을 그대로 올리세요</p>
-          <input type="file" id="excel-file" accept=".xlsx, .xls" style="font-size:12px; width:100%;" onchange="readExcel(this)">
-          <div class="sample-btn" onclick="downloadExcelSample()">엑셀 샘플 다운로드</div>
+          <p style="font-size:13px; font-weight:700; color:var(--primary); margin-bottom:5px;">📊 메모장/CSV 일괄 등록</p>
+          <input type="file" id="excel-file" accept=".csv,.txt" style="font-size:11px; width:100%;" onchange="uploadExcel(this)">
+          <div class="sample-link" onclick="downloadSample()">[샘플 양식 다운로드]</div>
           
-          <div id="admin-only-tools">
-            <button class="reset-btn" onclick="resetData()">전체 데이터 초기화(비우기)</button>
+          <div class="admin-only-tools" id="admin-tools">
+            <span class="reset-link" onclick="resetAllData()">전체 데이터 초기화(비우기)</span>
           </div>
       </div>
 
       <div class="input-group">
-          <input id="new-category" placeholder="기업명">
-          <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
-          <textarea id="new-text" placeholder="내용 입력..." rows="3"></textarea>
-          <button onclick="addGuide()" class="btn-navy">단일 추가</button>
+          <input id="new-category" placeholder="기업명 (예: GS건설)">
+          <input id="new-keywords" placeholder="키워드/태그 (쉼표 구분)">
+          <textarea id="new-text" placeholder="가이드 상세 내용을 입력하세요..." rows="3"></textarea>
+          <button onclick="addGuide()" class="btn-navy">단일 가이드 저장</button>
       </div>
     </section>
   </aside>
 </main>
 
-<div id="trash-bin">
-    <span>🗑️ 데이터를 초기화했습니다.</span>
-    <button class="restore-btn" onclick="restoreData()">실행 취소 (복구하기)</button>
+<div id="trash-notif">
+  <span>🗑️ 데이터가 초기화되었습니다.</span>
+  <button class="restore-btn" onclick="restoreData()">복구하기</button>
 </div>
 
 <script>
   let GUIDE = JSON.parse(localStorage.getItem("guide") || "[]");
-  let TRASH = []; // 복구용 임시 보관소
+  let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
+  let TRASH = []; // 복구용
   let isAdmin = false;
-
-  // 1. 엑셀 파일 읽기 (xlsx 라이브러리 활용)
-  function readExcel(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      
-      // 엑셀을 JSON으로 변환
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      
-      if (jsonData.length > 1) {
-        jsonData.slice(1).forEach(row => {
-          if (row[0] && row[2]) { // 기업명과 내용이 있을 때만
-            GUIDE.unshift({
-              category: String(row[0]).trim(),
-              keywords: row[1] ? String(row[1]).split(/[|/,]/).map(k => k.trim()) : [],
-              text: String(row[2]).trim()
-            });
-          }
-        });
-        saveAndReload();
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  // 2. 관리자 전용 초기화 (비밀번호 한 번 더!)
-  function resetData() {
-    const pw = prompt("보안을 위해 관리자 비밀번호를 다시 입력하세요.");
-    if (pw === "6559") {
-      TRASH = [...GUIDE]; // 현재 데이터를 휴지통에 복사
-      GUIDE = [];
-      localStorage.setItem("guide", JSON.stringify(GUIDE));
-      renderGuides();
-      showTrashBin();
-    } else {
-      alert("비밀번호가 틀렸습니다.");
-    }
-  }
-
-  function showTrashBin() {
-    const bin = document.getElementById("trash-bin");
-    bin.style.display = "flex";
-    setTimeout(() => { bin.style.display = "none"; }, 10000); // 10초 후 사라짐
-  }
-
-  function restoreData() {
-    GUIDE = [...TRASH];
-    saveAndReload();
-  }
-
-  // 3. 엑셀 샘플 다운로드 (XLSX 파일 생성)
-  function downloadExcelSample() {
-    const data = [
-      ["기업명", "키워드", "내용"],
-      ["삼성전자", "반도체|채용", "반도체 부문 채용은 하반기에 진행됩니다."],
-      ["현대자동차", "복지|포인트", "복지 포인트는 매달 1일에 지급됩니다."]
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "가이드양식");
-    XLSX.writeFile(wb, "워크허브_가이드_양식.xlsx");
-  }
-
-  function saveAndReload() {
-    localStorage.setItem("guide", JSON.stringify(GUIDE));
-    location.reload();
-  }
 
   function initFilters() {
     const catSelect = document.getElementById("filter-cat");
+    const typeSelect = document.getElementById("filter-type");
     const cats = [...new Set(GUIDE.map(i => i.category))].filter(Boolean);
-    catSelect.innerHTML = '<option value="all">모든 기업</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    const types = [...new Set(GUIDE.flatMap(i => i.keywords || []))].filter(Boolean);
+    catSelect.innerHTML = '<option value="all">🏢 모든 기업명</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    typeSelect.innerHTML = '<option value="all">📂 모든 키워드</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
   }
 
   function renderGuides() {
     const q = document.getElementById("q").value.trim().toLowerCase();
     const cat = document.getElementById("filter-cat").value;
+    const type = document.getElementById("filter-type").value;
+    const sort = document.getElementById("filter-sort").value;
     const container = document.getElementById("guide-result");
 
     let filtered = GUIDE.filter(item => {
-        const matchQ = (item.text || "").toLowerCase().includes(q) || (item.category || "").toLowerCase().includes(q);
+        const matchQ = (item.text||"").toLowerCase().includes(q) || (item.category||"").toLowerCase().includes(q);
         const matchCat = cat === "all" || item.category === cat;
-        return matchQ && matchCat;
+        const matchType = type === "all" || (item.keywords && item.keywords.includes(type));
+        return matchQ && matchCat && matchType;
     });
+    if(sort === "old") filtered = [...filtered].reverse();
 
     container.innerHTML = filtered.map((item, idx) => `
         <div class="list-item">
             <span class="badge">${item.category}</span>
-            <div style="margin:15px 0; font-weight:600;">${item.text}</div>
-            <div style="display:flex; gap:6px;">
-                ${item.keywords ? item.keywords.map(k => `<span style="font-size:11px; color:#6366f1;">#${k}</span>`).join('') : ''}
+            <div style="margin:15px 0; font-weight:600; font-size:15px; color:#1e293b;">${item.text}</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                ${item.keywords ? item.keywords.map(k => `<span style="font-size:11px; color:#6366f1; background:#f0f4ff; padding:2px 8px; border-radius:6px;">#${k}</span>`).join('') : ''}
             </div>
-            ${isAdmin ? `<button onclick="deleteSingle(${idx})" style="color:red; font-size:11px; border:none; background:none; cursor:pointer; margin-top:10px;">삭제</button>` : ''}
+            ${isAdmin ? `
+              <div class="admin-btns">
+                <button class="btn-sm" onclick="editGuide(${idx})">수정</button>
+                <button class="btn-sm del" onclick="deleteGuide(${idx})">삭제</button>
+              </div>` : ''}
         </div>
-    `).join('') || "<p style='text-align:center; color:#94a3b8;'>데이터가 없습니다.</p>";
+    `).join('') || "<p style='text-align:center; color:#94a3b8; padding:50px 0;'>결과가 없습니다.</p>";
+  }
+
+  function downloadSample() {
+    const header = "기업명\t키워드\t내용\n";
+    const sample = "현대건설\t재응시|시스템\t테스트 점수 미달 시 24시간 후 재응시 가능합니다.\n삼성전자\t수료증\t수료증은 마이페이지 메뉴에서 즉시 출력 가능합니다.";
+    const blob = new Blob(["\uFEFF" + header + sample], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "가이드_업로드_양식.txt";
+    link.click();
+  }
+
+  function uploadExcel(input) {
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+        lines.slice(1).forEach(line => {
+            let parts = line.includes('\t') ? line.split('\t') : line.split(',');
+            let cleanParts = parts.map(p => p.trim().replace(/^["']|["']$/g, ''));
+            if (cleanParts.length >= 2) {
+                GUIDE.unshift({
+                    category: cleanParts[0],
+                    keywords: cleanParts[1] ? cleanParts[1].split(/[|/,]/).map(k => k.trim()).filter(Boolean) : [],
+                    text: cleanParts.slice(2).join(', ')
+                });
+            }
+        });
+        localStorage.setItem("guide", JSON.stringify(GUIDE));
+        location.reload();
+    };
+    reader.readAsText(file, "UTF-8");
+  }
+
+  function resetAllData() {
+    if (prompt("데이터를 모두 비우려면 관리자 비밀번호를 입력하세요.") === "6559") {
+      TRASH = [...GUIDE];
+      GUIDE = [];
+      localStorage.setItem("guide", JSON.stringify(GUIDE));
+      renderGuides();
+      const notif = document.getElementById("trash-notif");
+      notif.style.display = "flex";
+      setTimeout(() => { notif.style.display = "none"; }, 10000);
+    }
+  }
+
+  function restoreData() {
+    GUIDE = [...TRASH];
+    localStorage.setItem("guide", JSON.stringify(GUIDE));
+    document.getElementById("trash-notif").style.display = "none";
+    renderGuides(); initFilters();
   }
 
   function addGuide() {
     const cat = document.getElementById("new-category").value;
     const txt = document.getElementById("new-text").value;
     const kw = document.getElementById("new-keywords").value;
-    if(!cat || !txt) return alert("필수 정보를 입력하세요.");
+    if(!cat || !txt) return alert("입력 오류");
     GUIDE.unshift({ category: cat, text: txt, keywords: kw.split(',').map(s=>s.trim()).filter(Boolean) });
-    saveAndReload();
+    localStorage.setItem("guide", JSON.stringify(GUIDE));
+    location.reload();
   }
 
-  function deleteSingle(idx) {
-    if(confirm("이 항목을 삭제할까요?")) {
-      TRASH = [GUIDE[idx]]; // 한 개 삭제 시에도 복구 가능하게 저장
-      GUIDE.splice(idx, 1);
-      localStorage.setItem("guide", JSON.stringify(GUIDE));
-      renderGuides();
-      showTrashBin();
-    }
+  function renderShares() {
+    const container = document.getElementById("share-result");
+    container.innerHTML = SHARES.map((s, idx) => `
+        <div class="share-item ${s.important ? 'important' : ''}">
+            ${s.important ? '<span class="important-badge">URGENT</span>' : ''}
+            <div style="font-size:15px; font-weight:600;">${s.text}</div>
+            <span class="share-time">🕒 ${s.time}</span>
+            ${isAdmin ? `<div class="admin-btns"><button class="btn-sm del" onclick="deleteShare(${idx})">삭제</button></div>` : ''}
+        </div>
+    `).join('') || "<p style='text-align:center; color:#94a3b8;'>소식이 없습니다.</p>";
+  }
+
+  function addShare() {
+    const txt = document.getElementById("share-text").value;
+    const imp = document.getElementById("is-important").checked;
+    if(!txt) return;
+    const time = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    SHARES.unshift({ text: txt, time: time, important: imp });
+    localStorage.setItem("shares", JSON.stringify(SHARES));
+    location.reload();
   }
 
   function toggleAdmin() {
-    const pw = prompt("관리자 비밀번호를 입력하세요.");
-    if (pw === "6559") {
+    if (prompt("비밀번호 입력") === "6559") {
       isAdmin = !isAdmin;
-      document.getElementById("mode-text").innerText = isAdmin ? "관리자 모드 활성화" : "팀의 지식을 체계적으로 관리하세요";
-      document.getElementById("admin-only-tools").style.display = isAdmin ? "block" : "none";
-      renderGuides();
+      document.getElementById("mode-text").innerText = isAdmin ? "관리자 권한으로 편집 중" : "팀의 지식을 체계적으로 관리하세요";
+      document.getElementById("admin-tools").style.display = isAdmin ? "block" : "none";
+      renderGuides(); renderShares();
     }
   }
 
-  window.onload = () => { initFilters(); renderGuides(); };
+  function editGuide(idx) {
+    const newTxt = prompt("내용 수정", GUIDE[idx].text);
+    if(newTxt) { GUIDE[idx].text = newTxt; localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); }
+  }
+  function deleteGuide(idx) { if(confirm("삭제하시겠습니까?")) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); initFilters(); } }
+  function deleteShare(idx) { if(confirm("삭제하시겠습니까?")) { SHARES.splice(idx,1); localStorage.setItem("shares", JSON.stringify(SHARES)); renderShares(); } }
+
+  window.onload = () => { initFilters(); renderGuides(); renderShares(); };
 </script>
 </body>
 </html>
