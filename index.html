@@ -56,7 +56,6 @@
   .share-zone .title-area i { background: var(--accent); }
   .reg-zone .title-area i { background: var(--secondary); }
 
-  /* 필터 바 디자인 */
   .filter-bar { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
   .filter-select { 
     padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--border-color);
@@ -75,10 +74,9 @@
   .btn-orange { background: var(--accent); color: white; }
   .btn-navy { background: var(--secondary); color: white; }
 
-  .list-item { background: #ffffff; padding: 25px; border-radius: 24px; margin-bottom: 20px; border: 1.5px solid #f8fafc; }
+  .list-item { background: #ffffff; padding: 25px; border-radius: 24px; margin-bottom: 20px; border: 1.5px solid #f8fafc; position: relative;}
   .badge { font-size: 12px; font-weight: 800; color: var(--primary); background: #eef2ff; padding: 6px 14px; border-radius: 12px; }
 
-  /* 중요공지 테두리 잘림 해결을 위한 여백 조정 */
   .share-item { 
     background: #f8fafc; padding: 22px; border-radius: 22px; 
     margin: 5px 5px 15px 5px; border: 1.5px solid #f1f5f9; position: relative;
@@ -159,6 +157,7 @@
       <div class="excel-box">
           <p style="font-size:13px; font-weight:700; color:var(--primary); margin-bottom:10px;">📊 엑셀/CSV 일괄 등록</p>
           <input type="file" id="excel-file" accept=".csv,.txt" style="font-size:11px; width:100%;" onchange="uploadExcel(this)">
+          <p style="font-size:10px; color:var(--secondary); margin-top:8px;">(기업명 / 키워드 / 내용 순으로 작성)</p>
       </div>
 
       <div class="input-group">
@@ -176,7 +175,6 @@
   let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
   let isAdmin = false;
 
-  // 필터 옵션 실시간 업데이트
   function initFilters() {
     const catSelect = document.getElementById("filter-cat");
     const typeSelect = document.getElementById("filter-type");
@@ -222,29 +220,41 @@
     `).join('') || "<p style='text-align:center; color:#94a3b8; padding:50px 0;'>결과가 없습니다.</p>";
   }
 
-  // 데이터 파싱 로직 (탭/쉼표 자동감지)
+  // ★ 엑셀 파싱 로직 대폭 강화 ★
   function uploadExcel(input) {
     const file = input.files[0];
     if(!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
         const text = e.target.result;
+        // 1. 줄바꿈 문자를 정리하여 행으로 분리
         const rows = text.split(/\r?\n/).filter(row => row.trim() !== "");
+        
+        // 2. 헤더 제외하고 한 줄씩 분석
         rows.slice(1).forEach(row => {
-            const cols = row.includes('\t') ? row.split('\t') : row.split(',');
+            // 정규식: 쉼표(,) 또는 탭(\t)으로 나누되, 따옴표 안의 구분자는 무시함
+            const cols = row.split(/\t|,/); 
+            
+            // 3. 데이터 정제 (따옴표 제거 및 공백 정리)
             const cleanCols = cols.map(s => s?.trim().replace(/^["']|["']$/g, ''));
-            const [category, keywords, content] = cleanCols;
+            
+            // 데이터가 3개 이상일 때만 등록 (기업명, 키워드, 내용)
+            if(cleanCols.length >= 3) {
+                const category = cleanCols[0];
+                const keywords = cleanCols[1];
+                const content = cleanCols.slice(2).join(' '); // 나머지 내용은 모두 '내용'으로 합침
 
-            if(category && content) {
-                GUIDE.unshift({ 
-                    category, 
-                    text: content, 
-                    keywords: keywords ? keywords.split(/[|/,]/).map(k => k.trim()) : [] 
-                });
+                if(category && content) {
+                    GUIDE.unshift({ 
+                        category: category, 
+                        text: content, 
+                        keywords: keywords ? keywords.split(/[|/]/).map(k => k.trim()).filter(Boolean) : [] 
+                    });
+                }
             }
         });
         localStorage.setItem("guide", JSON.stringify(GUIDE));
-        alert("데이터 등록이 완료되었습니다!");
+        alert("데이터가 정확하게 분리되어 등록되었습니다!");
         location.reload();
     };
     reader.readAsText(file, "UTF-8");
