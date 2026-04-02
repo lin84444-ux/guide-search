@@ -101,7 +101,6 @@
   }
   .sample-link { display: inline-block; margin-top: 10px; font-size: 12px; color: var(--primary); text-decoration: underline; cursor: pointer; font-weight: 700; }
   
-  /* 초기화 및 휴지통 스타일 */
   .admin-only-tools { display: none; margin-top: 15px; }
   .reset-link { font-size: 11px; color: #94a3b8; text-decoration: underline; cursor: pointer; }
   
@@ -194,14 +193,18 @@
 <script>
   let GUIDE = JSON.parse(localStorage.getItem("guide") || "[]");
   let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
-  let TRASH = []; // 복구용
+  let TRASH = []; 
   let isAdmin = false;
 
   function initFilters() {
     const catSelect = document.getElementById("filter-cat");
     const typeSelect = document.getElementById("filter-type");
+    
+    // 현재 가이드에 존재하는 기업과 키워드만 추출
     const cats = [...new Set(GUIDE.map(i => i.category))].filter(Boolean);
     const types = [...new Set(GUIDE.flatMap(i => i.keywords || []))].filter(Boolean);
+
+    // 필터 목록 갱신
     catSelect.innerHTML = '<option value="all">🏢 모든 기업명</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
     typeSelect.innerHTML = '<option value="all">📂 모든 키워드</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
   }
@@ -276,7 +279,11 @@
       TRASH = [...GUIDE];
       GUIDE = [];
       localStorage.setItem("guide", JSON.stringify(GUIDE));
+      
+      // 즉시 화면 반영 (가이드 목록 + 상단 필터)
       renderGuides();
+      initFilters(); 
+
       const notif = document.getElementById("trash-notif");
       notif.style.display = "flex";
       setTimeout(() => { notif.style.display = "none"; }, 10000);
@@ -287,7 +294,10 @@
     GUIDE = [...TRASH];
     localStorage.setItem("guide", JSON.stringify(GUIDE));
     document.getElementById("trash-notif").style.display = "none";
-    renderGuides(); initFilters();
+    
+    // 복구 후 즉시 화면 반영 (가이드 목록 + 상단 필터)
+    renderGuides(); 
+    initFilters(); 
   }
 
   function addGuide() {
@@ -335,8 +345,23 @@
     const newTxt = prompt("내용 수정", GUIDE[idx].text);
     if(newTxt) { GUIDE[idx].text = newTxt; localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); }
   }
-  function deleteGuide(idx) { if(confirm("삭제하시겠습니까?")) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); initFilters(); } }
-  function deleteShare(idx) { if(confirm("삭제하시겠습니까?")) { SHARES.splice(idx,1); localStorage.setItem("shares", JSON.stringify(SHARES)); renderShares(); } }
+  
+  function deleteGuide(idx) { 
+    if(confirm("삭제하시겠습니까?")) { 
+      GUIDE.splice(idx,1); 
+      localStorage.setItem("guide", JSON.stringify(GUIDE)); 
+      renderGuides(); 
+      initFilters(); 
+    } 
+  }
+  
+  function deleteShare(idx) { 
+    if(confirm("삭제하시겠습니까?")) { 
+      SHARES.splice(idx,1); 
+      localStorage.setItem("shares", JSON.stringify(SHARES)); 
+      renderShares(); 
+    } 
+  }
 
   window.onload = () => { initFilters(); renderGuides(); renderShares(); };
 </script>
