@@ -1,304 +1,338 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | 통합 지식 시스템</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkHub Pro | 지식 아카이브</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-  :root {
-    --bg-main: #f8fafc;
-    --header-grad: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
-    --card-bg: #ffffff;
-    --primary: #6366f1;
-    --secondary: #94a3b8;
-    --accent: #f43f5e;
-    --success: #10b981;
-    --text-main: #1e293b;
-    --text-sub: #475569;
-    --border-color: #f1f5f9;
-    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
-  }
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
-  body { 
-    font-family: 'Pretendard', sans-serif; 
-    margin: 0; background-color: var(--bg-main); color: var(--text-main);
-    line-height: 1.6; word-break: keep-all;
-  }
+        :root {
+            --bg-main: #f8fafc;
+            --header-grad: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
+            --card-bg: #ffffff;
+            --primary: #6366f1;
+            --secondary: #94a3b8;
+            --accent: #f43f5e;
+            --text-main: #1e293b;
+            --text-sub: #475569;
+            --border-color: #f1f5f9;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
+        }
 
-  header { 
-    background: var(--header-grad); padding: 60px 20px 120px; text-align: center; 
-    position: relative; z-index: 1; clip-path: ellipse(150% 100% at 50% 0%);
-  }
-  header h1 { margin: 0; font-size: 42px; font-weight: 900; letter-spacing: -2px; color: #334155; }
-  header p { opacity: 0.8; font-weight: 500; margin-top: 12px; font-size: 18px; color: #64748b; }
-  
-  .admin-toggle-btn { 
-    position: absolute; top: 30px; right: 40px; 
-    background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); 
-    padding: 10px 22px; border-radius: 14px; color: #475569; cursor: pointer; 
-    backdrop-filter: blur(10px); transition: 0.3s; font-size: 13px; font-weight: 700;
-  }
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            margin: 0; background-color: var(--bg-main); color: var(--text-main);
+            line-height: 1.6; word-break: keep-all;
+        }
 
-  /* 메인 레이아웃 구성 */
-  main { 
-    display: grid; grid-template-columns: 2.2fr 1fr; gap: 30px; max-width: 1450px; 
-    margin: -60px auto 80px; padding: 0 25px; position: relative; z-index: 10; 
-  }
+        header { 
+            background: var(--header-grad); padding: 60px 20px 140px; text-align: center; 
+            position: relative; z-index: 1; clip-path: ellipse(150% 100% at 50% 0%);
+        }
+        header h1 { margin: 0; font-size: 42px; font-weight: 900; letter-spacing: -2px; color: #334155; }
+        header p { opacity: 0.8; font-weight: 500; margin-top: 12px; font-size: 18px; color: #64748b; }
+        
+        .admin-toggle-btn { 
+            position: absolute; top: 20px; right: 20px; 
+            background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); 
+            padding: 8px 18px; border-radius: 12px; color: #475569; cursor: pointer; 
+            backdrop-filter: blur(10px); transition: 0.3s; font-size: 12px; font-weight: 700;
+        }
 
-  .card { 
-    background: var(--card-bg); border-radius: 28px; padding: 30px; 
-    box-shadow: var(--shadow); border: 1px solid #ffffff; margin-bottom: 25px;
-  }
+        main { 
+            display: grid; grid-template-columns: 2fr 1fr; gap: 30px; max-width: 1400px; 
+            margin: -80px auto 80px; padding: 0 25px; position: relative; z-index: 10; 
+        }
 
-  /* 탭 메뉴 스타일 */
-  .tab-container { display: flex; gap: 15px; margin-bottom: 25px; }
-  .tab-btn { 
-    padding: 12px 24px; border-radius: 15px; border: none; cursor: pointer; 
-    font-weight: 800; background: #e2e8f0; color: #64748b; transition: 0.3s;
-  }
-  .tab-btn.active { background: var(--primary); color: white; }
+        .card { 
+            background: var(--card-bg); border-radius: 28px; padding: 30px; 
+            box-shadow: var(--shadow); border: 1px solid #ffffff; margin-bottom: 30px;
+        }
 
-  .title-area { font-size: 20px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-  .title-area i { width: 6px; height: 20px; border-radius: 3px; }
-  .guide-zone .title-area i { background: var(--primary); }
-  .company-zone .title-area i { background: var(--success); }
-  .share-zone .title-area i { background: var(--accent); }
+        .title-area { font-size: 20px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .title-area i { width: 6px; height: 20px; border-radius: 3px; display: inline-block; }
+        .guide-zone .title-area i { background: var(--primary); }
+        .share-zone .title-area i { background: var(--accent); }
+        .reg-zone .title-area i { background: var(--secondary); }
 
-  /* 테이블 & 리스트 공통 스타일 */
-  .table-wrapper { overflow-x: auto; border-radius: 15px; border: 1px solid var(--border-color); }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th { background: #f8fafc; padding: 15px; text-align: left; color: var(--text-sub); border-bottom: 2px solid var(--border-color); }
-  td { padding: 15px; border-bottom: 1px solid var(--border-color); }
-  
-  .input-group { display: flex; flex-direction: column; gap: 12px; }
-  input, textarea, select { 
-    padding: 14px; border: 1.5px solid var(--border-color); border-radius: 14px; 
-    outline: none; font-size: 14px; background: #f8fafc; transition: 0.3s;
-  }
-  input:focus { border-color: var(--primary); background: white; }
+        .filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-select { 
+            padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--border-color);
+            background: white; font-size: 13px; font-weight: 600; color: var(--text-sub); outline: none; cursor: pointer;
+        }
 
-  button { padding: 14px; border: none; border-radius: 14px; cursor: pointer; font-weight: 700; transition: 0.2s; }
-  .btn-blue { background: var(--primary); color: white; }
-  .btn-green { background: var(--success); color: white; }
-  .btn-orange { background: var(--accent); color: white; }
+        .input-group { display: flex; flex-direction: column; gap: 12px; }
+        input, textarea { 
+            padding: 14px; border: 1.5px solid var(--border-color); border-radius: 14px; 
+            outline: none; font-size: 14px; background: #f8fafc; transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); background: white; }
 
-  /* 팀원 코드의 통계 카드 스타일링 */
-  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-  .stat-mini { background: #f1f5f9; padding: 15px; border-radius: 20px; text-align: center; }
-  .stat-mini h4 { margin: 0; font-size: 22px; color: var(--primary); }
-  .stat-mini p { margin: 5px 0 0; font-size: 12px; font-weight: 600; color: var(--text-sub); }
+        button { padding: 14px; border: none; border-radius: 14px; cursor: pointer; font-weight: 800; transition: 0.2s; }
+        .btn-blue { background: var(--primary); color: white; }
+        .btn-orange { background: var(--accent); color: white; }
+        .btn-navy { background: var(--secondary); color: white; }
 
-  .hidden { display: none; }
+        .list-item { background: #ffffff; padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1.5px solid #f8fafc; }
+        .badge { font-size: 11px; font-weight: 800; color: var(--primary); background: #eef2ff; padding: 4px 10px; border-radius: 8px; }
 
-  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
-</style>
+        .share-item { background: #f8fafc; padding: 18px; border-radius: 18px; margin-bottom: 12px; border: 1.5px solid #f1f5f9; position: relative; }
+        .share-item.important { background: #fff1f2; border: 2px solid var(--accent); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.01); } 100% { transform: scale(1); } }
+        
+        .important-badge { background: var(--accent); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-bottom: 5px; display: inline-block; }
+        .share-time { font-size: 11px; color: #94a3b8; display: block; margin-top: 8px; }
+
+        .admin-btns { margin-top: 10px; display: flex; gap: 5px; }
+        .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 8px; background: #f1f5f9; color: var(--text-sub); border:none; cursor:pointer; }
+        .btn-sm.del { color: var(--accent); }
+
+        .excel-box { background: #f0f4ff; border: 2px dashed #c7d2fe; padding: 15px; border-radius: 16px; text-align: center; margin-bottom: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f1f5f9; padding: 12px; text-align: left; font-weight: 700; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        
+        @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
 <header>
-  <button class="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
-  <h1>WorkHub Pro</h1>
-  <p id="mode-text">통합 지식 및 인프라 관리 시스템</p>
+    <button class="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
+    <h1>WorkHub Pro</h1>
+    <p id="mode-text">팀의 지식을 실시간으로 공유하고 관리하세요</p>
 </header>
 
 <main>
-  <div class="content-area">
-    <div class="tab-container">
-      <button class="tab-btn active" onclick="switchTab('guide')">📖 가이드 보관함</button>
-      <button class="tab-btn" onclick="switchTab('company')">🏢 기업 인프라 관리</button>
-    </div>
+    <section>
+        <div class="card guide-zone">
+            <div class="title-area"><i></i> 가이드 보관함</div>
+            <div style="display:flex; gap:8px; margin-bottom:15px;">
+                <input id="q" style="flex:1" placeholder="내용 또는 #키워드로 검색..." onkeyup="if(event.key==='Enter') renderGuides();">
+                <button class="btn-blue" onclick="renderGuides()" style="padding:0 25px;">검색</button>
+            </div>
+            <div class="filter-bar">
+                <select id="filter-cat" class="filter-select" onchange="renderGuides()"><option value="all">🏢 모든 기업명</option></select>
+                <select id="filter-sort" class="filter-select" onchange="renderGuides()">
+                    <option value="new">🕒 최근순</option>
+                    <option value="old">⏳ 과거순</option>
+                </select>
+            </div>
+            <div id="guide-result"></div>
+        </div>
 
-    <section id="guide-section" class="card guide-zone">
-      <div class="title-area"><i></i> 가이드 보관함</div>
-      <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <input id="q" style="flex:1" placeholder="가이드 검색..." onkeyup="if(event.key==='Enter') renderGuides();">
-        <button class="btn-blue" onclick="renderGuides()" style="padding:0 30px;">검색</button>
-      </div>
-      <div id="guide-result"></div>
+        <div class="card">
+            <div class="title-area"><i></i> 기업 관리 현황</div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th>기업명</th><th>코드</th><th>여부</th><th>기간</th><th>관리</th></tr>
+                    </thead>
+                    <tbody id="companyTable"></tbody>
+                </table>
+            </div>
+        </div>
     </section>
 
-    <section id="company-section" class="card company-zone hidden">
-      <div class="title-area"><i></i> 기업 인프라 현황</div>
-      
-      <div class="stats-row">
-        <div class="stat-mini"><h4 id="totalCount">0</h4><p>전체 기업</p></div>
-        <div class="stat-mini"><h4 id="activeCount" style="color:var(--success)">0</h4><p>운영 중</p></div>
-        <div class="stat-mini"><h4 id="inactiveCount" style="color:var(--accent)">0</h4><p>종료</p></div>
-      </div>
+    <aside>
+        <section class="card share-zone">
+            <div class="title-area"><i></i> 오늘의 공유사항</div>
+            <div id="share-result" style="max-height: 350px; overflow-y: auto; margin-bottom: 15px;"></div>
+            <div class="input-group">
+                <textarea id="share-text" placeholder="새로운 소식을 입력..." rows="2"></textarea>
+                <label style="font-size:12px; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" id="is-important"> ‼️ 중요 공지
+                </label>
+                <button onclick="addShare()" class="btn-orange">공유하기</button>
+            </div>
+        </section>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>기업명</th>
-              <th>코드</th>
-              <th>운영여부</th>
-              <th>관리</th>
-            </tr>
-          </thead>
-          <tbody id="companyTable"></tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-
-  <aside>
-    <section class="card share-zone">
-      <div class="title-area"><i></i> 오늘의 공유사항</div>
-      <div id="share-result" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;"></div>
-      <div class="input-group">
-        <textarea id="share-text" placeholder="공유사항 입력..." rows="2"></textarea>
-        <button onclick="addShare()" class="btn-orange">공유하기</button>
-      </div>
-    </section>
-
-    <section class="card reg-zone">
-      <div class="title-area"><i></i> 데이터 등록 센터</div>
-      
-      <div id="reg-guide-form" class="input-group">
-        <p style="font-size:12px; font-weight:bold; color:var(--primary);">[가이드 등록]</p>
-        <input id="new-category" placeholder="기업명">
-        <textarea id="new-text" placeholder="가이드 내용..." rows="2"></textarea>
-        <button onclick="addGuide()" class="btn-blue">가이드 저장</button>
-      </div>
-
-      <div id="reg-company-form" class="input-group hidden">
-        <p style="font-size:12px; font-weight:bold; color:var(--success);">[기업 등록]</p>
-        <input id="comp-name" placeholder="기업명">
-        <input id="comp-code" placeholder="기업코드">
-        <select id="comp-status">
-          <option value="운영중">운영중</option>
-          <option value="종료">종료</option>
-        </select>
-        <button onclick="addCompany()" class="btn-green">기업 정보 등록</button>
-      </div>
-      
-      <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee;">
-        <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">엑셀/CSV 일괄 업로드</p>
-        <input type="file" id="bulk-file" style="font-size:11px; width:100%;">
-      </div>
-    </section>
-  </aside>
+        <section class="card reg-zone">
+            <div class="title-area"><i></i> 데이터 센터</div>
+            <div class="excel-box">
+                <p style="font-size:12px; font-weight:700; color:var(--primary); margin-bottom:8px;">📊 엑셀 일괄 등록</p>
+                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="font-size:11px; width:100%;" onchange="uploadExcel()">
+            </div>
+            <div class="input-group">
+                <input id="new-category" placeholder="기업명">
+                <input id="new-code" placeholder="기업코드">
+                <input id="new-keywords" placeholder="키워드 (쉼표 구분)">
+                <textarea id="new-text" placeholder="상세 내용..." rows="2"></textarea>
+                <button onclick="addGuide()" class="btn-navy">실시간 저장</button>
+            </div>
+        </section>
+    </aside>
 </main>
 
 <script>
-  // 데이터 로드
-  let GUIDE = JSON.parse(localStorage.getItem("guide") || "[]");
-  let COMPANIES = JSON.parse(localStorage.getItem("companies") || "[]");
-  let SHARES = JSON.parse(localStorage.getItem("shares") || "[]");
-  let isAdmin = false;
+    // --- [파이어베이스 설정: 세영님이 주신 값 적용] ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyATn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE",
+        authDomain: "workhub-pro-be742.firebaseapp.com",
+        databaseURL: "https://workhub-pro-be742-default-rtdb.firebaseio.com/",
+        projectId: "workhub-pro-be742",
+        storageBucket: "workhub-pro-be742.firebasestorage.app",
+        messagingSenderId: "547958464107",
+        appId: "1:547958464107:web:3c78c150e0b3c77969db2e"
+    };
 
-  // 탭 전환 로직
-  function switchTab(type) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    if(type === 'guide') {
-      document.getElementById('guide-section').classList.remove('hidden');
-      document.getElementById('reg-guide-form').classList.remove('hidden');
-      document.getElementById('company-section').classList.add('hidden');
-      document.getElementById('reg-company-form').classList.add('hidden');
-    } else {
-      document.getElementById('guide-section').classList.add('hidden');
-      document.getElementById('reg-guide-form').classList.add('hidden');
-      document.getElementById('company-section').classList.remove('hidden');
-      document.getElementById('reg-company-form').classList.remove('hidden');
-      renderCompanies();
+    let GUIDE = [];
+    let SHARES = [];
+    let isAdmin = false;
+
+    function loadData() {
+        db.ref('guides').on('value', (snap) => {
+            const val = snap.val();
+            GUIDE = val ? Object.keys(val).map(k => ({id: k, ...val[k]})) : [];
+            updateFilters();
+            renderGuides();
+            renderCompanyTable();
+        });
+
+        db.ref('shares').on('value', (snap) => {
+            const val = snap.val();
+            SHARES = val ? Object.keys(val).map(k => ({id: k, ...val[k]})) : [];
+            renderShares();
+        });
     }
-  }
 
-  // [기존 1번 기능] 가이드 렌더링
-  function renderGuides() {
-    const q = document.getElementById("q").value.toLowerCase();
-    const container = document.getElementById("guide-result");
-    const filtered = GUIDE.filter(i => i.text.toLowerCase().includes(q) || i.category.toLowerCase().includes(q));
+    function addGuide() {
+        const cat = document.getElementById("new-category").value;
+        const code = document.getElementById("new-code").value;
+        const txt = document.getElementById("new-text").value;
+        const kw = document.getElementById("new-keywords").value;
+        if(!cat || !txt) return alert("내용을 입력해주세요.");
 
-    container.innerHTML = filtered.map((item, idx) => `
-      <div style="background:#f8fafc; padding:15px; border-radius:15px; margin-bottom:10px;">
-        <span style="font-size:11px; font-weight:800; color:var(--primary); background:#eef2ff; padding:4px 8px; border-radius:8px;">${item.category}</span>
-        <div style="margin-top:8px; font-weight:600; font-size:14px;">${item.text}</div>
-        ${isAdmin ? `<button onclick="deleteGuide(${idx})" style="color:var(--accent); font-size:11px; background:none; padding:5px 0;">삭제</button>` : ''}
-      </div>
-    `).join('') || "<p style='text-align:center; color:#94a3b8; font-size:13px;'>데이터가 없습니다.</p>";
-  }
-
-  // [기존 2번 기능] 기업 관리 렌더링 및 통계
-  function renderCompanies() {
-    const tbody = document.getElementById("companyTable");
-    tbody.innerHTML = COMPANIES.map((c, idx) => `
-      <tr>
-        <td><strong>${c.name}</strong></td>
-        <td>${c.code}</td>
-        <td style="color:${c.status === '운영중' ? 'var(--success)' : 'var(--accent)'}; font-weight:bold;">${c.status}</td>
-        <td><button onclick="deleteCompany(${idx})" style="color:var(--accent); border:none; background:none; cursor:pointer;">❌</button></td>
-      </tr>
-    `).join('');
-    updateStats();
-  }
-
-  function updateStats() {
-    document.getElementById("totalCount").innerText = COMPANIES.length;
-    document.getElementById("activeCount").innerText = COMPANIES.filter(c => c.status === '운영중').length;
-    document.getElementById("inactiveCount").innerText = COMPANIES.filter(c => c.status === '종료').length;
-  }
-
-  // 데이터 추가 함수들
-  function addGuide() {
-    const cat = document.getElementById("new-category").value;
-    const txt = document.getElementById("new-text").value;
-    if(!cat || !txt) return alert("내용을 입력하세요.");
-    GUIDE.unshift({ category: cat, text: txt });
-    localStorage.setItem("guide", JSON.stringify(GUIDE));
-    renderGuides();
-    document.getElementById("new-text").value = "";
-  }
-
-  function addCompany() {
-    const name = document.getElementById("comp-name").value;
-    const code = document.getElementById("comp-code").value;
-    const status = document.getElementById("comp-status").value;
-    if(!name || !code) return alert("기업 정보를 입력하세요.");
-    COMPANIES.unshift({ name, code, status });
-    localStorage.setItem("companies", JSON.stringify(COMPANIES));
-    renderCompanies();
-    document.getElementById("comp-name").value = "";
-    document.getElementById("comp-code").value = "";
-  }
-
-  // 삭제 및 기타 공통 기능
-  function deleteGuide(idx) { GUIDE.splice(idx,1); localStorage.setItem("guide", JSON.stringify(GUIDE)); renderGuides(); }
-  function deleteCompany(idx) { COMPANIES.splice(idx,1); localStorage.setItem("companies", JSON.stringify(COMPANIES)); renderCompanies(); }
-
-  function addShare() {
-    const txt = document.getElementById("share-text").value;
-    if(!txt) return;
-    SHARES.unshift({ text: txt, time: new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}) });
-    localStorage.setItem("shares", JSON.stringify(SHARES));
-    renderShares();
-    document.getElementById("share-text").value = "";
-  }
-
-  function renderShares() {
-    document.getElementById("share-result").innerHTML = SHARES.map(s => `
-      <div style="padding:12px; background:#fff1f2; border-radius:12px; margin-bottom:8px; border-left:4px solid var(--accent);">
-        <div style="font-size:13px; font-weight:600;">${s.text}</div>
-        <div style="font-size:10px; color:#94a3b8; margin-top:5px;">🕒 ${s.time}</div>
-      </div>
-    `).join('');
-  }
-
-  function toggleAdmin() {
-    if (prompt("관리자 암호 입력") === "6559") {
-      isAdmin = !isAdmin;
-      document.getElementById("mode-text").innerText = isAdmin ? "관리자 권한 활성화됨" : "통합 지식 및 인프라 관리 시스템";
-      renderGuides(); renderCompanies();
+        db.ref('guides').push({
+            category: cat,
+            code: code || "-",
+            text: txt,
+            keywords: kw ? kw.split(',').map(s=>s.trim()) : [],
+            status: "운영중",
+            period: "2026",
+            timestamp: Date.now()
+        });
+        document.querySelectorAll(".reg-zone input, .reg-zone textarea").forEach(i => i.value = "");
     }
-  }
 
-  window.onload = () => { renderGuides(); renderShares(); renderCompanies(); };
+    function renderGuides() {
+        const q = document.getElementById("q").value.toLowerCase();
+        const cat = document.getElementById("filter-cat").value;
+        const sort = document.getElementById("filter-sort").value;
+        const container = document.getElementById("guide-result");
+
+        let filtered = GUIDE.filter(i => {
+            const matchQ = i.text.toLowerCase().includes(q) || i.category.toLowerCase().includes(q);
+            const matchCat = cat === "all" || i.category === cat;
+            return matchQ && matchCat;
+        });
+
+        if(sort === "new") filtered.sort((a,b) => b.timestamp - a.timestamp);
+        else filtered.sort((a,b) => a.timestamp - b.timestamp);
+
+        container.innerHTML = filtered.map(i => `
+            <div class="list-item">
+                <span class="badge">${i.category}</span>
+                <div style="margin:10px 0; font-weight:600;">${i.text}</div>
+                <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                    ${i.keywords ? i.keywords.map(k => `<span style="font-size:10px; color:#6366f1; background:#f0f4ff; padding:2px 6px; border-radius:4px;">#${k}</span>`).join('') : ''}
+                </div>
+                ${isAdmin ? `<div class="admin-btns"><button class="btn-sm del" onclick="deleteItem('guides','${i.id}')">삭제</button></div>` : ''}
+            </div>
+        `).join('') || "<p style='text-align:center; padding:30px; color:#94a3b8;'>데이터가 없습니다.</p>";
+    }
+
+    function renderCompanyTable() {
+        const tbody = document.getElementById("companyTable");
+        tbody.innerHTML = GUIDE.map(i => `
+            <tr>
+                <td><strong>${i.category}</strong></td>
+                <td>${i.code || '-'}</td>
+                <td style="color:${i.status === '운영중' ? '#28a745' : '#dc3545'}; font-weight:700;">${i.status || '운영중'}</td>
+                <td>${i.period || '-'}</td>
+                <td>${isAdmin ? `<button class="btn-sm del" onclick="deleteItem('guides','${i.id}')">삭제</button>` : '-'}</td>
+            </tr>
+        `).join('');
+    }
+
+    function addShare() {
+        const txt = document.getElementById("share-text").value;
+        const imp = document.getElementById("is-important").checked;
+        if(!txt) return;
+
+        db.ref('shares').push({
+            text: txt,
+            important: imp,
+            time: new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+            timestamp: Date.now()
+        });
+        document.getElementById("share-text").value = "";
+    }
+
+    function renderShares() {
+        const container = document.getElementById("share-result");
+        const sorted = SHARES.sort((a,b) => b.timestamp - a.timestamp);
+        container.innerHTML = sorted.map(s => `
+            <div class="share-item ${s.important ? 'important' : ''}">
+                ${s.important ? '<span class="important-badge">URGENT</span>' : ''}
+                <div style="font-size:14px; font-weight:600;">${s.text}</div>
+                <span class="share-time">🕒 ${s.time}</span>
+                ${isAdmin ? `<button class="btn-sm del" style="position:absolute; top:10px; right:10px;" onclick="deleteItem('shares','${s.id}')">×</button>` : ''}
+            </div>
+        `).join('') || "<p style='text-align:center; color:#94a3b8;'>소식이 없습니다.</p>";
+    }
+
+    function uploadExcel() {
+        const file = document.getElementById('excelFile').files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            json.forEach(row => {
+                db.ref('guides').push({
+                    category: row['기업명'] || row['name'] || "미분류",
+                    code: String(row['기업코드'] || row['code'] || "-"),
+                    text: row['내용'] || row['text'] || "",
+                    status: row['운영여부'] || "운영중",
+                    period: row['운영기간'] || "2026",
+                    timestamp: Date.now()
+                });
+            });
+            alert("엑셀 업로드 완료!");
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function deleteItem(path, id) {
+        if(confirm("정말 삭제하시겠습니까?")) db.ref(`${path}/${id}`).remove();
+    }
+
+    function updateFilters() {
+        const cats = [...new Set(GUIDE.map(i => i.category))];
+        document.getElementById("filter-cat").innerHTML = '<option value="all">🏢 모든 기업명</option>' + 
+            cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function toggleAdmin() {
+        if (prompt("관리자 비밀번호") === "6559") {
+            isAdmin = !isAdmin;
+            document.getElementById("mode-text").innerText = isAdmin ? "🔐 관리자 모드 활성" : "팀의 지식을 실시간으로 공유하고 관리하세요";
+            renderGuides(); renderShares(); renderCompanyTable();
+        }
+    }
+
+    window.onload = loadData;
 </script>
 </body>
 </html>
