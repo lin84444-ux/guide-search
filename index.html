@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>WorkHub Pro - Final Fix</title>
+<title>WorkHub Pro - Full Version</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -15,24 +15,33 @@
   .nav-tabs { display: inline-flex; background: #f1f5f9; padding: 8px; border-radius: 20px; margin-top: 20px; }
   .nav-btn { padding: 15px 35px; border-radius: 15px; border: none; font-weight: 800; cursor: pointer; color: #64748b; background: transparent; font-size: 19px; }
   .nav-btn.active { background: var(--white); color: var(--main-blue); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+  
   main { max-width: 1500px; margin: 0 auto; padding: 30px; display: none; grid-template-columns: 2fr 1fr; gap: 30px; }
   main.active { display: grid; }
+  
+  /* 운영현황 요약 박스 */
+  .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+  .status-box { background: var(--white); padding: 40px 20px; border-radius: 25px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+  .status-label { font-size: 18px; font-weight: 700; color: #64748b; }
+  .status-value { font-size: 42px; font-weight: 900; margin-top: 10px; }
+
   .card { background: var(--white); border-radius: 30px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid var(--border); }
   .card-title { font-size: 26px; font-weight: 800; margin-bottom: 30px; position: relative; padding-left: 20px; }
   .card-title::before { content: ''; position: absolute; left: 0; width: 6px; height: 26px; background: var(--main-blue); border-radius: 10px; }
+  
   input, textarea { width: 100%; padding: 20px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 12px; box-sizing: border-box; background: #fcfdfe; font-size: 18px; font-family: inherit; }
   .btn-blue { width: 100%; padding: 22px; border-radius: 15px; border: none; background: var(--main-blue); color: #fff; font-weight: 900; cursor: pointer; font-size: 19px; }
-  .guide-search-box input { border: 2px solid var(--main-blue); padding: 25px; font-size: 22px; }
+  
   .list-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 18px; }
   .list-table th { background: #f8fafc; padding: 20px; text-align: left; color: #64748b; border-bottom: 2px solid var(--border); }
   .list-table td { padding: 20px; border-bottom: 1px solid #f1f5f9; }
+  
   .share-item { padding: 25px; border-bottom: 1px solid #eee; background: #fcfdfe; border-radius: 15px; margin-bottom: 15px; }
-  .share-time { font-size: 13px; color: #94a3b8; margin-top: 10px; font-weight: 700; }
   .btn-sample { width: 100%; padding: 18px; border-radius: 12px; border: none; background: #1e293b; color: #fff; font-weight: 700; cursor: pointer; margin-bottom: 15px; font-size: 17px; }
-  .url-link { color: var(--main-blue); text-decoration: none; font-weight: 600; font-size: 16px; }
 </style>
 </head>
 <body id="app-body">
+
 <header>
   <div class="logo">WorkHub Pro</div>
   <div class="nav-tabs">
@@ -43,17 +52,16 @@
 
 <main id="tab-0" class="active">
   <section>
+    <div class="status-grid">
+      <div class="status-box"><div class="status-label">전체</div><div class="status-value" id="c-all">0</div></div>
+      <div class="status-box"><div class="status-label">운영중</div><div class="status-value" id="c-on" style="color:var(--main-blue)">0</div></div>
+      <div class="status-box"><div class="status-label">종료</div><div class="status-value" id="c-off">0</div></div>
+    </div>
     <div class="card">
       <div class="card-title">기업 현황 리스트</div>
       <table class="list-table">
         <thead>
-          <tr>
-            <th>기업명</th>
-            <th>코드</th>
-            <th>운영기간</th>
-            <th>상태</th>
-            <th>연수원 URL</th>
-          </tr>
+          <tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>연수원 URL</th></tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -79,24 +87,16 @@
   <section>
     <div class="card">
       <div class="card-title">오늘의 가이드 검색</div>
-      <div class="guide-search-box">
-        <input type="text" id="guide-search" placeholder="검색어 입력 후 엔터 (공란 시 전체)" onkeypress="if(event.keyCode==13) filterGuides()">
-      </div>
-      <div id="guide-display"></div>
+      <input type="text" id="guide-search" placeholder="검색어 입력 후 엔터 (공란 시 전체)" onkeypress="if(event.keyCode==13) filterGuides()" style="border:2px solid var(--main-blue); padding:25px; font-size:22px;">
+      <div id="guide-display" style="margin-top:20px;"></div>
     </div>
   </section>
-  <aside style="display: flex; flex-direction: column; gap: 30px;">
+  <aside>
     <div class="card">
       <div class="card-title">오늘의 공유사항</div>
-      <textarea id="share-text" placeholder="공유사항을 입력하세요..." style="height: 150px;"></textarea>
+      <textarea id="share-text" placeholder="공유사항 입력..." style="height: 150px;"></textarea>
       <button class="btn-blue" onclick="addShare()">소식 공유</button>
       <div id="share-list" style="margin-top: 20px; max-height: 450px; overflow-y: auto;"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">가이드 등록</div>
-      <button class="btn-sample" onclick="downGuideSample()">📥 가이드 샘플 받기</button>
-      <input type="file" id="guide-input" accept=".xlsx" style="margin-bottom:15px;">
-      <button class="btn-blue" onclick="upGuide()" style="background:#eef2ff; color:var(--main-blue);">엑셀 가이드 대량 등록</button>
     </div>
   </aside>
 </main>
@@ -116,23 +116,30 @@
     db.ref('companies').on('value', s => {
       const v = s.val();
       const list = v ? Object.values(v) : [];
+      // 운영현황 카운트 업데이트
+      document.getElementById('c-all').innerText = list.length;
+      document.getElementById('c-on').innerText = list.filter(i => i.status === '운영중').length;
+      document.getElementById('c-off').innerText = list.filter(i => i.status === '종료').length;
+      
       document.getElementById('tbody').innerHTML = list.reverse().map(i => `
         <tr>
           <td><b style="font-size:20px;">${i.name}</b></td>
           <td>${i.code||'-'}</td>
           <td>${i.period}</td>
           <td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:900;">${i.status}</td>
-          <td><a href="${i.url.startsWith('http')?i.url:'http://'+i.url}" target="_blank" class="url-link">${i.url||'-'}</a></td>
+          <td>${i.url||'-'}</td>
         </tr>
       `).join('');
     });
+
     db.ref('shares').on('value', s => {
       const v = s.val();
       const list = v ? Object.values(v) : [];
       document.getElementById('share-list').innerHTML = list.reverse().map(i => `
-        <div class="share-item"><div>${i.text}</div><div class="share-time">${i.time}</div></div>
+        <div class="share-item"><div>${i.text}</div><div style="font-size:13px; color:#94a3b8; margin-top:10px;">${i.time}</div></div>
       `).join('');
     });
+
     db.ref('guides').on('value', s => {
       const v = s.val();
       allGuides = v ? Object.values(v) : [];
@@ -142,7 +149,7 @@
 
   function renderGuides(data) {
     document.getElementById('guide-display').innerHTML = data.reverse().map(i => `
-      <div class="share-item"><b style="font-size:21px; color:var(--main-blue);">[${i.company}]</b> <span style="font-weight:700;">${i.keyword}</span><p style="margin-top:10px; color:#475569;">${i.content}</p></div>
+      <div class="share-item"><b style="font-size:21px; color:var(--main-blue);">[${i.company}]</b> <b>${i.keyword}</b><p style="margin-top:10px; color:#475569;">${i.content}</p></div>
     `).join('');
   }
 
@@ -178,23 +185,6 @@
     reader.readAsArrayBuffer(file);
   }
 
-  async function upGuide() {
-    const file = document.getElementById('guide-input').files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const rows = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }).Sheets.Sheet1);
-      const up = {};
-      rows.forEach(r => {
-        const k = db.ref().child('guides').push().key;
-        up[`/guides/${k}`] = { company: r['대상기업'], keyword: r['키워드'], content: r['가이드내용'] };
-      });
-      await db.ref().update(up);
-      alert("가이드 등록 완료");
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
   function addShare() {
     const text = document.getElementById('share-text').value;
     if(!text) return;
@@ -208,12 +198,6 @@
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["기업명", "기업코드", "운영기간", "연수원 URL"]]), "Sheet1");
     XLSX.writeFile(wb, "Company_Sample.xlsx");
-  }
-
-  function downGuideSample() {
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"]]), "Sheet1");
-    XLSX.writeFile(wb, "WorkHub_Guide_Sample.xlsx");
   }
 
   function tab(i) {
