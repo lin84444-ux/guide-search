@@ -2,42 +2,56 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>WorkHub Pro - Final Fix</title>
+<title>WorkHub Pro - Final Restore</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
   :root { --main-blue: #6366f1; --bg: #f4f7ff; --white: #ffffff; --border: #e2e8f0; }
-  body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: #1e293b; }
-  header { padding: 40px 20px; text-align: center; background: #fff; position: relative; border-bottom: 1px solid var(--border); }
-  .admin-gate { position: absolute; top: 20px; right: 20px; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: 700; color: #64748b; }
-  .nav-tabs { display: inline-flex; background: #f1f5f9; padding: 6px; border-radius: 15px; margin-bottom: 20px; }
-  .nav-btn { padding: 12px 24px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; color: #64748b; background: transparent; }
-  .nav-btn.active { background: var(--white); color: var(--main-blue); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-  main { max-width: 1400px; margin: 0 auto; padding: 20px; display: none; grid-template-columns: 2fr 1fr; gap: 25px; }
+  
+  /* 폰트 크기 대폭 확대 (사용자 피드백 반영) */
+  body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: #1e293b; font-size: 18px; }
+  
+  header { padding: 50px 20px; text-align: center; background: #fff; position: relative; border-bottom: 2px solid var(--border); }
+  .logo { font-size: 32px; font-weight: 900; color: var(--main-blue); letter-spacing: -1px; }
+  
+  .nav-tabs { display: inline-flex; background: #f1f5f9; padding: 8px; border-radius: 20px; margin-top: 30px; }
+  .nav-btn { padding: 15px 35px; border-radius: 15px; border: none; font-weight: 800; cursor: pointer; color: #64748b; background: transparent; font-size: 18px; }
+  .nav-btn.active { background: var(--white); color: var(--main-blue); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+
+  main { max-width: 1500px; margin: 0 auto; padding: 30px; display: none; grid-template-columns: 2fr 1fr; gap: 30px; }
   main.active { display: grid; }
-  .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
-  .status-box { background: var(--white); padding: 30px 20px; border-radius: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-  .status-value { font-size: 32px; font-weight: 900; }
-  .card { background: var(--white); border-radius: 25px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border); }
-  .card-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; position: relative; padding-left: 15px; }
-  .card-title::before { content: ''; position: absolute; left: 0; width: 5px; height: 20px; background: var(--main-blue); border-radius: 10px; }
-  input, textarea { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 12px; box-sizing: border-box; background: #fcfdfe; font-size: 14px; }
-  .btn-blue { width: 100%; padding: 18px; border-radius: 12px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; }
-  .btn-sample { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #1e293b; color: #fff; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
-  .btn-nuke { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; display: none; }
-  .admin-mode .btn-nuke { display: block; }
-  .list-table { width: 100%; border-collapse: collapse; }
-  .list-table th, .list-table td { text-align: left; padding: 15px; border-bottom: 1px solid #f1f5f9; }
-  .share-item { padding: 15px; border-bottom: 1px solid #eee; background: #fcfdfe; border-radius: 10px; margin-bottom: 10px; }
-  .share-time { font-size: 11px; color: #94a3b8; margin-top: 5px; font-weight: 600; }
-  hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+
+  .card { background: var(--white); border-radius: 30px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+  .card-title { font-size: 24px; font-weight: 800; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; position: relative; padding-left: 20px; }
+  .card-title::before { content: ''; position: absolute; left: 0; width: 6px; height: 24px; background: var(--main-blue); border-radius: 10px; }
+
+  /* 가이드 검색창 디자인 */
+  .guide-search-box { position: relative; margin-bottom: 30px; }
+  .guide-search-box input { width: 100%; padding: 25px; border-radius: 20px; border: 2px solid var(--main-blue); font-size: 20px; font-weight: 700; box-sizing: border-box; }
+  
+  input, textarea { width: 100%; padding: 18px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 15px; box-sizing: border-box; background: #fcfdfe; font-size: 16px; font-family: inherit; }
+  .btn-blue { width: 100%; padding: 22px; border-radius: 15px; border: none; background: var(--main-blue); color: #fff; font-weight: 900; cursor: pointer; font-size: 18px; transition: 0.3s; }
+  .btn-blue:hover { opacity: 0.9; transform: translateY(-2px); }
+  
+  .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+  .status-box { background: var(--white); padding: 40px 20px; border-radius: 25px; text-align: center; }
+  .status-value { font-size: 40px; font-weight: 900; margin-top: 10px; }
+
+  .guide-item { padding: 25px; border-bottom: 1px solid #f1f5f9; background: #fcfdfe; border-radius: 20px; margin-bottom: 15px; }
+  .guide-item b { font-size: 20px; color: var(--main-blue); }
+  .guide-item p { margin: 10px 0 0 0; color: #475569; line-height: 1.6; }
+
+  .share-item { padding: 20px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+  .share-time { font-size: 12px; color: #94a3b8; margin-top: 8px; font-weight: 700; }
+  
+  .btn-sample { width: 100%; padding: 15px; border-radius: 12px; border: none; background: #1e293b; color: #fff; font-weight: 700; cursor: pointer; margin-bottom: 15px; font-size: 16px; }
 </style>
 </head>
 <body id="app-body">
+
 <header>
-  <button class="admin-gate" onclick="loginAdmin()">⚙️ 관리자 모드</button>
   <div class="logo">WorkHub Pro</div>
   <div class="nav-tabs">
     <button class="nav-btn active" onclick="tab(0)">🏢 기업관리시스템</button>
@@ -53,45 +67,49 @@
       <div class="status-box"><div>종료</div><div class="status-value" id="c-off">0</div></div>
     </div>
     <div class="card">
-      <div class="card-title"><span>기업 현황 리스트</span><button class="btn-nuke" onclick="nuke('companies')">데이터 초기화</button></div>
-      <input type="text" id="search" placeholder="기업명 검색..." onkeyup="renderComp()">
-      <table class="list-table">
-        <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th></tr></thead>
+      <div class="card-title">기업 현황 리스트</div>
+      <table style="width:100%; border-collapse: collapse;">
+        <thead style="background:#f8fafc;"><tr><th style="padding:15px; text-align:left;">기업명</th><th>운영기간</th><th>상태</th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
   </section>
   <aside>
     <div class="card">
-      <div class="card-title"><span>기업 수기 등록</span></div>
+      <div class="card-title">기업 수기 등록</div>
       <input type="text" id="add-name" placeholder="기업명">
-      <input type="text" id="add-code" placeholder="기업코드">
       <input type="text" id="add-period" placeholder="운영기간 (예: 2026.01~)">
-      <input type="text" id="add-url" placeholder="연수원 URL">
-      <button class="btn-blue" onclick="addOneComp()">기업 등록하기</button>
-      <hr>
-      <div class="card-title" style="font-size:16px;"><span>엑셀 대량 등록</span></div>
-      <button class="btn-sample" onclick="downCompSample()">📥 기업 양식 다운로드 (상태 제외)</button>
+      <button class="btn-blue" onclick="addOneComp()">기업 등록</button>
+      <hr style="margin:30px 0; border:0; border-top:1px solid #eee;">
+      <button class="btn-sample" onclick="downCompSample()">📥 기업 양식 다운로드</button>
       <input type="file" id="xl-input" accept=".xlsx">
-      <button class="btn-blue" onclick="upComp()" style="background:#475569;">파일 등록하기</button>
+      <button class="btn-blue" onclick="upComp()" style="background:#475569;">엑셀 등록</button>
     </div>
   </aside>
 </main>
 
 <main id="tab-1" style="grid-template-columns: 1.5fr 1fr;">
-  <section><div class="card"><div class="card-title"><span>가이드 보관함</span></div><div id="guide-display"></div></div></section>
-  <aside style="display: flex; flex-direction: column; gap: 25px;">
+  <section>
     <div class="card">
-      <div class="card-title"><span>오늘의 공유사항</span></div>
-      <textarea id="share-text" placeholder="공유할 내용을 입력하세요..." style="height: 100px;"></textarea>
+      <div class="card-title">오늘의 가이드 검색</div>
+      <div class="guide-search-box">
+        <input type="text" id="guide-search" placeholder="검색어를 입력하고 엔터를 누르세요 (공란 시 전체)" onkeypress="if(event.keyCode==13) filterGuides()">
+      </div>
+      <div id="guide-display"></div>
+    </div>
+  </section>
+  <aside style="display: flex; flex-direction: column; gap: 30px;">
+    <div class="card">
+      <div class="card-title">오늘의 공유사항</div>
+      <textarea id="share-text" placeholder="공유사항 입력..." style="height: 120px;"></textarea>
       <button class="btn-blue" onclick="addShare()">소식 공유</button>
-      <div id="share-list" style="margin-top: 20px; max-height: 350px; overflow-y: auto;"></div>
+      <div id="share-list" style="margin-top: 20px; max-height: 400px; overflow-y: auto;"></div>
     </div>
     <div class="card">
-      <div class="card-title"><span>가이드 등록</span></div>
+      <div class="card-title">가이드 등록</div>
       <button class="btn-sample" onclick="downGuideSample()" style="background:#475569;">📥 워크허브 샘플 받기</button>
       <input type="file" id="guide-input" accept=".xlsx" style="margin-bottom:10px;">
-      <button class="btn-blue" onclick="upGuide()" style="background:#eef2ff; color:var(--main-blue);">엑셀 가이드 등록</button>
+      <button class="btn-blue" onclick="upGuide()" style="background:#eef2ff; color:var(--main-blue);">엑셀 가이드 대량 등록</button>
     </div>
   </aside>
 </main>
@@ -106,6 +124,8 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
+  let allGuides = [];
+
   function init() {
     db.ref('companies').on('value', s => {
       const v = s.val();
@@ -113,27 +133,46 @@
       document.getElementById('c-all').innerText = list.length;
       document.getElementById('c-on').innerText = list.filter(i => i.status === '운영중').length;
       document.getElementById('c-off').innerText = list.filter(i => i.status === '종료').length;
-      renderComp(list);
+      document.getElementById('tbody').innerHTML = list.reverse().map(i => `
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:20px;"><b>${i.name}</b></td><td>${i.period}</td><td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:900;">${i.status}</td></tr>
+      `).join('');
     });
+
     db.ref('shares').on('value', s => {
       const v = s.val();
       const list = v ? Object.values(v) : [];
-      document.getElementById('share-list').innerHTML = list.reverse().map(i => `<div class="share-item"><div>${i.text}</div><div class="share-time">${i.time}</div></div>`).join('');
+      document.getElementById('share-list').innerHTML = list.reverse().map(i => `
+        <div class="share-item"><div>${i.text}</div><div class="share-time">${i.time}</div></div>
+      `).join('');
     });
+
     db.ref('guides').on('value', s => {
       const v = s.val();
-      const list = v ? Object.values(v) : [];
-      document.getElementById('guide-display').innerHTML = list.reverse().map(i => `<div class="share-item"><b>[${i.company}]</b> ${i.keyword}<br><small>${i.content}</small></div>`).join('');
+      allGuides = v ? Object.values(v) : [];
+      renderGuides(allGuides);
     });
   }
 
-  function addOneComp() {
-    const name = document.getElementById('add-name').value;
-    const period = document.getElementById('add-period').value;
-    if(!name || !period) return alert("필수 입력 확인!");
-    const status = period.endsWith('~') ? '운영중' : '종료';
-    db.ref('companies').push({ name, code: document.getElementById('add-code').value, period, url: document.getElementById('add-url').value, status });
-    ["add-name", "add-code", "add-period", "add-url"].forEach(id => document.getElementById(id).value = '');
+  // 가이드 렌더링 함수
+  function renderGuides(data) {
+    document.getElementById('guide-display').innerHTML = data.length ? data.reverse().map(i => `
+      <div class="guide-item"><b>[${i.company}]</b> ${i.keyword}<p>${i.content}</p></div>
+    `).join('') : '<div style="text-align:center; padding:100px; color:#94a3b8;">데이터가 없습니다.</div>';
+  }
+
+  // 검색 필터 로직 (엔터 시 작동)
+  function filterGuides() {
+    const q = document.getElementById('guide-search').value.toLowerCase().trim();
+    if (!q) {
+      renderGuides(allGuides); // 공란이면 전체 데이터
+    } else {
+      const filtered = allGuides.filter(i => 
+        i.company.toLowerCase().includes(q) || 
+        i.keyword.toLowerCase().includes(q) || 
+        i.content.toLowerCase().includes(q)
+      );
+      renderGuides(filtered);
+    }
   }
 
   function addShare() {
@@ -143,6 +182,16 @@
     const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
     db.ref('shares').push({ text, time: timeStr });
     document.getElementById('share-text').value = '';
+  }
+
+  function addOneComp() {
+    const name = document.getElementById('add-name').value;
+    const period = document.getElementById('add-period').value;
+    if(!name || !period) return alert("입력 확인!");
+    const status = period.endsWith('~') ? '운영중' : '종료';
+    db.ref('companies').push({ name, period, status });
+    document.getElementById('add-name').value = '';
+    document.getElementById('add-period').value = '';
   }
 
   async function upComp() {
@@ -155,10 +204,10 @@
       rows.forEach(r => {
         const period = String(r['운영기간'] || '');
         const k = db.ref().child('companies').push().key;
-        up[`/companies/${k}`] = { name: r['기업명'], code: r['기업코드']||'', period, url: r['연수원 URL']||'', status: period.endsWith('~') ? '운영중' : '종료' };
+        up[`/companies/${k}`] = { name: r['기업명'], period, status: period.endsWith('~') ? '운영중' : '종료' };
       });
       await db.ref().update(up);
-      alert("등록 완료");
+      alert("기업 데이터 등록 완료");
     };
     reader.readAsArrayBuffer(file);
   }
@@ -175,31 +224,23 @@
         up[`/guides/${k}`] = { company: r['대상기업'], keyword: r['키워드'], content: r['가이드내용'] };
       });
       await db.ref().update(up);
-      alert("가이드 등록 완료");
+      alert("워크허브 가이드 등록 완료");
     };
     reader.readAsArrayBuffer(file);
   }
 
-  function renderComp(data) {
-    const q = document.getElementById('search').value.toLowerCase();
-    const list = (data || []).filter(i => i.name.toLowerCase().includes(q));
-    document.getElementById('tbody').innerHTML = list.reverse().map(i => `<tr><td><b>${i.name}</b></td><td>${i.code}</td><td>${i.period}</td><td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:800;">${i.status}</td><td>${i.url}</td></tr>`).join('');
-  }
-
   function downCompSample() {
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["기업명", "기업코드", "운영기간", "연수원 URL"], ["기업A", "CODE1", "2026.01~", "a.com"]]), "Sheet1");
-    XLSX.writeFile(wb, "Company_Sample_NoStatus.xlsx");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["기업명", "운영기간"]]), "Sheet1");
+    XLSX.writeFile(wb, "Company_Sample.xlsx");
   }
 
   function downGuideSample() {
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"], ["lh", "오류", "내용작성"]]), "Sheet1");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"]]), "Sheet1");
     XLSX.writeFile(wb, "WorkHub_Guide_Sample.xlsx");
   }
 
-  function loginAdmin() { if(prompt("비번(6559)") === "6559") document.getElementById('app-body').classList.add('admin-mode'); }
-  async function nuke(p) { if(confirm("초기화?")) await db.ref(p).remove(); }
   function tab(i) {
     document.querySelectorAll('.nav-btn').forEach((b, idx) => b.classList.toggle('active', idx === i));
     document.querySelectorAll('main').forEach((m, idx) => m.classList.toggle('active', idx === i));
