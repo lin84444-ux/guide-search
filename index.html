@@ -10,44 +10,34 @@
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
   :root { --main-blue: #6366f1; --bg: #f4f7ff; --white: #ffffff; --border: #e2e8f0; --admin-red: #ef4444; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: #1e293b; font-size: 16px; }
-  
   header { padding: 30px 40px; text-align: center; background: #fff; border-bottom: 1px solid var(--border); position: relative; }
   .logo { font-size: 28px; font-weight: 900; color: var(--main-blue); }
   .header-admin { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 10px; font-size: 14px; color: #64748b; font-weight: 700; }
-  
   .nav-tabs { display: inline-flex; background: #f1f5f9; padding: 6px; border-radius: 15px; margin-top: 15px; }
   .nav-btn { padding: 12px 30px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; color: #64748b; background: transparent; font-size: 16px; }
   .nav-btn.active { background: var(--white); color: var(--main-blue); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-  
   main { max-width: 1400px; margin: 0 auto; padding: 25px; display: none; grid-template-columns: 2fr 1.1fr; gap: 25px; }
   main.active { display: grid; }
-  
   .card { background: var(--white); border-radius: 25px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border); margin-bottom: 25px; }
   .card-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; position: relative; padding-left: 15px; display: flex; justify-content: space-between; align-items: center; }
   .card-title::before { content: ''; position: absolute; left: 0; width: 5px; height: 22px; background: var(--main-blue); border-radius: 10px; }
-  
   input, textarea, select { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 10px; box-sizing: border-box; background: #fcfdfe; font-size: 16px; font-family: inherit; }
-  input:focus, textarea:focus { border-color: var(--main-blue); outline: none; }
-  
   .input-highlight { border: 2px solid #1e293b !important; }
   .btn-blue { width: 100%; padding: 18px; border-radius: 12px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 17px; }
   .btn-light-blue { width: 100%; padding: 18px; border-radius: 12px; border: none; background: #eef2ff; color: var(--main-blue); font-weight: 800; cursor: pointer; font-size: 17px; }
+  .btn-red { background: var(--admin-red); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; }
   .btn-sample { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #1e293b; color: #fff; font-weight: 700; cursor: pointer; margin-bottom: 10px; font-size: 14px; }
-  .btn-delete-all { background: var(--admin-red); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; display: none; }
-
   .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
   .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
   input:checked + .slider { background-color: var(--admin-red); }
   input:checked + .slider:before { transform: translateX(22px); }
-
   .share-item { padding: 20px; border-bottom: 1px solid #eee; background: #fcfdfe; border-radius: 15px; margin-bottom: 12px; position: relative; }
   .admin-only { display: none; position: absolute; top: 20px; right: 20px; gap: 8px; }
-  .btn-red { background: var(--admin-red); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; }
-
-  .list-table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .list-table { width: 100%; border-collapse: collapse; }
   .list-table th, .list-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+  #share-display { max-height: 400px; overflow-y: auto; padding: 5px; }
 </style>
 </head>
 <body>
@@ -58,12 +48,8 @@
     <button class="nav-btn active" onclick="tab(0)">🏢 기업관리시스템</button>
     <button class="nav-btn" onclick="tab(1)">🚀 워크허브</button>
   </div>
-  <div class="header-admin">
-    관리자 모드
-    <label class="switch">
-      <input type="checkbox" id="admin-switch" onchange="toggleAdmin()">
-      <span class="slider"></span>
-    </label>
+  <div class="header-admin">관리자 모드
+    <label class="switch"><input type="checkbox" id="admin-switch" onchange="toggleAdmin()"><span class="slider"></span></label>
   </div>
 </header>
 
@@ -81,10 +67,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-title">
-        기업 현황 리스트
-        <button class="btn-delete-all admin-view" onclick="deleteAllData('companies')">전체 삭제</button>
-      </div>
+      <div class="card-title">기업 현황 리스트 <button class="btn-red admin-view" style="display:none;" onclick="deleteAllData('companies')">전체 삭제</button></div>
       <table class="list-table">
         <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="admin-view" style="display:none;">관리</th></tr></thead>
         <tbody id="tbody"></tbody>
@@ -108,18 +91,20 @@
 </main>
 
 <main id="tab-1">
-  <section class="card">
-    <div class="card-title">
-      가이드 보관함
-      <button class="btn-delete-all admin-view" onclick="deleteAllData('guides')">전체 삭제</button>
+  <section>
+    <div class="card" style="margin-bottom: 25px; border: 2px solid var(--main-blue);">
+      <div class="card-title">📢 실시간 공유사항 <button class="btn-red admin-view" style="display:none;" onclick="deleteAllData('shares')">전체 삭제</button></div>
+      <div id="share-display"></div>
     </div>
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-      <input type="text" id="guide-search" placeholder="가이드 내용 검색..." onkeypress="if(event.keyCode==13) filterGuides()" style="margin-bottom: 0;">
-      <select id="guide-filter" onchange="filterGuides()" style="width: 150px; margin-bottom: 0;">
-        <option value="">전체 기업</option>
-      </select>
+    
+    <div class="card">
+      <div class="card-title">가이드 보관함 <button class="btn-red admin-view" style="display:none;" onclick="deleteAllData('guides')">전체 삭제</button></div>
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <input type="text" id="guide-search" placeholder="가이드 내용 검색..." onkeypress="if(event.keyCode==13) filterGuides()" style="margin-bottom: 0;">
+        <select id="guide-filter" onchange="filterGuides()" style="width: 150px; margin-bottom: 0;"><option value="">전체 기업</option></select>
+      </div>
+      <div id="guide-display"></div>
     </div>
-    <div id="guide-display" style="min-height: 400px;"></div>
   </section>
 
   <aside>
@@ -135,7 +120,6 @@
       <input type="text" id="g-key" placeholder="키워드 (쉼표 구분)">
       <textarea id="g-content" placeholder="상세 가이드 내용" style="height: 150px;"></textarea>
       <button class="btn-light-blue" onclick="addOneGuide()">가이드 저장</button>
-      
       <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
         <button class="btn-sample" onclick="downGuideSample()">📥 양식 다운로드</button>
         <input type="file" id="guide-input" accept=".xlsx">
@@ -146,170 +130,125 @@
 </main>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAtn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE",
-    authDomain: "workhub-pro-be742.firebaseapp.com",
-    databaseURL: "https://workhub-pro-be742-default-rtdb.firebaseio.com/",
-    projectId: "workhub-pro-be742"
-  };
+  // Firebase 설정
+  const firebaseConfig = { apiKey: "AIzaSyAtn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE", authDomain: "workhub-pro-be742.firebaseapp.com", databaseURL: "https://workhub-pro-be742-default-rtdb.firebaseio.com/", projectId: "workhub-pro-be742" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-  let allGuides = [];
-  let isAdmin = false;
+  let allGuides = []; let isAdmin = false;
 
   function init() {
+    // 기업 데이터 로드
     db.ref('companies').on('value', s => {
-      const v = s.val() || {};
-      const list = Object.keys(v).map(k => ({ id: k, ...v[k] }));
+      const v = s.val() || {}; const list = Object.keys(v).map(k => ({ id: k, ...v[k] }));
       document.getElementById('c-all').innerText = list.length;
       document.getElementById('c-on').innerText = list.filter(i => i.status === '운영중').length;
       document.getElementById('c-off').innerText = list.filter(i => i.status === '종료').length;
-      document.getElementById('tbody').innerHTML = list.reverse().map(i => `
-        <tr><td><b>${i.name}</b></td><td>${i.code||'-'}</td><td>${i.period}</td>
-        <td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:700;">${i.status}</td><td>${i.url||'-'}</td>
-        <td class="admin-view" style="display:${isAdmin?'table-cell':'none'}">
-          <button class="btn-red" onclick="deleteData('companies', '${i.id}')">삭제</button>
-        </td></tr>
-      `).join('');
-      
-      const filter = document.getElementById('guide-filter');
-      filter.innerHTML = '<option value="">전체 기업</option>' + list.map(i => `<option value="${i.name}">${i.name}</option>`).join('');
+      document.getElementById('tbody').innerHTML = list.reverse().map(i => `<tr><td><b>${i.name}</b></td><td>${i.code||'-'}</td><td>${i.period}</td><td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:700;">${i.status}</td><td>${i.url||'-'}</td><td class="admin-view" style="display:${isAdmin?'table-cell':'none'}"><button class="btn-red" onclick="deleteData('companies', '${i.id}')">삭제</button></td></tr>`).join('');
+      document.getElementById('guide-filter').innerHTML = '<option value="">전체 기업</option>' + list.map(i => `<option value="${i.name}">${i.name}</option>`).join('');
     });
-    
-    db.ref('guides').on('value', s => {
+
+    // [수정] 공유사항 데이터 로드 ( shares 경로 )
+    db.ref('shares').on('value', s => {
       const v = s.val() || {};
-      allGuides = Object.keys(v).map(k => ({ id: k, ...v[k] }));
-      renderGuides(allGuides);
+      const list = Object.keys(v).map(k => ({ id: k, ...v[k] }));
+      document.getElementById('share-display').innerHTML = list.reverse().map(i => `
+        <div class="share-item" style="border-left: 5px solid var(--main-blue); background: #f8faff;">
+          <div style="font-size: 12px; color: #64748b; margin-bottom: 4px; font-weight: 700;">🕒 ${i.time}</div>
+          <div style="font-size: 16px; line-height: 1.6; white-space: pre-wrap;">${i.content}</div>
+          <button class="btn-red admin-only" style="display:${isAdmin?'block':'none'}; position:absolute; right:15px; top:15px;" onclick="deleteData('shares', '${i.id}')">삭제</button>
+        </div>
+      `).join('');
     });
+
+    // 가이드 데이터 로드 ( guides 경로 )
+    db.ref('guides').on('value', s => {
+      const v = s.val() || {}; 
+      allGuides = Object.keys(v).map(k => ({ id: k, ...v[k] })); 
+      renderGuides(allGuides); 
+    });
+  }
+
+  // [수정] 오늘의 공유사항 등록 (시간 초 단위 포함)
+  function addQuickShare() {
+    const content = document.getElementById('quick-content').value;
+    if(!content) return alert("내용을 입력하세요!");
+    const now = new Date();
+    const timeStr = now.getFullYear() + "-" + (now.getMonth() + 1).toString().padStart(2, '0') + "-" + now.getDate().toString().padStart(2, '0') + " " + 
+                    now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0') + ":" + now.getSeconds().toString().padStart(2, '0');
+    
+    db.ref('shares').push({ content, time: timeStr });
+    document.getElementById('quick-content').value = '';
+  }
+
+  // 가이드 수기 등록
+  function addOneGuide() {
+    const company = document.getElementById('g-comp').value;
+    const keyword = document.getElementById('g-key').value;
+    const content = document.getElementById('g-content').value;
+    if(!company || !content) return alert("기업명과 가이드 내용을 입력하세요!");
+    db.ref('guides').push({ company, keyword: keyword||"일반", content });
+    ["g-comp", "g-key", "g-content"].forEach(id => document.getElementById(id).value = '');
+    alert("가이드 저장 완료");
   }
 
   function renderGuides(data) {
     const display = document.getElementById('guide-display');
-    if (data.length === 0) {
-      display.innerHTML = '<div style="text-align: center; color: #94a3b8; padding-top: 150px;">검색 결과가 없습니다.</div>';
-      return;
-    }
+    if (data.length === 0) { display.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 50px;">데이터가 없습니다.</div>'; return; }
     display.innerHTML = data.slice().reverse().map(i => `
       <div class="share-item">
-        <div class="admin-only" style="display:${isAdmin?'flex':'none'}">
-          <button class="btn-red" onclick="editGuide('${i.id}')">수정</button>
-          <button class="btn-red" onclick="deleteData('guides', '${i.id}')">삭제</button>
-        </div>
+        <div class="admin-only" style="display:${isAdmin?'flex':'none'}"><button class="btn-red" onclick="deleteData('guides', '${i.id}')">삭제</button></div>
         <b style="color:var(--main-blue);">[${i.company}]</b> <span style="font-weight:700;">${i.keyword}</span>
-        <div style="margin-top:8px; color:#475569; font-size:15px; line-height:1.5; white-space: pre-wrap;">${i.content}</div>
+        <div style="margin-top:8px; color:#475569; font-size:15px; white-space: pre-wrap;">${i.content}</div>
       </div>
     `).join('');
   }
 
   function toggleAdmin() {
     const sw = document.getElementById('admin-switch');
-    if (sw.checked) {
-      if (prompt("관리자 비밀번호") === '6559') isAdmin = true;
-      else { alert("비밀번호 불일치"); sw.checked = false; isAdmin = false; }
-    } else isAdmin = false;
-    
-    document.querySelectorAll('.admin-view').forEach(el => el.style.display = isAdmin ? (el.tagName === 'TD' || el.tagName === 'TH' ? 'table-cell' : 'inline-block') : 'none');
-    init(); // 다시 로드하여 테이블 UI 갱신
+    if (sw.checked) { if (prompt("비밀번호") === '6559') isAdmin = true; else { alert("불일치"); sw.checked = false; isAdmin = false; } } else isAdmin = false;
+    document.querySelectorAll('.admin-view').forEach(el => el.style.display = isAdmin ? (el.tagName === 'TD' ? 'table-cell' : 'inline-block') : 'none');
+    init();
   }
 
-  // 삭제 기능 추가
-  function deleteData(path, id) {
-    if(confirm("정말 삭제하시겠습니까?")) db.ref(`${path}/${id}`).remove().then(() => alert("삭제되었습니다."));
-  }
-
-  function deleteAllData(path) {
-    if(confirm(`⚠️ 주의: 모든 ${path === 'companies' ? '기업' : '가이드'} 데이터를 삭제하시겠습니까?`)) {
-      db.ref(path).remove().then(() => alert("모든 데이터가 삭제되었습니다."));
-    }
-  }
-
-  function addQuickShare() {
-    const content = document.getElementById('quick-content').value;
-    if(!content) return alert("공유할 내용을 입력하세요!");
-    db.ref('guides').push({ company: "전체", keyword: "공지사항", content: content });
-    document.getElementById('quick-content').value = '';
-    alert("공유되었습니다.");
-  }
-
-  function addOneGuide() {
-    const company = document.getElementById('g-comp').value;
-    const keyword = document.getElementById('g-key').value;
-    const content = document.getElementById('g-content').value;
-    if(!company || !content) return alert("기업명과 내용을 모두 입력하세요!");
-    db.ref('guides').push({ company, keyword: keyword||"일반", content });
-    ["g-comp", "g-key", "g-content"].forEach(id => document.getElementById(id).value = '');
-    alert("저장되었습니다.");
-  }
-
+  function deleteData(path, id) { if(confirm("삭제하시겠습니까?")) db.ref(`${path}/${id}`).remove(); }
+  function deleteAllData(path) { if(confirm("정말 모든 데이터를 삭제하시겠습니까?")) db.ref(path).remove(); }
+  function tab(i) { document.querySelectorAll('.nav-btn').forEach((b, idx) => b.classList.toggle('active', idx === i)); document.querySelectorAll('main').forEach((m, idx) => m.classList.toggle('active', idx === i)); }
+  
   function filterGuides() {
-    const q = document.getElementById('guide-search').value.toLowerCase().trim();
+    const q = document.getElementById('guide-search').value.toLowerCase();
     const f = document.getElementById('guide-filter').value;
     let filtered = allGuides;
     if(f) filtered = filtered.filter(i => i.company === f);
-    if(q) filtered = filtered.filter(i => i.company.toLowerCase().includes(q) || i.keyword.toLowerCase().includes(q) || i.content.toLowerCase().includes(q));
+    if(q) filtered = filtered.filter(i => i.content.toLowerCase().includes(q) || i.keyword.toLowerCase().includes(q));
     renderGuides(filtered);
   }
 
   function addOneComp() {
-    const name = document.getElementById('add-name').value;
-    const period = document.getElementById('add-period').value;
-    if(!name || !period) return alert("필수 입력 확인!");
+    const name = document.getElementById('add-name').value; const period = document.getElementById('add-period').value;
+    if(!name || !period) return alert("기업명과 기간은 필수입니다!");
     db.ref('companies').push({ name, code: document.getElementById('add-code').value, period, url: document.getElementById('add-url').value, status: period.endsWith('~') ? '운영중' : '종료' });
     ["add-name", "add-code", "add-period", "add-url"].forEach(id => document.getElementById(id).value = '');
   }
 
   async function upComp() {
-    const file = document.getElementById('xl-input').files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = async (e) => {
+    const file = document.getElementById('xl-input').files[0]; if(!file) return;
+    const reader = new FileReader(); reader.onload = async (e) => {
       const rows = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }).Sheets.Sheet1);
-      const up = {};
-      rows.forEach(r => {
-        const p = String(r['운영기간'] || '');
-        const k = db.ref().child('companies').push().key;
-        up[`/companies/${k}`] = { name: r['기업명'], code: r['기업코드']||'', period: p, url: r['연수원 URL']||'', status: p.endsWith('~') ? '운영중' : '종료' };
-      });
-      await db.ref().update(up);
-      alert("등록 완료");
-    };
-    reader.readAsArrayBuffer(file);
+      const up = {}; rows.forEach(r => { const p = String(r['운영기간']||''); const k = db.ref().child('companies').push().key; up[`/companies/${k}`] = { name: r['기업명'], code: r['기업코드']||'', period: p, url: r['연수원 URL']||'', status: p.endsWith('~') ? '운영중' : '종료' }; });
+      await db.ref().update(up); alert("업로드 완료");
+    }; reader.readAsArrayBuffer(file);
   }
 
   async function upGuide() {
-    const file = document.getElementById('guide-input').files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = async (e) => {
+    const file = document.getElementById('guide-input').files[0]; if(!file) return;
+    const reader = new FileReader(); reader.onload = async (e) => {
       const rows = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }).Sheets.Sheet1);
-      rows.forEach(r => db.ref('guides').push({ company: r['대상기업'], keyword: r['키워드'], content: r['가이드내용'] }));
-      alert("완료");
-    };
-    reader.readAsArrayBuffer(file);
+      rows.forEach(r => db.ref('guides').push({ company: r['대상기업'], keyword: r['키워드'], content: r['가이드내용'] })); alert("업로드 완료");
+    }; reader.readAsArrayBuffer(file);
   }
 
-  function downCompSample() {
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["기업명", "기업코드", "운영기간", "연수원 URL"]]), "Sheet1");
-    XLSX.writeFile(wb, "Company_Sample.xlsx");
-  }
-
-  function downGuideSample() {
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"]]), "Sheet1");
-    XLSX.writeFile(wb, "WorkHub_Sample.xlsx");
-  }
-
-  function tab(i) {
-    document.querySelectorAll('.nav-btn').forEach((b, idx) => b.classList.toggle('active', idx === i));
-    document.querySelectorAll('main').forEach((m, idx) => m.classList.toggle('active', idx === i));
-  }
-  
-  function editGuide(id) {
-    const target = allGuides.find(i => i.id === id);
-    const n = prompt("수정할 내용:", target.content);
-    if(n) db.ref('guides/'+id).update({ content: n });
-  }
+  function downCompSample() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["기업명", "기업코드", "운영기간", "연수원 URL"]]), "Sheet1"); XLSX.writeFile(wb, "Company_Sample.xlsx"); }
+  function downGuideSample() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"]]), "Sheet1"); XLSX.writeFile(wb, "WorkHub_Sample.xlsx"); }
 
   window.onload = init;
 </script>
