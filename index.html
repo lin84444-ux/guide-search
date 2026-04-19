@@ -3,37 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | Final Integration</title>
+<title>WorkHub Pro | 정밀 데이터 매핑 버전</title>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
   :root { --bg-color: #f4f7ff; --primary: #6366f1; --text-dark: #1e293b; --text-light: #64748b; --white: #ffffff; --border: #e2e8f0; --accent: #f43f5e; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-dark); }
   header { padding: 40px 20px 20px; text-align: center; position: relative; }
   .logo { font-size: 34px; font-weight: 900; color: #0f172a; margin-bottom: 25px; letter-spacing: -1px; }
+  
   .admin-btn { position: absolute; top: 20px; right: 20px; padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-light); font-weight: 800; font-size: 13px; cursor: pointer; }
   .admin-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
   .nav-tabs { display: inline-flex; background: var(--white); padding: 6px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 40px; }
   .nav-btn { padding: 12px 25px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; background: transparent; color: var(--text-light); font-size: 14px; }
   .nav-btn.active { background: var(--primary); color: var(--white); }
+
   main { max-width: 1400px; margin: 0 auto 50px; padding: 0 20px; }
   .tab-content { display: none; grid-template-columns: 1.8fr 1.1fr; gap: 30px; }
   .tab-content.active { display: grid; }
+
   .card { background: var(--white); border-radius: 28px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); height: fit-content; margin-bottom: 25px; }
   .card-title { font-size: 19px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
   .card-title::before { content: ''; width: 4px; height: 18px; background: var(--primary); border-radius: 10px; }
+
   input, textarea, select { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1.5px solid #f1f5f9; background: #f8fafc; outline: none; font-size: 14px; margin-bottom: 12px; }
   .btn-primary { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: 800; cursor: pointer; }
+
   .excel-box { border: 2px dashed #cbd5e1; border-radius: 18px; padding: 20px; text-align: center; margin-bottom: 20px; background: #fcfdff; }
-  .sample-link { display: inline-block; margin-top: 8px; font-size: 12px; color: var(--primary); text-decoration: underline; cursor: pointer; font-weight: 700; }
+  
   .list-table { width: 100%; border-collapse: collapse; }
   .list-table th { text-align: left; padding: 12px; font-size: 12px; color: var(--text-light); border-bottom: 2px solid #f1f5f9; }
   .list-table td { padding: 15px 12px; font-size: 14px; border-bottom: 1px solid #f8fafc; }
-  .del-btn, .edit-btn { display: none; border: none; cursor: pointer; background: none; font-size: 12px; font-weight: bold; margin-top: 8px; }
-  .del-btn { color: var(--accent); }
-  .edit-btn { color: var(--primary); margin-right: 10px; }
-  .admin-active .del-btn, .admin-active .edit-btn { display: inline-block; }
-  .badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; background: #eef2ff; color: var(--primary); display: inline-block; margin-bottom: 8px; }
-  @media (max-width: 1000px) { .tab-content { grid-template-columns: 1fr; } }
+  
+  .del-btn { display: none; border: none; cursor: pointer; background: none; color: var(--accent); font-size: 12px; font-weight: bold; }
+  .admin-active .del-btn { display: inline-block; }
+  .badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; background: #eef2ff; color: var(--primary); }
 </style>
 </head>
 <body id="main-body">
@@ -54,23 +58,19 @@
       <input type="text" id="c-search" placeholder="기업명 검색 (Enter)" onkeyup="if(event.key==='Enter') renderCorps()">
       <div style="overflow-x:auto;">
         <table class="list-table">
-          <thead><tr><th>기업명</th><th>기업코드</th><th>상태</th><th>기간</th><th>URL</th><th class="del-btn">관리</th></tr></thead>
+          <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th class="del-btn">관리</th></tr></thead>
           <tbody id="corp-list-body"></tbody>
         </table>
       </div>
     </section>
 
     <section class="card">
-      <div class="card-title">기업 등록 (CSV 업로드)</div>
+      <div class="card-title">기업 데이터 등록</div>
       <div class="excel-box">
-        <input type="file" onchange="uploadCSV(this, 'corp')" style="font-size:11px; width:100%;">
+        <p style="font-size:13px; font-weight:700; color:var(--primary);">보유하신 엑셀(CSV) 파일을 올려주세요</p>
+        <input type="file" id="file-input" onchange="processFile(this, 'corp')" style="font-size:11px; margin-top:10px; width:100%;">
       </div>
-      <input id="in-c-name" placeholder="기업명">
-      <input id="in-c-code" placeholder="기업코드">
-      <input id="in-c-url" placeholder="기업URL">
-      <input id="in-c-period" placeholder="운영기간">
-      <select id="in-c-status"><option>운영중</option><option>종료</option></select>
-      <button class="btn-primary" onclick="addCorp()">개별 등록</button>
+      <p style="font-size:11px; color:var(--text-light); text-align:center;">※ 파일 상단 빈 줄이 있어도 자동으로 인식합니다.</p>
     </section>
   </div>
 
@@ -87,25 +87,13 @@
         <textarea id="in-s-text" placeholder="소식을 입력하세요..." rows="3"></textarea>
         <button class="btn-primary" onclick="shareNow()">소식 공유</button>
       </section>
-
-      <section class="card">
-        <div class="card-title">가이드 등록 센터</div>
-        <div class="excel-box">
-          <input type="file" onchange="uploadCSV(this, 'guide')" style="font-size:11px; width:100%;">
-          <span class="sample-link" onclick="downloadSample()">[샘플 양식 다운로드]</span>
-        </div>
-        <input id="in-g-corp" placeholder="기업명">
-        <input id="in-g-key" placeholder="키워드">
-        <textarea id="in-g-text" placeholder="상세 가이드 내용" rows="4"></textarea>
-        <button class="btn-primary" style="background:#1e293b;" onclick="addGuide()">저장하기</button>
-      </section>
     </div>
   </div>
 </main>
 
 <script>
-  let DB_CORPS = JSON.parse(localStorage.getItem("pro_corps_db") || "[]");
-  let DB_GUIDES = JSON.parse(localStorage.getItem("pro_guides_db") || "[]");
+  let DB_CORPS = JSON.parse(localStorage.getItem("final_corp_db") || "[]");
+  let DB_GUIDES = JSON.parse(localStorage.getItem("final_guide_db") || "[]");
   let IS_ADMIN = false;
 
   function toggleAdmin() {
@@ -130,25 +118,48 @@
     btn.classList.add('active');
   }
 
-  function uploadCSV(input, type) {
+  // --- 핵심: 파일 업로드 로직 (빈 줄 무시 및 정밀 매핑) ---
+  function processFile(input, type) {
     const file = input.files[0];
     if(!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-      const rows = e.target.result.split(/\r?\n/).filter(r => r.trim());
-      const dataRows = rows.slice(1);
+      const content = e.target.result;
+      const lines = content.split(/\r?\n/);
+      
+      // 실제 데이터가 시작되는 헤더(기업명) 위치 찾기
+      let headerIndex = -1;
+      for(let i=0; i<lines.length; i++) {
+        if(lines[i].includes("기업명")) {
+          headerIndex = i;
+          break;
+        }
+      }
+
+      if(headerIndex === -1) {
+        alert("올바른 양식의 파일이 아닙니다. '기업명' 항목이 포함된 파일을 올려주세요.");
+        return;
+      }
+
+      const dataRows = lines.slice(headerIndex + 1);
       dataRows.forEach(row => {
-        // 엑셀 CSV 파싱 최적화 (쉼표와 따옴표 처리)
+        if(!row.trim()) return;
+        // 쉼표로 분리하되, 큰따옴표 안의 쉼표는 무시하는 정규식
         const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(',');
         const p = cols.map(v => v.replace(/^"|"$/g, '').trim());
+
         if(type === 'corp' && p.length >= 1) {
-          DB_CORPS.unshift({ name: p[0], code: p[1]||'', status: p[2]||'운영중', period: p[3]||'', url: p[4]||'' });
-        } else if(type === 'guide' && p.length >= 2) {
-          DB_GUIDES.unshift({ category: p[0], keywords: (p[1]||'').split('|'), text: p[2]||'', date: new Date().toLocaleDateString() });
+          DB_CORPS.unshift({
+            name: p[0],    // 기업명
+            code: p[1] || '-', // 기업코드
+            period: p[2] || '~', // 오픈기간
+            status: (p[2] && p[2].includes('~') && p[2].length > 5) ? '운영중' : '대기/종료' 
+          });
         }
       });
       saveDB();
-      alert("등록 완료!");
+      alert("데이터 등록이 완료되었습니다.");
+      input.value = ""; // 파일 선택 초기화
     };
     reader.readAsText(file, "UTF-8");
   }
@@ -156,26 +167,9 @@
   function shareNow() {
     const txt = document.getElementById("in-s-text").value.trim();
     if(!txt) return;
-    DB_GUIDES.unshift({ category: "📢 오늘의공유", text: txt, keywords: ["공유"], date: new Date().toLocaleDateString() });
+    DB_GUIDES.unshift({ category: "📢 오늘의공유", text: txt, date: new Date().toLocaleDateString() });
     saveDB();
     document.getElementById("in-s-text").value = "";
-  }
-
-  function addCorp() {
-    const name = document.getElementById("in-c-name").value.trim();
-    if(!name) return;
-    DB_CORPS.unshift({ name, code: document.getElementById("in-c-code").value, url: document.getElementById("in-c-url").value, period: document.getElementById("in-c-period").value, status: document.getElementById("in-c-status").value });
-    saveDB();
-    ["in-c-name", "in-c-code", "in-c-url", "in-c-period"].forEach(id => document.getElementById(id).value = "");
-  }
-
-  function addGuide() {
-    const corp = document.getElementById("in-g-corp").value.trim();
-    const text = document.getElementById("in-g-text").value.trim();
-    if(!corp || !text) return;
-    DB_GUIDES.unshift({ category: corp, text, keywords: document.getElementById("in-g-key").value.split(','), date: new Date().toLocaleDateString() });
-    saveDB();
-    ["in-g-corp", "in-g-key", "in-g-text"].forEach(id => document.getElementById(id).value = "");
   }
 
   function renderCorps() {
@@ -185,44 +179,34 @@
       <tr>
         <td style="font-weight:800;">${c.name}</td>
         <td>${c.code}</td>
-        <td style="color:${c.status==='운영중'?'#6366f1':''}">${c.status}</td>
-        <td>${c.period}</td>
-        <td>${c.url ? `<a href="${c.url}" target="_blank">🔗</a>` : '-'}</td>
+        <td style="font-size:12px; color:var(--text-light);">${c.period}</td>
+        <td><span class="badge">${c.status}</span></td>
         <td><button class="del-btn" onclick="deleteItem('corp', ${i})">삭제</button></td>
       </tr>`).join('');
   }
 
   function renderGuides() {
     const q = document.getElementById("g-search").value.toLowerCase();
-    const filtered = DB_GUIDES.filter(g => g.text.toLowerCase().includes(q) || g.category.toLowerCase().includes(q));
+    const filtered = DB_GUIDES.filter(g => g.text.toLowerCase().includes(q));
     document.getElementById("guide-list-area").innerHTML = filtered.map((g, i) => `
       <div class="card" style="padding:20px; border-radius:20px;">
         <span class="badge">${g.category}</span>
-        <div style="font-weight:700; line-height:1.6; white-space:pre-wrap;">${g.text}</div>
+        <div style="font-weight:700; line-height:1.6; white-space:pre-wrap; margin-top:10px;">${g.text}</div>
         <button class="del-btn" onclick="deleteItem('guide', ${i})">삭제</button>
       </div>`).join('');
   }
 
   function deleteItem(type, i) {
-    if(!confirm("삭제할까요?")) return;
+    if(!confirm("삭제하시겠습니까?")) return;
     if(type === 'corp') DB_CORPS.splice(i, 1);
     else DB_GUIDES.splice(i, 1);
     saveDB();
   }
 
   function saveDB() {
-    localStorage.setItem("pro_corps_db", JSON.stringify(DB_CORPS));
-    localStorage.setItem("pro_guides_db", JSON.stringify(DB_GUIDES));
+    localStorage.setItem("final_corp_db", JSON.stringify(DB_CORPS));
+    localStorage.setItem("final_guide_db", JSON.stringify(DB_GUIDES));
     renderCorps(); renderGuides();
-  }
-
-  function downloadSample() {
-    const csv = "\uFEFF기업명,키워드,내용\n삼성전자,필독|가이드,내용입니다.";
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "workhub_sample.csv";
-    link.click();
   }
 
   window.onload = () => { renderCorps(); renderGuides(); };
