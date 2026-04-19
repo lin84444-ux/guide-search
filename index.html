@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | 통합 관리 시스템 v13</title>
+<title>WorkHub Pro | 팀 공유 시스템 v14</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
   :root { --bg-color: #f4f7ff; --primary: #2563eb; --primary-hover: #1d4ed8; --primary-light: #eff6ff; --text-dark: #1e293b; --text-light: #64748b; --white: #ffffff; --border: #e2e8f0; --accent: #ef4444; }
@@ -12,12 +14,11 @@
   header { padding: 40px 20px 10px; text-align: center; position: relative; }
   .logo { font-size: 34px; font-weight: 900; color: #0f172a; margin-bottom: 25px; letter-spacing: -1px; }
   
-  /* 관리자 버튼 */
-  .admin-btn { position: absolute; top: 20px; right: 20px; padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-light); font-weight: 800; font-size: 13px; cursor: pointer; z-index: 100; transition: 0.2s; }
-  .admin-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+  .admin-btn { position: absolute; top: 20px; right: 20px; padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-light); font-weight: 800; font-size: 13px; cursor: pointer; z-index: 100; }
+  .admin-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
   .nav-tabs { display: inline-flex; background: var(--white); padding: 6px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
-  .nav-btn { padding: 12px 25px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: var(--text-light); font-size: 14px; transition: 0.3s; }
+  .nav-btn { padding: 12px 25px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: var(--text-light); font-size: 14px; }
   .nav-btn.active { background: var(--primary); color: var(--white); }
 
   main { max-width: 1400px; margin: 0 auto 50px; padding: 0 20px; }
@@ -28,24 +29,15 @@
   .card-title { font-size: 19px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
   .card-title::before { content: ''; width: 4px; height: 18px; background: var(--primary); border-radius: 10px; }
 
-  /* 검색창 UI 개선 */
   .search-area { display: flex; gap: 8px; margin-bottom: 25px; }
   .search-input { flex: 1; padding: 16px 20px; border-radius: 14px; border: 1.5px solid var(--border); background: #f8fafc; font-size: 15px; outline: none; }
-  .search-input:focus { border-color: var(--primary); background: #fff; }
-  .btn-search-trigger { padding: 0 30px; border-radius: 14px; border: none; background: var(--primary); color: white; font-weight: 800; cursor: pointer; font-size: 15px; }
+  .btn-search-trigger { padding: 0 30px; border-radius: 14px; border: none; background: var(--primary); color: white; font-weight: 800; cursor: pointer; }
 
-  /* 테이블 및 URL 링크 */
   .list-table { width: 100%; border-collapse: collapse; }
   .list-table th { text-align: left; padding: 12px; font-size: 12px; color: var(--text-light); border-bottom: 2px solid #f1f5f9; }
   .list-table td { padding: 16px 12px; border-bottom: 1px solid #f8fafc; font-size: 14px; }
   
-  /* 클릭 가능한 URL 스타일 */
   .url-active-link { color: var(--primary); text-decoration: underline; font-weight: 700; font-size: 13px; }
-  .url-active-link:hover { color: var(--primary-hover); }
-
-  .badge { padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; }
-  .badge.on { background: var(--primary-light); color: var(--primary); }
-  .badge.off { background: #f1f5f9; color: var(--text-light); }
 
   input, textarea, select { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1.5px solid #f1f5f9; background: #f8fafc; margin-bottom: 12px; font-family: inherit; }
   .btn-primary { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: 800; cursor: pointer; }
@@ -58,7 +50,7 @@
 </head>
 <body id="main-body">
 
-<div id="loading-overlay">⏳ 파일 업로드 및 데이터 처리 중...</div>
+<div id="loading-overlay">⏳ 실시간 데이터를 동기화 중입니다...</div>
 
 <header>
   <button class="admin-btn" id="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
@@ -73,9 +65,9 @@
   <div id="corp-tab" class="tab-content active">
     <div>
       <section class="card">
-        <div class="card-title">기업 현황 리스트</div>
+        <div class="card-title">기업 현황 리스트 (실시간 공유됨)</div>
         <div class="search-area">
-          <input type="text" id="unified-search" class="search-input" placeholder="기업명 또는 코드를 입력하세요" onkeyup="if(window.event.keyCode==13) renderCorps()">
+          <input type="text" id="unified-search" class="search-input" placeholder="기업명 또는 코드를 입력하세요" onkeyup="renderCorps()">
           <button class="btn-search-trigger" onclick="renderCorps()">검색</button>
         </div>
         <table class="list-table">
@@ -84,22 +76,20 @@
         </table>
       </section>
     </div>
-    
     <div class="side-col">
       <section class="card">
-        <div class="card-title">기업 수기 등록</div>
+        <div class="card-title">기업 신규 등록</div>
         <input id="in-c-name" placeholder="기업명">
         <input id="in-c-code" placeholder="기업코드">
         <input id="in-c-url" placeholder="URL (예: 000.hunet.co.kr)">
         <select id="in-c-status"><option value="운영중">운영중</option><option value="종료">종료</option></select>
         <input id="in-c-period" placeholder="운영기간 (~)">
-        <button class="btn-primary" onclick="addCorp()">수기 등록</button>
+        <button class="btn-primary" onclick="addCorp()">공유 등록</button>
       </section>
       <section class="card">
-        <div class="card-title">파일 일괄 등록</div>
+        <div class="card-title">파일 일괄 업로드</div>
         <input type="file" id="csv-file-input" style="font-size:11px;">
-        <button class="btn-primary" style="background:#1e293b;" onclick="handleFileUpload()">파일 등록하기</button>
-        <button class="del-btn" style="width:100%; margin-top:10px; background:#f1f5f9; color:#64748b;" onclick="clearData('corp')">기업 데이터 전체 삭제</button>
+        <button class="btn-primary" style="background:#1e293b;" onclick="handleFileUpload()">파일 일괄 공유</button>
       </section>
     </div>
   </div>
@@ -114,8 +104,8 @@
     </div>
     <div class="side-col">
       <section class="card">
-        <div class="card-title">신규 가이드 등록</div>
-        <textarea id="in-g-text" placeholder="공유할 가이드 내용을 입력하세요..." rows="6"></textarea>
+        <div class="card-title">가이드 등록</div>
+        <textarea id="in-g-text" placeholder="공유할 내용을 입력하세요..." rows="6"></textarea>
         <button class="btn-primary" onclick="addGuide()">가이드 저장</button>
       </section>
     </div>
@@ -123,24 +113,43 @@
 </main>
 
 <script>
-  // 저장소 키를 v13으로 변경하여 꼬인 데이터 초기화
-  let DB_CORPS = JSON.parse(localStorage.getItem("wh_pro_v13_c") || "[]");
-  let DB_GUIDES = JSON.parse(localStorage.getItem("wh_pro_v13_g") || "[]");
+  // [필독] 공유를 위해 본인의 Firebase 설정값으로 아래를 교체해야 합니다.
+  const firebaseConfig = {
+    apiKey: "AIzaSy...", 
+    databaseURL: "https://workhub-pro-default-rtdb.firebaseio.com",
+    projectId: "workhub-pro",
+  };
+  
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  let DB_CORPS = [];
+  let DB_GUIDES = [];
   let IS_ADMIN = false;
+
+  // 실시간 데이터 수신
+  db.ref('corps').on('value', (snapshot) => {
+    const data = snapshot.val();
+    DB_CORPS = data ? Object.entries(data).map(([key, val]) => ({ ...val, key })) : [];
+    renderCorps();
+  });
+
+  db.ref('guides').on('value', (snapshot) => {
+    const data = snapshot.val();
+    DB_GUIDES = data ? Object.entries(data).map(([key, val]) => ({ ...val, key })) : [];
+    renderGuides();
+  });
 
   function toggleAdmin() {
     if(!IS_ADMIN) {
-      const pw = prompt("비밀번호를 입력하세요:");
-      if(pw === "6559") {
+      if(prompt("비밀번호:") === "6559") {
         IS_ADMIN = true;
         document.getElementById("main-body").classList.add("admin-active");
-        document.getElementById("admin-toggle-btn").classList.add("active");
         document.getElementById("admin-toggle-btn").innerText = "🔓 관리자 ON";
       }
     } else {
       IS_ADMIN = false;
       document.getElementById("main-body").classList.remove("admin-active");
-      document.getElementById("admin-toggle-btn").classList.remove("active");
       document.getElementById("admin-toggle-btn").innerText = "⚙️ 관리자 모드";
     }
     renderCorps(); renderGuides();
@@ -153,122 +162,82 @@
     btn.classList.add('active');
   }
 
-  // --- 파일 업로드 속도 개선 로직 ---
-  function handleFileUpload() {
-    const fileInput = document.getElementById("csv-file-input");
-    const file = fileInput.files[0];
-    if(!file) return alert("파일을 먼저 선택해주세요.");
-    
-    document.getElementById("loading-overlay").style.display = "flex";
+  function addCorp() {
+    const name = document.getElementById("in-c-name").value.trim();
+    if(!name) return;
+    db.ref('corps').push({
+      name, code: document.getElementById("in-c-code").value,
+      url: document.getElementById("in-c-url").value,
+      status: document.getElementById("in-c-status").value,
+      period: document.getElementById("in-c-period").value || "~"
+    });
+    alert("공유 데이터로 등록되었습니다.");
+  }
 
+  function handleFileUpload() {
+    const file = document.getElementById("csv-file-input").files[0];
+    if(!file) return alert("파일을 선택하세요.");
+    document.getElementById("loading-overlay").style.display = "flex";
     const reader = new FileReader();
     reader.onload = function(e) {
-      const content = e.target.result;
-      const rows = content.split(/\r?\n/);
-      
-      // 헤더 위치 찾기
+      const rows = e.target.result.split(/\r?\n/);
       let startIndex = rows.findIndex(r => r.includes("기업명")) + 1;
       if(startIndex === 0) startIndex = 1;
 
-      const results = [];
       for(let i = startIndex; i < rows.length; i++) {
         if(!rows[i].trim()) continue;
         const p = rows[i].split(',').map(v => v.replace(/^"|"$/g, '').trim());
-        
         if(p[0]) {
-          const period = p[2] || "~";
-          results.push({
-            name: p[0],
-            code: p[1] || '',
-            period: period,
-            status: (period === "~" || period.includes("202")) ? "운영중" : "종료",
+          db.ref('corps').push({
+            name: p[0], code: p[1] || '', period: p[2] || "~",
+            status: (p[2] && p[2].includes("202")) ? "운영중" : "운영중",
             url: p[3] || ''
           });
         }
       }
-      DB_CORPS = [...DB_CORPS, ...results];
-      saveDB();
       document.getElementById("loading-overlay").style.display = "none";
-      alert(`${results.length}건 등록 완료!`);
-      fileInput.value = "";
+      alert("전체 공유 완료!");
     };
     reader.readAsText(file, "UTF-8");
   }
 
   function renderCorps() {
     const query = document.getElementById("unified-search").value.toLowerCase().trim();
-    const filtered = DB_CORPS.filter(c => 
-      c.name.toLowerCase().includes(query) || String(c.code) === query
-    );
-
+    const filtered = DB_CORPS.filter(c => c.name.toLowerCase().includes(query) || String(c.code) === query);
     const tbody = document.getElementById("corp-list-body");
-    tbody.innerHTML = filtered.map((c, i) => {
-      const rawUrl = c.url || '';
-      const displayUrl = rawUrl.replace(/^https?:\/\//, '');
-      const fullUrl = rawUrl ? (rawUrl.startsWith('http') ? rawUrl : 'https://' + rawUrl) : '';
-
+    tbody.innerHTML = filtered.reverse().map((c) => {
+      const displayUrl = c.url ? c.url.replace(/^https?:\/\//, '') : '-';
+      const fullUrl = c.url ? (c.url.startsWith('http') ? c.url : 'https://' + c.url) : '#';
       return `
         <tr>
           <td style="font-weight:800;">${c.name}</td>
           <td>${c.code}</td>
-          <td style="font-size:12px; color:var(--text-light);">${c.period}</td>
+          <td style="font-size:12px;">${c.period}</td>
           <td><span class="badge ${c.status === '운영중' ? 'on' : 'off'}">${c.status}</span></td>
-          <td>
-            ${rawUrl ? `<a href="${fullUrl}" target="_blank" class="url-active-link">${displayUrl}</a>` : '-'}
-          </td>
-          <td><button class="del-btn" onclick="deleteItem('corp', ${i})">삭제</button></td>
+          <td>${c.url ? `<a href="${fullUrl}" target="_blank" class="url-active-link">${displayUrl}</a>` : '-'}</td>
+          <td><button class="del-btn" onclick="deleteRemote('corps', '${c.key}')">삭제</button></td>
         </tr>`;
     }).join('');
   }
 
   function addGuide() {
     const text = document.getElementById("in-g-text").value.trim();
-    if(!text) return;
-    DB_GUIDES.unshift({ text });
-    saveDB();
+    if(text) db.ref('guides').push({ text });
     document.getElementById("in-g-text").value = "";
-    alert("가이드가 등록되었습니다.");
   }
 
   function renderGuides() {
     const q = document.getElementById("g-search").value.toLowerCase();
     const filtered = DB_GUIDES.filter(g => g.text.toLowerCase().includes(q));
-    document.getElementById("guide-list-area").innerHTML = filtered.map((g, i) => `
+    document.getElementById("guide-list-area").innerHTML = filtered.reverse().map((g) => `
       <div class="card" style="padding:20px; margin-bottom:15px;">
-        <div style="white-space:pre-wrap; font-weight:700; line-height:1.6;">${g.text}</div>
-        <div style="margin-top:10px;"><button class="del-btn" onclick="deleteItem('guide', ${i})">삭제</button></div>
+        <div style="white-space:pre-wrap; font-weight:700;">${g.text}</div>
+        <div style="margin-top:10px;"><button class="del-btn" onclick="deleteRemote('guides', '${g.key}')">삭제</button></div>
       </div>`).join('');
   }
 
-  function addCorp() {
-    const name = document.getElementById("in-c-name").value.trim();
-    if(!name) return alert("기업명을 입력하세요.");
-    DB_CORPS.unshift({
-      name, code: document.getElementById("in-c-code").value,
-      url: document.getElementById("in-c-url").value,
-      status: document.getElementById("in-c-status").value,
-      period: document.getElementById("in-c-period").value || "~"
-    });
-    saveDB();
-    alert("수기 등록이 완료되었습니다.");
-  }
-
-  function deleteItem(type, i) {
-    if(!confirm("삭제하시겠습니까?")) return;
-    if(type==='corp') DB_CORPS.splice(i, 1); else DB_GUIDES.splice(i, 1);
-    saveDB();
-  }
-
-  function clearData(type) {
-    if(!confirm("전체 데이터를 삭제하시겠습니까?")) return;
-    if(type==='corp') DB_CORPS = []; else DB_GUIDES = [];
-    saveDB();
-  }
-
-  function saveDB() {
-    localStorage.setItem("wh_pro_v13_c", JSON.stringify(DB_CORPS));
-    localStorage.setItem("wh_pro_v13_g", JSON.stringify(DB_GUIDES));
-    renderCorps(); renderGuides();
+  function deleteRemote(path, key) {
+    if(confirm("공유된 데이터를 삭제하시겠습니까?")) db.ref(`${path}/${key}`).remove();
   }
 
   window.onload = () => { renderCorps(); renderGuides(); };
