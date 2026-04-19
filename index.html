@@ -3,138 +3,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | 기업 관리 시스템</title>
+<title>WorkHub Pro | 통합 관리 시스템</title>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
   :root {
     --bg-main: #f8fafc;
-    --primary: #6366f1;
-    --accent-pink: #fb7185;
-    --text-main: #1e293b;
-    --border-color: #e2e8f0;
+    --header-grad: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
     --card-bg: #ffffff;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --primary: #6366f1; /* 선호하시는 블루 */
+    --accent: #f43f5e; /* 포인트 색상 */
+    --secondary: #94a3b8;
+    --text-main: #1e293b;
+    --text-sub: #475569;
+    --border-color: #f1f5f9;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
   }
 
-  body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg-main); color: var(--text-main); }
+  body { 
+    font-family: 'Pretendard', sans-serif; 
+    margin: 0; background-color: var(--bg-main); color: var(--text-main);
+    line-height: 1.6; word-break: keep-all;
+  }
 
-  header { background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%); padding: 40px 20px 80px; text-align: center; }
-  
-  .nav-tabs { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-  .nav-btn { padding: 10px 30px; border-radius: 50px; border: none; background: white; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); }
+  header { 
+    background: var(--header-grad); padding: 50px 20px 100px; text-align: center; 
+    position: relative; z-index: 1; clip-path: ellipse(150% 100% at 50% 0%);
+  }
+
+  .nav-tabs { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
+  .nav-btn {
+    padding: 12px 35px; border-radius: 50px; border: none;
+    background: white; color: var(--secondary); font-weight: 700; cursor: pointer;
+    box-shadow: var(--shadow); transition: 0.3s;
+  }
   .nav-btn.active { background: var(--primary); color: white; }
 
-  main { max-width: 1200px; margin: -50px auto 50px; padding: 0 20px; }
-  .content-section { display: none; flex-direction: column; gap: 20px; }
+  .admin-toggle-btn { 
+    position: absolute; top: 30px; right: 40px; 
+    background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); 
+    padding: 10px 22px; border-radius: 14px; color: #475569; cursor: pointer; 
+    backdrop-filter: blur(10px); transition: 0.3s; font-size: 13px; font-weight: 700;
+  }
+
+  main { 
+    max-width: 1400px; margin: -60px auto 80px; padding: 0 25px; position: relative; z-index: 10; 
+  }
+
+  .content-section { display: none; flex-direction: column; gap: 25px; }
   .content-section.active { display: flex; }
 
-  .card { background: var(--card-bg); border-radius: 15px; padding: 25px; box-shadow: var(--shadow); }
+  .card { background: var(--card-bg); border-radius: 24px; padding: 30px; box-shadow: var(--shadow); border: 1px solid #ffffff; }
+  .title-area { font-size: 20px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .title-area i { width: 6px; height: 20px; border-radius: 3px; background: var(--primary); }
 
-  /* 1. 엑셀 업로드 바 (요구사항 1) */
-  .upload-bar {
-    background: linear-gradient(to right, #f472b6, #fb7185);
-    padding: 15px 25px; border-radius: 12px; display: flex; align-items: center; gap: 15px; color: white;
+  /* 대시보드 통계 카드 (블루톤 유지) */
+  .stats-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .stat-card { padding: 25px; border-radius: 20px; text-align: center; color: white; }
+  .stat-card.all { background: #6366f1; }
+  .stat-card.on { background: #4f46e5; }
+  .stat-card.off { background: #94a3b8; }
+  .stat-val { font-size: 32px; font-weight: 900; }
+
+  /* 입력창 및 테이블 */
+  input, textarea, select { 
+    padding: 14px; border: 1.5px solid var(--border-color); border-radius: 14px; 
+    outline: none; background: #f8fafc; transition: 0.3s; font-size: 14px;
   }
-  .upload-bar input { background: white; padding: 5px; border-radius: 6px; flex: 1; border: none; }
+  input:focus { border-color: var(--primary); background: white; }
+  button { padding: 14px; border: none; border-radius: 14px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+  .btn-blue { background: var(--primary); color: white; }
+  
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th { background: #f8fafc; color: var(--text-sub); padding: 15px; font-size: 13px; border-bottom: 2px solid var(--border-color); }
+  td { padding: 15px; text-align: center; border-bottom: 1px solid var(--border-color); font-size: 14px; }
 
-  /* 2. 통계 카드 (요구사항 2) */
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .stat-card { padding: 20px; border-radius: 12px; text-align: center; color: white; }
-  .stat-card.all { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
-  .stat-card.on { background: linear-gradient(135deg, #10b981, #34d399); }
-  .stat-card.off { background: linear-gradient(135deg, #f43f5e, #fb923c); }
-  .stat-num { font-size: 32px; font-weight: 900; }
-  .stat-label { font-size: 14px; opacity: 0.9; }
+  .badge { padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 11px; }
+  .badge-on { background: #eef2ff; color: #6366f1; }
+  .badge-off { background: #f1f5f9; color: #94a3b8; }
 
-  /* 3. 검색창 (요구사항 3) */
-  .search-area { display: flex; gap: 10px; margin-bottom: 15px; }
-  .search-input { flex: 1; padding: 12px 20px; border-radius: 50px; border: 1.5px solid var(--border-color); outline: none; }
-
-  /* 4. 개별 등록창 (요구사항 4) */
-  .reg-form { display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 8px; margin-top: 10px; }
-  .reg-form input, .reg-form select { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; font-size: 13px; }
-  .btn-reg { background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; }
-
-  /* 테이블 */
-  table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: center; }
-  th { background: #6366f1; color: white; padding: 12px; font-size: 14px; }
-  td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-  .badge { padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 11px; }
-  .badge-on { background: #ecfdf5; color: #10b981; }
-  .badge-off { background: #fff1f2; color: #f43f5e; }
+  .hub-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 30px; }
+  @media (max-width: 1000px) { .hub-grid { grid-template-columns: 1fr; } .stats-container { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🏢 기업 통합 관리</h1>
+  <button class="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
+  <h1>WorkHub Pro</h1>
   <div class="nav-tabs">
-    <button class="nav-btn active" onclick="switchTab('corp-page', this)">기업관리시스템</button>
-    <button class="nav-btn" onclick="switchTab('hub-page', this)">워크허브</button>
+    <button class="nav-btn active" onclick="switchTab('corp-tab', this)">🏢 기업관리시스템</button>
+    <button class="nav-btn" onclick="switchTab('hub-tab', this)">🚀 워크허브</button>
   </div>
 </header>
 
 <main>
-  <section id="corp-page" class="content-section active">
-    
-    <div class="upload-bar">
-      <span style="font-weight: 800;">📊 엑셀 파일 업로드</span>
-      <input type="file" id="excel-file">
-      <button onclick="alert('업로드 기능 연결됨')" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:700;">엑셀 업로드</button>
+  <section id="corp-tab" class="content-section active">
+    <div class="card" style="background: #eef2ff; border: 2px dashed #c7d2fe;">
+      <div style="display:flex; align-items:center; gap:15px;">
+        <span style="font-weight:800; color:var(--primary);">📊 엑셀 파일 업로드</span>
+        <input type="file" id="excel-file" style="flex:1;">
+        <button class="btn-blue" onclick="alert('준비중인 기능입니다.')">업로드</button>
+      </div>
     </div>
 
-    <div class="stats-grid">
-      <div class="stat-card all"><div class="stat-num" id="s-all">0</div><div class="stat-label">전체 기업</div></div>
-      <div class="stat-card on"><div class="stat-num" id="s-on">0</div><div class="stat-label">운영 중</div></div>
-      <div class="stat-card off"><div class="stat-num" id="s-off">0</div><div class="stat-label">종료</div></div>
+    <div class="stats-container">
+      <div class="stat-card all"><div class="stat-val" id="st-all">0</div><div class="stat-label">전체 기업</div></div>
+      <div class="stat-card on"><div class="stat-val" id="st-on">0</div><div class="stat-label">운영 중</div></div>
+      <div class="stat-card off"><div class="stat-val" id="st-off">0</div><div class="stat-label">종료</div></div>
     </div>
 
     <div class="card">
-      <div class="search-area">
-        <input id="search-box" class="search-input" placeholder="🔍 기업명 검색 후 엔터를 누르세요 (빈 칸으로 엔터 시 전체 노출)" onkeyup="if(event.key==='Enter') renderTable()">
-        <button style="background:#10b981; color:white; border:none; padding:0 20px; border-radius:50px; font-weight:700; cursor:pointer;">엑셀 내보내기</button>
+      <div class="title-area"><i></i> 기업 검색 및 등록</div>
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <input id="corp-q" style="flex:1" placeholder="기업명 검색 (공란 엔터 시 전체 노출)" onkeyup="if(event.key==='Enter') renderCorpTable()">
+        <button class="btn-blue" onclick="renderCorpTable()" style="padding:0 30px;">검색</button>
       </div>
-
-      <hr style="border:0; border-top:1px solid #f1f5f9; margin:20px 0;">
-
-      <div style="font-size:14px; font-weight:800; margin-bottom:10px; color:var(--primary);">+ 신규 기업 개별 등록</div>
-      <div class="reg-form">
+      
+      <div style="display:grid; grid-template-columns: repeat(5, 1fr) auto; gap:8px;">
         <input id="in-name" placeholder="기업명">
         <input id="in-code" placeholder="기업코드">
-        <input id="in-url" placeholder="기업URL">
-        <select id="in-status">
-          <option value="운영중">운영중</option>
-          <option value="종료">종료</option>
-        </select>
-        <input id="in-period" placeholder="운영기간 (예: 20년)">
-        <button onclick="addCorp()" class="btn-reg">등록</button>
+        <input id="in-url" placeholder="URL">
+        <select id="in-status"><option>운영중</option><option>종료</option></select>
+        <input id="in-period" placeholder="운영기간">
+        <button onclick="addCorp()" class="btn-blue">등록</button>
       </div>
-    </div>
 
-    <div class="card" style="padding:0; overflow:hidden;">
       <table>
         <thead>
-          <tr>
-            <th>기업명</th><th>기업코드</th><th>기업URL</th><th>운영여부</th><th>운영기간</th><th>관리</th>
-          </tr>
+          <tr><th>기업명</th><th>코드</th><th>URL</th><th>상태</th><th>기간</th><th>관리</th></tr>
         </thead>
-        <tbody id="corp-list"></tbody>
+        <tbody id="corp-body"></tbody>
       </table>
     </div>
   </section>
 
-  <section id="hub-page" class="content-section">
-    <div class="card">
-      <h2>🚀 워크허브 가이드</h2>
-      <p>기존의 가이드 관리 기능을 여기에 연결하여 사용할 수 있습니다.</p>
+  <section id="hub-tab" class="content-section">
+    <div class="hub-grid">
+      <div class="card">
+        <div class="title-area"><i></i> 가이드 보관함</div>
+        <input id="guide-q" style="width:100%; box-sizing:border-box; margin-bottom:15px;" placeholder="가이드 내용 검색..." onkeyup="renderGuides()">
+        <div id="guide-result"></div>
+      </div>
+      <div class="card">
+        <div class="title-area"><i></i> 가이드 등록</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <input id="new-cat" placeholder="기업명">
+          <textarea id="new-txt" placeholder="가이드 내용" rows="4"></textarea>
+          <button onclick="addGuide()" class="btn-blue">가이드 저장</button>
+        </div>
+      </div>
     </div>
   </section>
 </main>
 
 <script>
-  // 초기 데이터 (localStorage)
-  let CORPORATIONS = JSON.parse(localStorage.getItem("corps_data") || "[]");
+  let CORPS = JSON.parse(localStorage.getItem("pro_corps") || "[]");
+  let GUIDES = JSON.parse(localStorage.getItem("pro_guides") || "[]");
+  let isAdmin = false;
 
   function switchTab(id, btn) {
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -143,38 +169,27 @@
     btn.classList.add('active');
   }
 
-  // 기업 등록 (요구사항 4)
+  // --- 기업 관리 기능 ---
   function addCorp() {
     const name = document.getElementById("in-name").value;
-    const code = document.getElementById("in-code").value;
-    const url = document.getElementById("in-url").value;
-    const status = document.getElementById("in-status").value;
-    const period = document.getElementById("in-period").value;
-
-    if(!name) return alert("기업명을 입력해주세요.");
-
-    CORPORATIONS.unshift({ name, code, url, status, period });
-    localStorage.setItem("corps_data", JSON.stringify(CORPORATIONS));
+    if(!name) return alert("기업명을 입력하세요.");
     
-    // 입력창 비우기
-    document.querySelectorAll('.reg-form input').forEach(el => el.value = "");
-    renderTable();
+    CORPS.unshift({
+      name, 
+      code: document.getElementById("in-code").value,
+      url: document.getElementById("in-url").value,
+      status: document.getElementById("in-status").value,
+      period: document.getElementById("in-period").value
+    });
+    
+    localStorage.setItem("pro_corps", JSON.stringify(CORPS));
+    document.querySelectorAll('#corp-tab input').forEach(i => i.value="");
+    renderCorpTable();
   }
 
-  // 테이블 렌더링 및 검색 (요구사항 2, 3)
-  function renderTable() {
-    const keyword = document.getElementById("search-box").value.trim().toLowerCase();
-    const tbody = document.getElementById("corp-list");
-    
-    // 검색 필터링 (빈 칸이면 전체 노출)
-    const filtered = CORPORATIONS.filter(c => c.name.toLowerCase().includes(keyword));
+  function renderCorpTable() {
+    const q = document.getElementById("corp-q").value.trim().toLowerCase();
+    const tbody = document.getElementById("corp-body");
+    const filtered = CORPS.filter(c => c.name.toLowerCase().includes(q));
 
-    // 통계 카운트 업데이트
-    document.getElementById("s-all").innerText = CORPORATIONS.length;
-    document.getElementById("s-on").innerText = CORPORATIONS.filter(c => c.status === '운영중').length;
-    document.getElementById("s-off").innerText = CORPORATIONS.filter(c => c.status === '종료').length;
-
-    tbody.innerHTML = filtered.map((c, idx) => `
-      <tr>
-        <td style="font-weight:800;">${c.name}</td>
-        <td>
+    document.getElementById("st-all").innerText = CORPS.length;
