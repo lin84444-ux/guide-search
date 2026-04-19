@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | 기업관리 시스템 v9</title>
+<title>WorkHub Pro | 기업관리 시스템 v10</title>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
   :root { --bg-color: #f4f7ff; --primary: #2563eb; --primary-light: #eff6ff; --text-dark: #1e293b; --text-light: #64748b; --white: #ffffff; --border: #e2e8f0; --accent: #ef4444; }
@@ -44,6 +44,10 @@
   .list-table th { text-align: left; padding: 12px; font-size: 12px; color: var(--text-light); border-bottom: 2px solid #f1f5f9; }
   .list-table td { padding: 16px 12px; border-bottom: 1px solid #f8fafc; font-size: 14px; }
   
+  /* URL 링크 스타일 */
+  .url-link { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 12px; border-bottom: 1px solid transparent; transition: 0.2s; max-width: 150px; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .url-link:hover { border-bottom-color: var(--primary); }
+
   .del-btn { display: none; border: none; cursor: pointer; background: var(--primary-light); color: var(--primary); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; margin-left: 5px; }
   .admin-active .del-btn { display: inline-block; }
   .del-btn.real-del { color: var(--accent); background: #fff1f1; }
@@ -57,7 +61,7 @@
 </head>
 <body id="main-body">
 
-<div id="loading-overlay">⏳ 처리 중입니다...</div>
+<div id="loading-overlay">⏳ 데이터를 동기화 중입니다...</div>
 
 <header>
   <button class="admin-btn" id="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
@@ -83,7 +87,7 @@
           <input type="text" id="c-search-code" placeholder="기업코드(100% 일치)" onkeyup="renderCorps()" style="margin-bottom:0; flex:0.6;">
         </div>
         <table class="list-table">
-          <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="del-btn">관리</th></tr></thead>
+          <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>연수원 URL</th><th class="del-btn">관리</th></tr></thead>
           <tbody id="corp-list-body"></tbody>
         </table>
       </section>
@@ -93,15 +97,15 @@
         <div class="card-title">기업 수기 등록</div>
         <input id="in-c-name" placeholder="기업명">
         <input id="in-c-code" placeholder="기업코드">
-        <input id="in-c-url" placeholder="URL">
+        <input id="in-c-url" placeholder="URL (http:// 제외 가능)">
         <select id="in-c-status"><option value="운영중">운영중</option><option value="종료">종료</option></select>
         <input id="in-c-period" placeholder="운영기간 (~)">
-        <button class="btn-primary" onclick="addCorp()">수기 등록</button>
+        <button class="btn-primary" onclick="addCorpManual()">등록</button>
       </section>
       <section class="card">
         <div class="card-title">파일 일괄 등록</div>
-        <input type="file" id="csv-file" style="font-size:11px;">
-        <button class="btn-primary" style="background:#1e293b;" onclick="uploadFile()">파일 등록하기</button>
+        <input type="file" id="csv-file-input" style="font-size:11px;">
+        <button class="btn-primary" style="background:#1e293b;" onclick="processFileUpload()">파일 등록하기</button>
         <button class="btn-danger-all" onclick="clearData('corp')">기업 데이터 전체 삭제</button>
       </section>
     </div>
@@ -134,10 +138,9 @@
 </main>
 
 <script>
-  // 저장소 키를 최신화하여 데이터 충돌 방지
-  let DB_CORPS = JSON.parse(localStorage.getItem("wh_final_v9_c") || "[]");
-  let DB_GUIDES = JSON.parse(localStorage.getItem("wh_final_v9_g") || "[]");
-  let SHARE_MSG = localStorage.getItem("wh_final_v9_s") || "";
+  let DB_CORPS = JSON.parse(localStorage.getItem("wh_pro_c_v10") || "[]");
+  let DB_GUIDES = JSON.parse(localStorage.getItem("wh_pro_g_v10") || "[]");
+  let SHARE_MSG = localStorage.getItem("wh_pro_s_v10") || "";
   let IS_ADMIN = false;
 
   function toggleAdmin() {
@@ -164,8 +167,7 @@
     btn.classList.add('active');
   }
 
-  // --- 기업 관리 로직 ---
-  function addCorp() {
+  function addCorpManual() {
     const name = document.getElementById("in-c-name").value.trim();
     if(!name) return alert("기업명을 입력하세요.");
     DB_CORPS.unshift({
@@ -174,41 +176,42 @@
       status: document.getElementById("in-c-status").value,
       period: document.getElementById("in-c-period").value || "~"
     });
-    saveDB(); alert("등록되었습니다.");
+    saveDB(); alert("수기 등록 완료!");
   }
 
-  function uploadFile() {
-    const fileInput = document.getElementById("csv-file");
+  function processFileUpload() {
+    const fileInput = document.getElementById("csv-file-input");
     const file = fileInput.files[0];
-    if(!file) return alert("파일을 선택하세요.");
-    
+    if(!file) return alert("등록할 파일을 먼저 선택하세요.");
+
     document.getElementById("loading-overlay").style.display = "flex";
-    
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const lines = e.target.result.split(/\r?\n/);
-      // 헤더 추출 (기업명, 기업코드, 오픈기간, url 순서 가정)
       let headerIdx = lines.findIndex(l => l.includes("기업명"));
       
       lines.slice(headerIdx + 1).forEach(row => {
         if(!row.trim()) return;
-        // 쉼표로 분리하되 따옴표 내부 쉼표 무시 로직
         const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(',');
         const p = cols.map(v => v.replace(/^"|"$/g, '').trim());
         
-        const name = p[0];
-        const code = p[1] || '-';
         const period = p[2] || "~";
-        const url = p[3] || ''; // 4번째 열(url) 반영
         const status = (period === "~" || period.includes("202")) ? "운영중" : "종료";
         
-        DB_CORPS.push({ name, code, period, status, url });
+        DB_CORPS.push({
+          name: p[0],
+          code: p[1] || '-',
+          period: period,
+          status: status,
+          url: p[3] || '' // 4번째 열 URL 반영
+        });
       });
-      
+
       saveDB();
       fileInput.value = "";
       document.getElementById("loading-overlay").style.display = "none";
-      alert("데이터 등록이 완료되었습니다!");
+      alert("데이터 일괄 등록이 완료되었습니다!");
     };
     reader.readAsText(file, "UTF-8");
   }
@@ -216,8 +219,7 @@
   function renderCorps() {
     const sName = document.getElementById("c-search-name").value.toLowerCase();
     const sCode = document.getElementById("c-search-code").value.trim();
-    
-    // 필터링: 기업명(포함) 및 기업코드(100% 일치)
+
     const filtered = DB_CORPS.filter(c => {
       const nameMatch = c.name.toLowerCase().includes(sName);
       const codeMatch = sCode === "" || String(c.code) === sCode;
@@ -228,25 +230,32 @@
     document.getElementById("count-on").innerText = DB_CORPS.filter(c => c.status === "운영중").length;
     document.getElementById("count-off").innerText = DB_CORPS.filter(c => c.status === "종료").length;
 
-    document.getElementById("corp-list-body").innerHTML = filtered.map((c, i) => `
-      <tr>
-        <td style="font-weight:800;">${c.name}</td>
-        <td>${c.code}</td>
-        <td style="font-size:12px; color:var(--text-light);">${c.period}</td>
-        <td><span class="badge ${c.status === '운영중' ? 'on' : 'off'}">${c.status}</span></td>
-        <td>${c.url ? `<a href="${c.url.startsWith('http') ? c.url : 'http://'+c.url}" target="_blank">🔗</a>` : '-'}</td>
-        <td><button class="del-btn real-del" onclick="deleteItem('corp', ${i})">삭제</button></td>
-      </tr>`).join('');
+    const tbody = document.getElementById("corp-list-body");
+    tbody.innerHTML = filtered.map((c, i) => {
+      const displayUrl = c.url ? c.url.replace(/^https?:\/\//, '') : '-';
+      const fullUrl = c.url ? (c.url.startsWith('http') ? c.url : 'http://' + c.url) : '';
+      
+      return `
+        <tr>
+          <td style="font-weight:800;">${c.name}</td>
+          <td>${c.code}</td>
+          <td style="font-size:12px; color:var(--text-light);">${c.period}</td>
+          <td><span class="badge ${c.status === '운영중' ? 'on' : 'off'}">${c.status}</span></td>
+          <td>
+            ${c.url ? `<a href="${fullUrl}" target="_blank" class="url-link">${displayUrl}</a>` : '-'}
+          </td>
+          <td><button class="del-btn real-del" onclick="deleteItem('corp', ${i})">삭제</button></td>
+        </tr>`;
+    }).join('');
   }
 
-  // --- 워크허브 로직 ---
   function addGuide() {
     const text = document.getElementById("in-g-text").value.trim();
     if(!text) return alert("내용을 입력하세요.");
     DB_GUIDES.unshift({ category: document.getElementById("in-g-cat").value || "일반", text });
     saveDB();
     document.getElementById("in-g-text").value = "";
-    alert("저장되었습니다.");
+    alert("가이드가 저장되었습니다.");
   }
 
   function renderGuides() {
@@ -266,16 +275,16 @@
   }
 
   function editGuide(i) {
-    const newText = prompt("내용을 수정하세요:", DB_GUIDES[i].text);
+    const newText = prompt("가이드 내용을 수정하세요:", DB_GUIDES[i].text);
     if(newText) { DB_GUIDES[i].text = newText; saveDB(); }
   }
 
   function saveShare() {
     SHARE_MSG = document.getElementById("in-s-text").value.trim();
-    localStorage.setItem("wh_final_v9_s", SHARE_MSG);
+    localStorage.setItem("wh_pro_s_v10", SHARE_MSG);
     renderShare();
     document.getElementById("in-s-text").value = "";
-    alert("공유되었습니다.");
+    alert("공유사항이 업데이트되었습니다.");
   }
 
   function renderShare() {
@@ -285,22 +294,23 @@
   }
 
   function deleteItem(type, i) {
-    if(!confirm("삭제하시겠습니까?")) return;
+    if(!confirm("정말 삭제하시겠습니까?")) return;
     if(type === 'corp') DB_CORPS.splice(i, 1);
     else DB_GUIDES.splice(i, 1);
     saveDB();
   }
 
   function clearData(type) {
-    if(!confirm("해당 데이터를 전부 삭제하시겠습니까?")) return;
+    if(!confirm("해당 탭의 모든 데이터를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.")) return;
     if(type === 'corp') DB_CORPS = [];
     else DB_GUIDES = [];
     saveDB();
+    alert("전체 삭제 완료");
   }
 
   function saveDB() {
-    localStorage.setItem("wh_final_v9_c", JSON.stringify(DB_CORPS));
-    localStorage.setItem("wh_final_v9_g", JSON.stringify(DB_GUIDES));
+    localStorage.setItem("wh_pro_c_v10", JSON.stringify(DB_CORPS));
+    localStorage.setItem("wh_pro_g_v10", JSON.stringify(DB_GUIDES));
     renderCorps(); renderGuides();
   }
 
