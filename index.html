@@ -23,17 +23,17 @@
   main.active { display: grid; }
   
   .card { background: var(--white); border-radius: 25px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border); margin-bottom: 25px; }
-  .card-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; position: relative; padding-left: 15px; }
+  .card-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; position: relative; padding-left: 15px; display: flex; justify-content: space-between; align-items: center; }
   .card-title::before { content: ''; position: absolute; left: 0; width: 5px; height: 22px; background: var(--main-blue); border-radius: 10px; }
   
   input, textarea, select { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 10px; box-sizing: border-box; background: #fcfdfe; font-size: 16px; font-family: inherit; }
   input:focus, textarea:focus { border-color: var(--main-blue); outline: none; }
   
-  /* 사진 강조 레이아웃 스타일 */
   .input-highlight { border: 2px solid #1e293b !important; }
   .btn-blue { width: 100%; padding: 18px; border-radius: 12px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 17px; }
   .btn-light-blue { width: 100%; padding: 18px; border-radius: 12px; border: none; background: #eef2ff; color: var(--main-blue); font-weight: 800; cursor: pointer; font-size: 17px; }
   .btn-sample { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #1e293b; color: #fff; font-weight: 700; cursor: pointer; margin-bottom: 10px; font-size: 14px; }
+  .btn-delete-all { background: var(--admin-red); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; display: none; }
 
   .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
   .switch input { opacity: 0; width: 0; height: 0; }
@@ -81,9 +81,12 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-title">기업 현황 리스트</div>
+      <div class="card-title">
+        기업 현황 리스트
+        <button class="btn-delete-all admin-view" onclick="deleteAllData('companies')">전체 삭제</button>
+      </div>
       <table class="list-table">
-        <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th></tr></thead>
+        <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="admin-view" style="display:none;">관리</th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -106,7 +109,10 @@
 
 <main id="tab-1">
   <section class="card">
-    <div class="card-title">가이드 보관함</div>
+    <div class="card-title">
+      가이드 보관함
+      <button class="btn-delete-all admin-view" onclick="deleteAllData('guides')">전체 삭제</button>
+    </div>
     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
       <input type="text" id="guide-search" placeholder="가이드 내용 검색..." onkeypress="if(event.keyCode==13) filterGuides()" style="margin-bottom: 0;">
       <select id="guide-filter" onchange="filterGuides()" style="width: 150px; margin-bottom: 0;">
@@ -125,9 +131,9 @@
 
     <div class="card">
       <div class="card-title">가이드 등록</div>
-      <input type="text" id="g-comp" placeholder="대상 기업명" style="background: #fcfdfe;">
-      <input type="text" id="g-key" placeholder="키워드 (쉼표 구분)" style="background: #fcfdfe;">
-      <textarea id="g-content" placeholder="상세 가이드 내용" style="height: 150px; background: #fcfdfe;"></textarea>
+      <input type="text" id="g-comp" placeholder="대상 기업명">
+      <input type="text" id="g-key" placeholder="키워드 (쉼표 구분)">
+      <textarea id="g-content" placeholder="상세 가이드 내용" style="height: 150px;"></textarea>
       <button class="btn-light-blue" onclick="addOneGuide()">가이드 저장</button>
       
       <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
@@ -154,13 +160,16 @@
   function init() {
     db.ref('companies').on('value', s => {
       const v = s.val() || {};
-      const list = Object.values(v);
+      const list = Object.keys(v).map(k => ({ id: k, ...v[k] }));
       document.getElementById('c-all').innerText = list.length;
       document.getElementById('c-on').innerText = list.filter(i => i.status === '운영중').length;
       document.getElementById('c-off').innerText = list.filter(i => i.status === '종료').length;
       document.getElementById('tbody').innerHTML = list.reverse().map(i => `
         <tr><td><b>${i.name}</b></td><td>${i.code||'-'}</td><td>${i.period}</td>
-        <td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:700;">${i.status}</td><td>${i.url||'-'}</td></tr>
+        <td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:700;">${i.status}</td><td>${i.url||'-'}</td>
+        <td class="admin-view" style="display:${isAdmin?'table-cell':'none'}">
+          <button class="btn-red" onclick="deleteData('companies', '${i.id}')">삭제</button>
+        </td></tr>
       `).join('');
       
       const filter = document.getElementById('guide-filter');
@@ -184,12 +193,34 @@
       <div class="share-item">
         <div class="admin-only" style="display:${isAdmin?'flex':'none'}">
           <button class="btn-red" onclick="editGuide('${i.id}')">수정</button>
-          <button class="btn-red" onclick="delGuide('${i.id}')">삭제</button>
+          <button class="btn-red" onclick="deleteData('guides', '${i.id}')">삭제</button>
         </div>
         <b style="color:var(--main-blue);">[${i.company}]</b> <span style="font-weight:700;">${i.keyword}</span>
         <div style="margin-top:8px; color:#475569; font-size:15px; line-height:1.5; white-space: pre-wrap;">${i.content}</div>
       </div>
     `).join('');
+  }
+
+  function toggleAdmin() {
+    const sw = document.getElementById('admin-switch');
+    if (sw.checked) {
+      if (prompt("관리자 비밀번호") === '6559') isAdmin = true;
+      else { alert("비밀번호 불일치"); sw.checked = false; isAdmin = false; }
+    } else isAdmin = false;
+    
+    document.querySelectorAll('.admin-view').forEach(el => el.style.display = isAdmin ? (el.tagName === 'TD' || el.tagName === 'TH' ? 'table-cell' : 'inline-block') : 'none');
+    init(); // 다시 로드하여 테이블 UI 갱신
+  }
+
+  // 삭제 기능 추가
+  function deleteData(path, id) {
+    if(confirm("정말 삭제하시겠습니까?")) db.ref(`${path}/${id}`).remove().then(() => alert("삭제되었습니다."));
+  }
+
+  function deleteAllData(path) {
+    if(confirm(`⚠️ 주의: 모든 ${path === 'companies' ? '기업' : '가이드'} 데이터를 삭제하시겠습니까?`)) {
+      db.ref(path).remove().then(() => alert("모든 데이터가 삭제되었습니다."));
+    }
   }
 
   function addQuickShare() {
@@ -217,15 +248,6 @@
     if(f) filtered = filtered.filter(i => i.company === f);
     if(q) filtered = filtered.filter(i => i.company.toLowerCase().includes(q) || i.keyword.toLowerCase().includes(q) || i.content.toLowerCase().includes(q));
     renderGuides(filtered);
-  }
-
-  function toggleAdmin() {
-    const sw = document.getElementById('admin-switch');
-    if (sw.checked) {
-      if (prompt("관리자 비밀번호") === '6559') isAdmin = true;
-      else { alert("비밀번호 불일치"); sw.checked = false; isAdmin = false; }
-    } else isAdmin = false;
-    renderGuides(allGuides);
   }
 
   function addOneComp() {
@@ -283,7 +305,6 @@
     document.querySelectorAll('main').forEach((m, idx) => m.classList.toggle('active', idx === i));
   }
   
-  function delGuide(id) { if(confirm("삭제하시겠습니까?")) db.ref('guides/'+id).remove(); }
   function editGuide(id) {
     const target = allGuides.find(i => i.id === id);
     const n = prompt("수정할 내용:", target.content);
