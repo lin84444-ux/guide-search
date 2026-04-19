@@ -12,7 +12,6 @@
   :root { --main-blue: #2e6ff2; --bg: #f4f7ff; --white: #ffffff; --border: #eef2f8; --text: #1e293b; --light-gray: #94a3b8; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: var(--text); }
   
-  /* [사진 반영] 디자인 레이아웃 */
   header { padding: 40px 20px 10px; text-align: center; position: relative; }
   .logo { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 25px; }
   .admin-btn { position: absolute; top: 20px; right: 25px; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border); background: #fff; cursor: pointer; color: #64748b; font-size: 13px; font-weight: 600; }
@@ -33,7 +32,7 @@
 
   input, select { width: 100%; padding: 18px 20px; border-radius: 16px; border: 1.5px solid #f1f5f9; margin-bottom: 15px; box-sizing: border-box; background: #f8fafc; font-size: 15px; outline: none; }
   
-  .btn-submit { width: 100%; padding: 20px; border-radius: 18px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 16px; }
+  .btn-submit { width: 100%; padding: 20px; border-radius: 18px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 16px; transition: 0.2s; }
   .btn-dark { background: #1e293b; margin-top: 10px; }
 
   .list-table { width: 100%; border-collapse: collapse; }
@@ -58,9 +57,9 @@
 <main>
   <div>
     <div class="summary-bar">
-      <div class="summary-item"><div class="summary-val" id="cnt-all">0</div></div>
-      <div class="summary-item"><div class="summary-val" id="cnt-on" style="color:var(--main-blue)">0</div></div>
-      <div class="summary-item"><div class="summary-val">0</div></div>
+      <div class="summary-item">전체<br><div class="summary-val" id="cnt-all">0</div></div>
+      <div class="summary-item">운영중<br><div class="summary-val" id="cnt-on" style="color:var(--main-blue)">0</div></div>
+      <div class="summary-item">종료<br><div class="summary-val" id="cnt-off">0</div></div>
     </div>
     <section class="card">
       <div class="card-title">기업 현황 리스트</div>
@@ -84,15 +83,14 @@
     </section>
     <section class="card">
       <div class="card-title">파일 등록</div>
-      <button class="btn-submit btn-dark" style="margin-bottom:15px;">📥 샘플 양식 받기</button>
-      <input type="file" id="excel-file" accept=".xlsx, .xls, .csv">
-      <button class="btn-submit btn-dark" onclick="startExcelUpload()">파일 등록</button>
+      <button class="btn-submit btn-dark" style="margin-bottom:15px;" onclick="downloadSample()">📥 샘플 양식 받기</button>
+      <input type="file" id="excel-input" accept=".xlsx, .xls, .csv" style="margin-bottom:15px;">
+      <button class="btn-submit" onclick="uploadExcel()">파일 등록</button>
     </section>
   </div>
 </main>
 
 <script>
-  // 사용자님 실제 파이어베이스 설정
   const firebaseConfig = {
     apiKey: "AIzaSyAtn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE",
     authDomain: "workhub-pro-be742.firebaseapp.com",
@@ -113,22 +111,33 @@
       DATA = val ? Object.entries(val).map(([k, v]) => ({ ...v, key: k })).filter(i => i.name) : [];
       document.getElementById('cnt-all').innerText = DATA.length;
       document.getElementById('cnt-on').innerText = DATA.filter(d => d.status === '운영중').length;
+      document.getElementById('cnt-off').innerText = DATA.filter(d => d.status === '종료').length;
       render();
     });
   }
 
-  // [수정] 엑셀 파일 업로드 실제 동작 함수
-  function startExcelUpload() {
-    const fileInput = document.getElementById('excel-file');
-    const file = fileInput.files[0];
-    if (!file) return alert("먼저 파일을 선택해 주세요!");
+  // 1. [신규] 샘플 엑셀 파일 생성 및 다운로드
+  function downloadSample() {
+    const data = [
+      ["기업명", "기업코드", "운영기간", "상태", "연수원 URL"],
+      ["샘플기업A", "A001", "2026.01~2026.12", "운영중", "sample.hunet.co.kr"]
+    ];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, "WorkHub_샘플양식.xlsx");
+  }
+
+  // 2. 엑셀 업로드 기능
+  function uploadExcel() {
+    const file = document.getElementById('excel-input').files[0];
+    if (!file) return alert("파일을 선택해주세요.");
 
     const reader = new FileReader();
     reader.onload = function(e) {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet);
+      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
       let count = 0;
       rows.forEach(row => {
@@ -137,31 +146,27 @@
           db.ref('/').push({
             name: name,
             code: row['기업코드'] || row['code'] || '',
-            url: row['url'] || row['연수원 URL'] || '',
-            status: row['상태'] || '운영중',
-            period: row['운영기간'] || row['오픈기간'] || '~'
+            period: row['운영기간'] || row['period'] || '~',
+            url: row['연수원 URL'] || row['url'] || '',
+            status: row['상태'] || '운영중'
           });
           count++;
         }
       });
-      alert(count + "건의 데이터가 성공적으로 등록되었습니다!");
-      fileInput.value = ""; // 파일 선택 초기화
+      alert(count + "건 등록 완료!");
     };
     reader.readAsArrayBuffer(file);
   }
 
   function addOne() {
     const n = document.getElementById('in-name').value.trim();
-    if(!n) return alert("기업명을 입력하세요.");
+    if(!n) return alert("기업명 필수!");
     db.ref('/').push({
       name: n, code: document.getElementById('in-code').value,
       url: document.getElementById('in-url').value,
       status: document.getElementById('in-status').value,
       period: document.getElementById('in-period').value || "~"
-    }).then(() => {
-      alert("등록되었습니다!");
-      document.getElementById('in-name').value = "";
-    });
+    }).then(() => alert("등록 성공"));
   }
 
   function render() {
@@ -178,7 +183,7 @@
       </tr>`).join('');
   }
 
-  function del(k) { if(confirm("삭제하시겠습니까?")) db.ref('/').child(k).remove(); }
+  function del(k) { if(confirm("삭제?")) db.ref('/').child(k).remove(); }
   function toggleAdmin() {
     ADMIN = !ADMIN;
     document.getElementById('app-body').classList.toggle('admin-mode', ADMIN);
