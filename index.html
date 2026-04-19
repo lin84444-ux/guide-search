@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | 기업관리 시스템</title>
+<title>WorkHub Pro | 기업관리 시스템 최종형</title>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
   :root { --bg-color: #f4f7ff; --primary: #6366f1; --text-dark: #1e293b; --text-light: #64748b; --white: #ffffff; --border: #e2e8f0; --accent: #ff4d4d; }
@@ -11,7 +11,6 @@
   header { padding: 40px 20px 10px; text-align: center; position: relative; }
   .logo { font-size: 34px; font-weight: 900; color: #0f172a; margin-bottom: 25px; letter-spacing: -1px; }
   
-  /* 관리자 버튼: OFF(회색/흰색), ON(빨간색) */
   .admin-btn { position: absolute; top: 20px; right: 20px; padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-light); font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.3s; }
   .admin-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3); }
 
@@ -36,9 +35,10 @@
   .summary-value.off { color: var(--text-light); }
 
   input, textarea, select { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1.5px solid #f1f5f9; background: #f8fafc; outline: none; font-size: 14px; margin-bottom: 12px; }
-  input:focus { border-color: var(--primary); background: var(--white); }
   .btn-primary { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: 800; cursor: pointer; }
-  
+  .btn-danger { width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); font-weight: 800; cursor: pointer; margin-top: 10px; display: none; }
+  .admin-active .btn-danger { display: block; }
+
   .list-table { width: 100%; border-collapse: collapse; }
   .list-table th { text-align: left; padding: 12px; font-size: 12px; color: var(--text-light); border-bottom: 2px solid #f1f5f9; }
   .list-table td { padding: 15px 12px; font-size: 14px; border-bottom: 1px solid #f8fafc; }
@@ -50,10 +50,16 @@
   .badge.on { background: #eef2ff; color: var(--primary); }
   .badge.off { background: #f1f5f9; color: var(--text-light); }
 
-  .share-display { background: #eff6ff; border: 2px solid #dbeafe; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+  /* 로딩 오버레이 */
+  #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 1000; justify-content: center; align-items: center; font-weight: 800; color: var(--primary); flex-direction: column; }
 </style>
 </head>
 <body id="main-body">
+
+<div id="loading-overlay">
+  <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
+  <div>데이터 등록 중... 잠시만 기다려주세요.</div>
+</div>
 
 <header>
   <button class="admin-btn" id="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
@@ -76,7 +82,7 @@
       <section class="card">
         <div class="card-title">기업 현황 리스트</div>
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-          <input type="text" id="c-search-name" placeholder="기업명 검색 (포함)" onkeyup="renderCorps()" style="margin-bottom:0;">
+          <input type="text" id="c-search-name" placeholder="기업명 검색" onkeyup="renderCorps()" style="margin-bottom:0;">
           <input type="text" id="c-search-code" placeholder="기업코드 (100% 일치)" onkeyup="renderCorps()" style="margin-bottom:0; flex: 0.6;">
         </div>
         <div style="overflow-x:auto;">
@@ -84,6 +90,7 @@
             <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="del-btn">관리</th></tr></thead>
             <tbody id="corp-list-body"></tbody>
           </table>
+          <div id="no-data-msg" style="text-align:center; padding:50px; color:var(--text-light); display:none;">등록된 기업 데이터가 없습니다.</div>
         </div>
       </section>
     </div>
@@ -98,15 +105,17 @@
           <option value="운영중">운영중</option>
           <option value="종료">종료</option>
         </select>
-        <input id="in-c-period" placeholder="운영기간 (예: ~ 또는 20260419 ~ 20270419)">
+        <input id="in-c-period" placeholder="운영기간 (예: ~)">
         <button class="btn-primary" onclick="addCorpManual()">즉시 등록</button>
       </section>
 
       <section class="card">
         <div class="card-title">파일 일괄 등록</div>
-        <input type="file" onchange="processFile(this, 'corp')" style="font-size:11px; margin-bottom:10px; width:100%;">
-        <p style="font-size:11px; color:var(--text-light); line-height:1.5;">
-          ※ 업로드한 파일에서 기간이 <b>'~'</b>인 데이터는 자동으로 <b>운영중</b>으로 표시됩니다.
+        <input type="file" id="csv-file-input" style="font-size:11px; margin-bottom:10px; width:100%;">
+        <button class="btn-primary" style="background:#1e293b;" onclick="triggerFileUpload()">파일 등록하기</button>
+        <button class="btn-danger" onclick="clearAllData()">전체 데이터 삭제</button>
+        <p style="font-size:11px; color:var(--text-light); line-height:1.5; margin-top:15px;">
+          ※ 파일 업로드 후 [파일 등록하기] 버튼을 눌러주세요.
         </p>
       </section>
     </div>
@@ -124,7 +133,7 @@
         <div id="share-display-area" class="share-display" style="display:none;">
           <div id="today-msg" style="font-weight:700; color:#1e40af; white-space:pre-wrap;"></div>
         </div>
-        <textarea id="in-s-text" placeholder="공유할 소식을 입력하세요..." rows="3"></textarea>
+        <textarea id="in-s-text" placeholder="소식을 입력하세요..." rows="3"></textarea>
         <button class="btn-primary" onclick="shareNow()">소식 등록</button>
       </section>
     </div>
@@ -132,9 +141,9 @@
 </main>
 
 <script>
-  let DB_CORPS = JSON.parse(localStorage.getItem("wp_final_corp_v3") || "[]");
-  let DB_GUIDES = JSON.parse(localStorage.getItem("wp_final_guide_v3") || "[]");
-  let TODAY_SHARE = localStorage.getItem("wp_today_msg_v3") || "";
+  let DB_CORPS = JSON.parse(localStorage.getItem("wp_final_corp_v4") || "[]");
+  let DB_GUIDES = JSON.parse(localStorage.getItem("wp_final_guide_v4") || "[]");
+  let TODAY_SHARE = localStorage.getItem("wp_today_msg_v4") || "";
   let IS_ADMIN = false;
 
   function toggleAdmin() {
@@ -163,11 +172,18 @@
     btn.classList.add('active');
   }
 
-  // 기업 수기 등록
+  // 데이터 전체 삭제 (관리자 전용)
+  function clearAllData() {
+    if(!confirm("정말로 모든 기업 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
+    DB_CORPS = [];
+    saveDB();
+    alert("모든 데이터가 삭제되었습니다.");
+  }
+
+  // 수기 등록
   function addCorpManual() {
     const name = document.getElementById("in-c-name").value.trim();
     if(!name) return alert("기업명을 입력하세요.");
-    
     DB_CORPS.unshift({
       name,
       code: document.getElementById("in-c-code").value.trim(),
@@ -176,34 +192,44 @@
       period: document.getElementById("in-c-period").value.trim() || "~"
     });
     saveDB();
+    alert("등록되었습니다.");
     ["in-c-name", "in-c-code", "in-c-url", "in-c-period"].forEach(id => document.getElementById(id).value = "");
   }
 
-  // 파일 업로드 처리
-  function processFile(input, type) {
+  // 파일 등록 버튼 클릭 시
+  function triggerFileUpload() {
+    const input = document.getElementById("csv-file-input");
     const file = input.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const lines = e.target.result.split(/\r?\n/);
-      let headerIndex = lines.findIndex(l => l.includes("기업명"));
-      if(headerIndex === -1) return alert("올바른 CSV 형식이 아닙니다.");
-      
-      lines.slice(headerIndex + 1).forEach(row => {
-        if(!row.trim()) return;
-        const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(',');
-        const p = cols.map(v => v.replace(/^"|"$/g, '').trim());
+    if(!file) return alert("업로드할 파일을 먼저 선택해주세요.");
+    
+    document.getElementById("loading-overlay").style.display = "flex";
+    
+    setTimeout(() => { // 시각적 피드백을 위한 지연
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const lines = e.target.result.split(/\r?\n/);
+        let headerIndex = lines.findIndex(l => l.includes("기업명"));
+        if(headerIndex === -1) {
+          document.getElementById("loading-overlay").style.display = "none";
+          return alert("기업명 헤더를 찾을 수 없습니다.");
+        }
         
-        const period = p[2] || "~";
-        // '~' 이거나 날짜 형태가 포함되면 '운영중', 그 외 특수 케이스는 '종료'
-        const status = (period.trim() === "~" || period.includes("202")) ? "운영중" : "종료";
-
-        DB_CORPS.push({ name: p[0], code: p[1]||'-', period: period, status: status, url: p[4]||'' });
-      });
-      saveDB();
-      input.value = "";
-    };
-    reader.readAsText(file, "UTF-8");
+        lines.slice(headerIndex + 1).forEach(row => {
+          if(!row.trim()) return;
+          const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(',');
+          const p = cols.map(v => v.replace(/^"|"$/g, '').trim());
+          const period = p[2] || "~";
+          const status = (period.trim() === "~" || period.includes("202")) ? "운영중" : "종료";
+          DB_CORPS.push({ name: p[0], code: p[1]||'-', period: period, status: status, url: p[4]||'' });
+        });
+        
+        saveDB();
+        input.value = "";
+        document.getElementById("loading-overlay").style.display = "none";
+        alert("파일 등록이 완료되었습니다!");
+      };
+      reader.readAsText(file, "UTF-8");
+    }, 500);
   }
 
   function renderCorps() {
@@ -212,35 +238,42 @@
 
     const filtered = DB_CORPS.filter(c => {
       const matchName = c.name.toLowerCase().includes(sName);
-      // 기업코드는 입력값이 있을 때만 100% 일치 확인
       const matchCode = sCode === "" || String(c.code) === sCode;
       return matchName && matchCode;
     });
 
-    // 상단 요약 업데이트
     document.getElementById("count-all").innerText = DB_CORPS.length;
     document.getElementById("count-on").innerText = DB_CORPS.filter(c => c.status === "운영중").length;
     document.getElementById("count-off").innerText = DB_CORPS.filter(c => c.status === "종료").length;
 
-    document.getElementById("corp-list-body").innerHTML = filtered.map((c, i) => `
-      <tr>
-        <td style="font-weight:800;">${c.name}</td>
-        <td style="color:var(--text-light); font-size:13px;">${c.code}</td>
-        <td style="font-size:12px; color:var(--text-light);">${c.period}</td>
-        <td><span class="badge ${c.status === '운영중' ? 'on' : 'off'}">${c.status}</span></td>
-        <td>${c.url ? `<a href="${c.url}" target="_blank">🔗</a>` : '-'}</td>
-        <td><button class="del-btn" onclick="deleteItem('corp', ${i})">삭제</button></td>
-      </tr>`).join('');
+    const listBody = document.getElementById("corp-list-body");
+    const noData = document.getElementById("no-data-msg");
+
+    if(filtered.length === 0) {
+      listBody.innerHTML = "";
+      noData.style.display = "block";
+    } else {
+      noData.style.display = "none";
+      listBody.innerHTML = filtered.map((c, i) => `
+        <tr>
+          <td style="font-weight:800;">${c.name}</td>
+          <td style="color:var(--text-light); font-size:13px;">${c.code}</td>
+          <td style="font-size:12px; color:var(--text-light);">${c.period}</td>
+          <td><span class="badge ${c.status === '운영중' ? 'on' : 'off'}">${c.status}</span></td>
+          <td>${c.url ? `<a href="${c.url}" target="_blank">🔗</a>` : '-'}</td>
+          <td><button class="del-btn" onclick="deleteItem('corp', ${i})">삭제</button></td>
+        </tr>`).join('');
+    }
   }
 
-  // 오늘의 공유 및 가이드
   function shareNow() {
     const txt = document.getElementById("in-s-text").value.trim();
     if(!txt) return;
     TODAY_SHARE = txt;
-    localStorage.setItem("wp_today_msg_v3", TODAY_SHARE);
+    localStorage.setItem("wp_today_msg_v4", TODAY_SHARE);
     renderShare();
     document.getElementById("in-s-text").value = "";
+    alert("공유사항이 등록되었습니다.");
   }
 
   function renderShare() {
@@ -272,8 +305,8 @@
   }
 
   function saveDB() {
-    localStorage.setItem("wp_final_corp_v3", JSON.stringify(DB_CORPS));
-    localStorage.setItem("wp_final_guide_v3", JSON.stringify(DB_GUIDES));
+    localStorage.setItem("wp_final_corp_v4", JSON.stringify(DB_CORPS));
+    localStorage.setItem("wp_final_guide_v4", JSON.stringify(DB_GUIDES));
     renderCorps(); renderGuides();
   }
 
