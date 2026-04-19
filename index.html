@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | 통합 관리 v23</title>
+<title>WorkHub Pro | 최종 통합 관리</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
@@ -44,11 +44,10 @@
 <body id="main-body">
 
 <header>
-  <button class="admin-btn" id="admin-toggle" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
+  <button class="admin-btn" onclick="toggleAdmin()">⚙️ 관리 모드</button>
   <div class="logo">WorkHub Pro</div>
   <div class="nav-tabs">
-    <button class="nav-btn active" onclick="switchTab('corp-tab', this)">🏢 기업관리시스템</button>
-    <button class="nav-btn" onclick="switchTab('guide-tab', this)">🚀 워크허브</button>
+    <button class="nav-btn active" onclick="switchTab('corp-tab', this)">🏢 기업관리</button>
   </div>
 </header>
 
@@ -58,12 +57,11 @@
       <div class="summary-bar">
         <div class="summary-item"><div class="summary-label">전체</div><div class="summary-value" id="count-all">0</div></div>
         <div class="summary-item"><div class="summary-label">운영중</div><div class="summary-value on" id="count-on">0</div></div>
-        <div class="summary-item"><div class="summary-label">종료</div><div class="summary-value" id="count-off">0</div></div>
       </div>
       <section class="card">
         <div class="card-title">기업 현황 리스트</div>
         <div class="search-area">
-          <input type="text" id="u-search" class="search-input" placeholder="기업명 검색" onkeyup="renderCorps()">
+          <input type="text" id="u-search" class="search-input" placeholder="검색어를 입력하세요" onkeyup="renderCorps()">
         </div>
         <table class="list-table">
           <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>연수원 URL</th><th class="del-btn">관리</th></tr></thead>
@@ -73,19 +71,12 @@
     </div>
     <div class="side-col">
       <section class="card">
-        <div class="card-title">기업 등록</div>
+        <div class="card-title">단일 기업 등록</div>
         <input id="in-name" placeholder="기업명">
         <input id="in-code" placeholder="기업코드">
-        <input id="in-url" placeholder="URL (000.hunet.co.kr)">
+        <input id="in-url" placeholder="URL">
         <select id="in-status"><option value="운영중">운영중</option><option value="종료">종료</option></select>
-        <input id="in-period" placeholder="운영기간 (~)">
         <button class="btn-primary" onclick="addCorp()">등록 완료</button>
-      </section>
-      <section class="card">
-        <div class="card-title">파일 등록</div>
-        <button class="btn-primary" style="background:#1e293b; margin-bottom:10px;" onclick="downloadSample()">📥 샘플 양식 받기</button>
-        <input type="file" id="csv-file">
-        <button class="btn-primary" style="margin-top:10px;" onclick="uploadFile()">파일 등록</button>
       </section>
     </div>
   </div>
@@ -106,16 +97,20 @@
   const db = firebase.database();
   let DB_CORPS = [], IS_ADMIN = false;
 
-  // 데이터 즉시 동기화 로직
+  // [수정 핵심] '/' 경로를 직접 바라보게 하여 삐져나온 데이터를 모두 가져옵니다.
   function loadData() {
-    db.ref('corps').off(); // 중복 리스너 방지
-    db.ref('corps').on('value', (snapshot) => {
+    db.ref('/').on('value', (snapshot) => {
       const data = snapshot.val();
-      DB_CORPS = data ? Object.entries(data).map(([key, value]) => ({ ...value, key })) : [];
+      if (data) {
+        // 기업명(name)이 있는 데이터만 필터링해서 가져옵니다.
+        DB_CORPS = Object.entries(data)
+          .map(([key, value]) => ({ ...value, key }))
+          .filter(item => item.name); 
+      } else {
+        DB_CORPS = [];
+      }
       updateSummary();
       renderCorps();
-    }, (error) => {
-      console.error("데이터 읽기 실패:", error);
     });
   }
 
@@ -123,66 +118,37 @@
     const name = document.getElementById("in-name").value.trim();
     if(!name) return alert("기업명을 입력하세요.");
     
-    db.ref('corps').push({
+    // 저장도 최상위 경로('/')에 직접 합니다.
+    db.ref('/').push({
       name: name,
       code: document.getElementById("in-code").value,
       url: document.getElementById("in-url").value,
       status: document.getElementById("in-status").value,
-      period: document.getElementById("in-period").value || "~"
+      period: "~"
     }).then(() => {
-      alert("등록되었습니다!");
+      alert("등록 완료!");
       document.getElementById("in-name").value = "";
-      // 등록 후 리스트 다시 그리기 강제 실행
-      loadData();
-    }).catch(err => alert("오류: " + err.message));
+    });
   }
 
   function renderCorps() {
     const query = document.getElementById("u-search").value.toLowerCase();
     const filtered = DB_CORPS.filter(c => c.name.toLowerCase().includes(query));
-    const tbody = document.getElementById("corp-list");
-    
-    tbody.innerHTML = filtered.reverse().map(c => `
+    document.getElementById("corp-list").innerHTML = filtered.reverse().map(c => `
       <tr>
         <td style="font-weight:800;">${c.name}</td>
         <td>${c.code}</td>
-        <td>${c.period}</td>
+        <td>${c.period || '~'}</td>
         <td><span class="badge ${c.status==='운영중'?'on':'off'}">${c.status}</span></td>
         <td>${c.url ? `<a href="https://${c.url}" target="_blank" style="color:var(--primary)">${c.url}</a>` : '-'}</td>
         <td><button class="del-btn" onclick="deleteItem('${c.key}')">삭제</button></td>
       </tr>`).join('');
   }
 
-  function downloadSample() {
-    const csv = "기업명,기업코드,오픈기간,url\n(주)샘플기업,12345,~,000.hunet.co.kr";
-    const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "양식.csv";
-    link.click();
-  }
-
-  function uploadFile() {
-    const file = document.getElementById("csv-file").files[0];
-    if(!file) return alert("파일을 선택하세요.");
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const rows = e.target.result.split(/\r?\n/);
-      rows.slice(1).forEach(row => {
-        const p = row.split(',').map(v => v.replace(/^"|"$/g, '').trim());
-        if(p[0]) db.ref('corps').push({ name: p[0], code: p[1]||'', period: p[2]||'~', status: '운영중', url: p[3]||'' });
-      });
-      alert("파일 등록 완료!");
-      loadData();
-    };
-    reader.readAsText(file, "UTF-8");
-  }
-
-  function deleteItem(key) { if(confirm("삭제하시겠습니까?")) db.ref('corps').child(key).remove().then(() => loadData()); }
+  function deleteItem(key) { if(confirm("삭제하시겠습니까?")) db.ref('/').child(key).remove(); }
   function updateSummary() {
     document.getElementById("count-all").innerText = DB_CORPS.length;
     document.getElementById("count-on").innerText = DB_CORPS.filter(c => c.status === "운영중").length;
-    document.getElementById("count-off").innerText = DB_CORPS.filter(c => c.status === "종료").length;
   }
   function toggleAdmin() {
     IS_ADMIN = !IS_ADMIN;
@@ -190,7 +156,6 @@
     renderCorps();
   }
   
-  // 페이지 로드 시 즉시 데이터 로딩 시작
   window.onload = loadData;
 </script>
 </body>
