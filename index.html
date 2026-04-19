@@ -8,28 +8,46 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-  :root { --main-blue: #2563eb; --navy: #1e293b; --bg: #f8fafc; --white: #ffffff; --border: #e2e8f0; --text: #334155; }
+  :root { --main-blue: #2563eb; --bg: #f4f7ff; --white: #ffffff; --border: #e2e8f0; --text: #1e293b; --light-text: #64748b; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: var(--text); }
-  header { background: var(--white); padding: 25px; text-align: center; border-bottom: 1px solid var(--border); position: relative; }
-  .logo { font-size: 28px; font-weight: 900; color: #0f172a; }
-  .admin-btn { position: absolute; top: 20px; right: 20px; padding: 8px 15px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 13px; }
-  .nav-tabs { margin-top: 20px; display: inline-flex; gap: 10px; background: #f1f5f9; padding: 5px; border-radius: 12px; }
-  .nav-btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: #64748b; }
+  
+  /* 사진 속 상단 디자인 */
+  header { padding: 40px 20px 20px; text-align: center; position: relative; }
+  .logo { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 25px; }
+  .admin-btn { position: absolute; top: 20px; right: 20px; padding: 8px 15px; border-radius: 10px; border: 1px solid var(--border); background: #fff; cursor: pointer; color: var(--light-text); font-size: 13px; }
+  
+  /* 탭 버튼 스타일 */
+  .nav-tabs { display: inline-flex; background: var(--white); padding: 6px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 40px; }
+  .nav-btn { padding: 12px 25px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: var(--light-text); display: flex; align-items: center; gap: 6px; }
   .nav-btn.active { background: var(--main-blue); color: #fff; }
-  main { max-width: 1300px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1.8fr 1.1fr; gap: 30px; }
+
+  main { max-width: 1400px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: 1.8fr 1.1fr; gap: 30px; }
+
+  /* 요약 바 (전체/운영중/종료) */
   .summary-bar { display: flex; gap: 15px; margin-bottom: 25px; }
-  .summary-item { flex: 1; background: var(--white); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
-  .summary-val { font-size: 24px; font-weight: 800; color: var(--navy); }
-  .card { background: var(--white); border-radius: 20px; padding: 30px; border: 1px solid var(--border); margin-bottom: 25px; }
-  .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: var(--navy); border-left: 4px solid var(--main-blue); padding-left: 12px; }
-  input, select { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 12px; box-sizing: border-box; background: #fcfdfe; }
-  .btn-submit { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 16px; }
-  .btn-file { background: var(--navy); margin-top: 10px; }
-  .list-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  .list-table th { text-align: left; padding: 12px; font-size: 13px; color: #94a3b8; border-bottom: 2px solid #f1f5f9; }
-  .list-table td { padding: 15px 12px; border-bottom: 1px solid #f8fafc; font-size: 14px; }
-  .badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: #f1f5f9; }
-  .badge.on { background: #dbeafe; color: var(--main-blue); }
+  .summary-item { flex: 1; background: var(--white); padding: 25px; border-radius: 20px; text-align: center; border: 1px solid rgba(0,0,0,0.02); }
+  .summary-label { font-size: 13px; color: var(--light-text); margin-bottom: 8px; font-weight: 600; }
+  .summary-val { font-size: 28px; font-weight: 900; color: #0f172a; }
+
+  /* 카드 스타일 */
+  .card { background: var(--white); border-radius: 28px; padding: 30px; border: 1px solid rgba(0,0,0,0.02); margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+  .card-title { font-size: 19px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .card-title::before { content: ''; width: 4px; height: 18px; background: var(--main-blue); border-radius: 10px; }
+
+  /* 입력창 및 검색창 */
+  input, select { width: 100%; padding: 16px; border-radius: 14px; border: 1.5px solid #f1f5f9; margin-bottom: 15px; box-sizing: border-box; background: #f8fafc; font-size: 15px; }
+  .search-input { margin-bottom: 30px; }
+  
+  /* 버튼 */
+  .btn-submit { width: 100%; padding: 18px; border-radius: 15px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 16px; transition: 0.2s; }
+  .btn-submit:hover { filter: brightness(1.1); }
+  .btn-file-sub { background: #1e293b; margin-top: 10px; }
+
+  /* 리스트 테이블 */
+  .list-table { width: 100%; border-collapse: collapse; }
+  .list-table th { text-align: left; padding: 15px 10px; font-size: 12px; color: var(--light-text); border-bottom: 2px solid #f1f5f9; }
+  .list-table td { padding: 20px 10px; border-bottom: 1px solid #f8fafc; font-size: 14px; color: #334155; }
+  
   .del-btn { display: none; color: #ef4444; border: none; background: none; cursor: pointer; font-weight: bold; }
   .admin-mode .del-btn { display: inline-block; }
 </style>
@@ -48,14 +66,15 @@
 <main>
   <div>
     <div class="summary-bar">
-      <div class="summary-item"><div>전체</div><div class="summary-val" id="cnt-all">0</div></div>
-      <div class="summary-item"><div>운영중</div><div class="summary-val" id="cnt-on" style="color:var(--main-blue)">0</div></div>
+      <div class="summary-item"><div class="summary-label">전체</div><div class="summary-val" id="cnt-all">0</div></div>
+      <div class="summary-item"><div class="summary-label">운영중</div><div class="summary-val" id="cnt-on" style="color:var(--main-blue)">0</div></div>
+      <div class="summary-item"><div class="summary-label">종료</div><div class="summary-val">0</div></div>
     </div>
     <section class="card">
       <div class="card-title">기업 현황 리스트</div>
-      <input type="text" id="search-input" placeholder="기업명 검색..." onkeyup="render()">
+      <input type="text" id="search-input" class="search-input" placeholder="기업명 검색" onkeyup="render()">
       <table class="list-table">
-        <thead><tr><th>기업명</th><th>코드</th><th>상태</th><th>연수원 URL</th><th class="del-btn">관리</th></tr></thead>
+        <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>연수원 URL</th><th class="del-btn">관리</th></tr></thead>
         <tbody id="list-body"></tbody>
       </table>
     </section>
@@ -63,23 +82,25 @@
 
   <div>
     <section class="card">
-      <div class="card-title">기업 수기 등록</div>
+      <div class="card-title">기업 등록</div>
       <input id="in-name" placeholder="기업명">
       <input id="in-code" placeholder="기업코드">
       <input id="in-url" placeholder="URL (000.hunet.co.kr)">
       <select id="in-status"><option value="운영중">운영중</option><option value="종료">종료</option></select>
+      <input id="in-period" placeholder="운영기간 (~)">
       <button class="btn-submit" onclick="add()">데이터 등록</button>
     </section>
     <section class="card">
       <div class="card-title">파일 등록</div>
+      <button class="btn-submit btn-file-sub" style="margin-bottom:15px; background:#334155;">📥 샘플 양식 받기</button>
       <input type="file" id="file-input">
-      <button class="btn-submit btn-file" onclick="alert('준비중입니다.')">엑셀 등록</button>
+      <button class="btn-submit btn-file-sub" onclick="alert('파일 기능을 준비중입니다.')">파일 등록</button>
     </section>
   </div>
 </main>
 
 <script>
-  // 캡처해주신 이미지(image_61952b.png)의 실제 설정값을 그대로 넣었습니다.
+  // image_61952b.png의 실제 설정값을 반영했습니다.
   const firebaseConfig = {
     apiKey: "AIzaSyAtn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE",
     authDomain: "workhub-pro-be742.firebaseapp.com",
@@ -105,17 +126,20 @@
   }
 
   function add() {
-    const n = document.getElementById('in-name').value;
+    const n = document.getElementById('in-name').value.trim();
     if(!n) return alert("기업명을 입력하세요.");
     db.ref('/').push({
       name: n,
       code: document.getElementById('in-code').value,
       url: document.getElementById('in-url').value,
-      status: document.getElementById('in-status').value
+      status: document.getElementById('in-status').value,
+      period: document.getElementById('in-period').value || "~"
     }).then(() => {
       alert("등록 완료!");
       document.getElementById('in-name').value = "";
-    });
+      document.getElementById('in-code').value = "";
+      document.getElementById('in-url').value = "";
+    }).catch(err => alert("오류 발생: " + err.message));
   }
 
   function render() {
@@ -123,15 +147,16 @@
     const f = DATA.filter(d => d.name.toLowerCase().includes(q));
     document.getElementById('list-body').innerHTML = f.reverse().map(d => `
       <tr>
-        <td style="font-weight:700;">${d.name}</td>
+        <td style="font-weight:800;">${d.name}</td>
         <td>${d.code || '-'}</td>
-        <td><span class="badge ${d.status==='운영중'?'on':''}">${d.status}</span></td>
-        <td>${d.url || '-'}</td>
+        <td>${d.period || '-'}</td>
+        <td><span style="color:${d.status==='운영중'?'#2563eb':'#64748b'}; font-weight:700;">${d.status}</span></td>
+        <td><a href="https://${d.url}" target="_blank" style="color:var(--main-blue); text-decoration:none;">${d.url || '-'}</a></td>
         <td><button class="del-btn" onclick="del('${d.key}')">삭제</button></td>
       </tr>`).join('');
   }
 
-  function del(k) { if(confirm("삭제할까요?")) db.ref('/').child(k).remove(); }
+  function del(k) { if(confirm("삭제하시겠습니까?")) db.ref('/').child(k).remove(); }
   function toggleAdmin() {
     ADMIN = !ADMIN;
     document.getElementById('app-body').classList.toggle('admin-mode', ADMIN);
