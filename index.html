@@ -1,213 +1,218 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-  :root { --main-blue: #2e6ff2; --bg: #f4f7ff; --white: #ffffff; --border: #eef2f8; --text: #1e293b; --danger: #ef4444; }
-  body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
-  
-  /* 로딩 오버레이 */
-  #loading-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px);
-    display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10000;
-  }
-  .spinner { width: 50px; height: 50px; border: 5px solid var(--border); border-top: 5px solid var(--main-blue); border-radius: 50%; animation: spin 1s linear infinite; }
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-  header { padding: 40px 20px 10px; text-align: center; position: relative; }
-  .logo { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 25px; }
-  .admin-btn { position: absolute; top: 20px; right: 25px; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--border); background: #fff; cursor: pointer; color: #64748b; font-size: 13px; font-weight: 600; transition: 0.2s; }
-  .admin-btn:hover { background: #f8fafc; }
-
-  /* 탭 복구 */
-  .nav-tabs { display: inline-flex; background: var(--white); padding: 6px; border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 40px; }
-  .nav-btn { padding: 12px 28px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: #94a3b8; font-size: 14px; transition: 0.3s; }
-  .nav-btn.active { background: var(--main-blue); color: #fff; }
-
-  main { max-width: 1400px; margin: 0 auto; padding: 0 20px; display: none; grid-template-columns: 1.8fr 1.1fr; gap: 30px; }
-  main.active { display: grid; }
-  .card { background: var(--white); border-radius: 35px; padding: 35px; margin-bottom: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.03); }
-  .card-title { font-size: 20px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
-  .card-title span::before { content: 'ㅣ'; color: var(--main-blue); font-weight: 900; margin-right: 8px; }
-
-  input { width: 100%; padding: 18px 20px; border-radius: 16px; border: 1.5px solid #f1f5f9; margin-bottom: 15px; box-sizing: border-box; background: #f8fafc; font-size: 15px; outline: none; }
-  .btn-submit { width: 100%; padding: 20px; border-radius: 18px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 16px; transition: 0.3s; }
-  .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; }
-  .btn-danger { background: var(--danger); font-size: 13px; padding: 10px 15px; border-radius: 12px; display: none; cursor: pointer; color: #fff; border: none; }
-  .admin-mode .btn-danger { display: inline-block; }
-
-  .list-table { width: 100%; border-collapse: collapse; }
-  .list-table th { text-align: left; padding: 15px; font-size: 12.5px; color: #94a3b8; border-bottom: 2px solid #f8fafc; }
-  .list-table td { padding: 22px 15px; border-bottom: 1px solid #fbfcfe; font-size: 14.5px; }
-  .del-btn { display: none; color: var(--danger); border: none; background: none; cursor: pointer; font-weight: bold; }
-  .admin-mode .del-btn { display: inline-block; }
-</style>
+    <meta charset="UTF-8">
+    <title>WorkHub Pro - 최종본</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        /* [디자인 생략 - 위의 전체 코드와 동일] */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        :root { --main-blue: #2e6ff2; --bg: #f4f7ff; --white: #ffffff; --border: #eef2f8; --text: #1e293b; --danger: #ef4444; }
+        body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; }
+        .spinner { width: 60px; height: 60px; border: 6px solid var(--border); border-top: 6px solid var(--main-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        header { padding: 40px 20px 10px; text-align: center; position: relative; }
+        .logo { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 25px; }
+        .admin-btn { position: absolute; top: 20px; right: 25px; padding: 12px 20px; border-radius: 12px; border: 1.5px solid var(--border); background: #fff; cursor: pointer; color: #64748b; font-size: 14px; font-weight: 700; transition: 0.3s; }
+        .admin-btn.on { background: var(--danger); color: #fff; border-color: var(--danger); }
+        .nav-tabs { display: inline-flex; background: var(--white); padding: 6px; border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 40px; }
+        .nav-btn { padding: 12px 28px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: #94a3b8; font-size: 15px; }
+        .nav-btn.active { background: var(--main-blue); color: #fff; }
+        main { max-width: 1400px; margin: 0 auto; padding: 0 20px; display: none; grid-template-columns: 1.8fr 1.1fr; gap: 30px; }
+        main.active { display: grid; }
+        .card { background: var(--white); border-radius: 35px; padding: 35px; margin-bottom: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.03); }
+        .card-title { font-size: 20px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
+        .card-title span::before { content: 'ㅣ'; color: var(--main-blue); font-weight: 900; margin-right: 8px; }
+        input { width: 100%; padding: 18px 20px; border-radius: 16px; border: 1.5px solid #f1f5f9; margin-bottom: 15px; box-sizing: border-box; background: #f8fafc; font-size: 15px; outline: none; }
+        .btn-submit { width: 100%; padding: 20px; border-radius: 18px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 16px; }
+        .btn-reset { background: #1e293b; color: #fff; padding: 10px 15px; border-radius: 10px; border: none; cursor: pointer; display: none; font-weight: 700; }
+        .admin-mode .btn-reset { display: block; }
+        .list-table { width: 100%; border-collapse: collapse; }
+        .list-table th { text-align: left; padding: 15px; font-size: 13px; color: #94a3b8; border-bottom: 2.5px solid #f8fafc; }
+        .list-table td { padding: 20px 15px; border-bottom: 1px solid #fbfcfe; font-size: 15px; }
+        .del-col { display: none; }
+        .admin-mode .del-col { display: table-cell; }
+        .del-btn { color: var(--danger); font-weight: 800; cursor: pointer; border: none; background: none; }
+        #network-warning { display:none; background: #fee2e2; color: #b91c1c; text-align: center; padding: 10px; font-weight: 700; }
+    </style>
 </head>
 <body id="app-body">
 
-<div id="loading-overlay"><div class="spinner"></div><div style="margin-top:15px; font-weight:700; color:var(--main-blue);">데이터 처리 중...</div></div>
+    <div id="network-warning">⚠️ 사내망 보안 정책으로 인해 DB 연결이 차단되었습니다.</div>
+    <div id="loading-overlay"><div class="spinner"></div><div style="margin-top:20px;">데이터 동기화 중...</div></div>
 
-<header>
-  <button class="admin-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
-  <div class="logo">WorkHub Pro</div>
-  <div class="nav-tabs">
-    <button class="nav-btn active" onclick="switchTab(0)">🏢 기업관리시스템</button>
-    <button class="nav-btn" onclick="switchTab(1)">🚀 워크허브</button>
-  </div>
-</header>
+    <header>
+        <button id="admin-toggle-btn" class="admin-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
+        <div class="logo">WorkHub Pro</div>
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="switchTab(0)">🏢 기업관리시스템</button>
+            <button class="nav-btn" onclick="switchTab(1)">🚀 워크허브</button>
+        </div>
+    </header>
 
-<main id="tab-0" class="active">
-  <div>
-    <section class="card">
-      <div class="card-title">
-        <span>기업 현황 리스트</span>
-        <button class="btn-danger" onclick="deleteAllData()">전체 데이터 삭제</button>
-      </div>
-      <input type="text" id="search-input" placeholder="기업명 검색" onkeyup="render()">
-      <table class="list-table">
-        <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="del-btn">관리</th></tr></thead>
-        <tbody id="list-body"></tbody>
-      </table>
-    </section>
-  </div>
-  <div>
-    <section class="card">
-      <div class="card-title"><span>기업 등록</span></div>
-      <input id="in-name" placeholder="기업명">
-      <input id="in-code" placeholder="기업코드">
-      <input id="in-url" placeholder="URL">
-      <input id="in-period" placeholder="운영기간 (예: 2026.01~)">
-      <button id="btn-add-one" class="btn-submit" onclick="addOne()">데이터 등록</button>
-    </section>
-    <section class="card">
-      <div class="card-title"><span>파일 등록</span></div>
-      <button class="btn-submit" style="background:#1e293b; margin-bottom:15px;" onclick="downloadSample()">📥 샘플 양식 받기</button>
-      <input type="file" id="excel-input" accept=".xlsx, .xls">
-      <button id="btn-upload" class="btn-submit" onclick="uploadExcel()">파일 등록</button>
-    </section>
-  </div>
-</main>
+    <main id="tab-0" class="active">
+        <div>
+            <div class="card">
+                <div class="card-title"><span>기업 현황 리스트</span><button class="btn-reset" onclick="resetData('companies')">⚠️ 초기화</button></div>
+                <input type="text" id="search-comp" placeholder="기업명 검색..." onkeyup="renderCompanies()">
+                <table class="list-table">
+                    <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="del-col">관리</th></tr></thead>
+                    <tbody id="company-list"></tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+            <div class="card">
+                <div class="card-title"><span>기업 등록</span></div>
+                <input id="c-name" placeholder="기업명"><input id="c-code" placeholder="코드"><input id="c-url" placeholder="URL"><input id="c-period" placeholder="운영기간">
+                <button class="btn-submit" onclick="addCompany()">등록</button>
+            </div>
+            <div class="card">
+                <div class="card-title"><span>엑셀 등록</span></div>
+                <input type="file" id="excel-file" accept=".xlsx">
+                <button class="btn-submit" onclick="uploadExcel()">파일 업로드</button>
+            </div>
+        </div>
+    </main>
 
-<main id="tab-1">
-  <section class="card" style="grid-column: span 2; text-align: center; padding: 100px;">
-    <h2>🚀 워크허브 서비스 준비 중</h2>
-    <p style="color: #64748b;">이 페이지는 워크허브 관리 및 가이드 확인을 위한 공간입니다.</p>
-  </section>
-</main>
+    <main id="tab-1">
+        <div style="grid-column: span 2;">
+            <div class="card">
+                <div class="card-title"><span>워크허브 가이드 관리</span><button class="btn-reset" onclick="resetData('guides')">⚠️ 초기화</button></div>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="guide-name" placeholder="제목" style="margin:0;"><input type="text" id="guide-link" placeholder="URL" style="margin:0;"><button class="btn-submit" style="width:120px;" onclick="addGuide()">추가</button>
+                </div>
+                <table class="list-table">
+                    <thead><tr><th>명칭</th><th>링크</th><th class="del-col">관리</th></tr></thead>
+                    <tbody id="guide-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAtn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE",
-    authDomain: "workhub-pro-be742.firebaseapp.com",
-    databaseURL: "https://workhub-pro-be742-default-rtdb.firebaseio.com/",
-    projectId: "workhub-pro-be742",
-    storageBucket: "workhub-pro-be742.firebasestorage.app",
-    messagingSenderId: "547958464107",
-    appId: "1:547958464107:web:3c78c150e0b3c77969db2e"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  let DATA = [], ADMIN = false, LOCK = false;
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE",
+            authDomain: "workhub-pro-be742.firebaseapp.com",
+            databaseURL: "https://workhub-pro-be742-default-rtdb.firebaseio.com/",
+            projectId: "workhub-pro-be742"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let COMPANIES = [], GUIDES = [], IS_ADMIN = false;
 
-  function showLoading(v) { document.getElementById('loading-overlay').style.display = v ? 'flex' : 'none'; LOCK = v; }
+        // [핵심] 사내망 감시 및 초기 로드
+        function init() {
+            const connectedRef = db.ref(".info/connected");
+            connectedRef.on("value", (snap) => {
+                if (snap.val() === true) {
+                    document.getElementById('network-warning').style.display = 'none';
+                } else {
+                    document.getElementById('network-warning').style.display = 'block';
+                }
+            });
 
-  // 탭 전환 함수
-  function switchTab(idx) {
-    document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
-    document.querySelectorAll('main').forEach((m, i) => m.classList.toggle('active', i === idx));
-  }
+            showLoading(true);
+            db.ref('companies').on('value', ss => {
+                const v = ss.val();
+                COMPANIES = v ? Object.entries(v).map(([k, val]) => ({ ...val, key: k })) : [];
+                renderCompanies();
+                showLoading(false);
+            }, (err) => { alert("보안 정책으로 DB 접근이 차단되었습니다."); showLoading(false); });
 
-  // 상태 자동 판별 (종료일 유무 체크)
-  function parseStatus(period) {
-    const p = String(period || '').replace(/\s/g, '');
-    const parts = p.split('~');
-    // ~ 뒤에 날짜 정보(4자 이상)가 있으면 무조건 종료
-    if (parts.length > 1 && parts[1].length >= 4) return "종료";
-    return "운영중";
-  }
+            db.ref('guides').on('value', ss => {
+                const v = ss.val();
+                GUIDES = v ? Object.entries(v).map(([k, val]) => ({ ...val, key: k })) : [];
+                renderGuides();
+            });
+        }
 
-  function load() {
-    db.ref('companies').on('value', (ss) => {
-      const val = ss.val();
-      DATA = val ? Object.entries(val).map(([k, v]) => ({ ...v, key: k })) : [];
-      render();
-    });
-  }
-
-  async function uploadExcel() {
-    if (LOCK) return;
-    const file = document.getElementById('excel-input').files[0];
-    if (!file) return alert("파일을 선택하세요.");
-    
-    showLoading(true);
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-        const updates = {};
-        rows.forEach(r => {
-          if (r['기업명']) {
-            const key = db.ref().child('companies').push().key;
-            const period = r['운영기간'] || '';
-            updates[`/companies/${key}`] = {
-              name: r['기업명'], code: r['기업코드'] || '',
-              period: period, url: r['연수원 URL'] || '',
-              status: parseStatus(period)
+        // [핵심] 엑셀 업로드 (보안 차단 안내 포함)
+        async function uploadExcel() {
+            const file = document.getElementById('excel-file').files[0];
+            if(!file) return alert("파일을 선택하세요.");
+            showLoading(true);
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                    const updates = {};
+                    rows.forEach(r => {
+                        if(r['기업명']) {
+                            const key = db.ref().child('companies').push().key;
+                            updates[`/companies/${key}`] = {
+                                name: r['기업명'], code: r['기업코드']||'', period: r['운영기간']||'',
+                                url: r['연수원 URL']||'', status: (String(r['운영기간']).includes('~') && String(r['운영기간']).split('~')[1].length >= 4) ? "종료" : "운영중"
+                            };
+                        }
+                    });
+                    await db.ref().update(updates);
+                    alert("업로드 완료");
+                } catch(err) { alert("사내 보안망에 의해 등록이 차단되었습니다."); }
+                showLoading(false);
             };
-          }
-        });
-        await db.ref().update(updates);
-        alert(Object.keys(updates).length + "건 등록 완료");
-      } catch (err) { alert("오류 발생"); }
-      showLoading(false);
-      document.getElementById('excel-input').value = "";
-    };
-    reader.readAsArrayBuffer(file);
-  }
+            reader.readAsArrayBuffer(file);
+        }
 
-  async function addOne() {
-    if (LOCK) return;
-    const n = document.getElementById('in-name').value;
-    const p = document.getElementById('in-period').value;
-    if(!n) return alert("기업명 입력!");
-    showLoading(true);
-    await db.ref('companies').push({
-      name: n, code: document.getElementById('in-code').value,
-      url: document.getElementById('in-url').value,
-      period: p, status: parseStatus(p)
-    });
-    showLoading(false);
-    document.getElementById('in-name').value = "";
-    alert("등록 완료");
-  }
+        // 관리자 비번 6559
+        function toggleAdmin() {
+            if (!IS_ADMIN) {
+                if (prompt("관리자 비밀번호") === "6559") {
+                    IS_ADMIN = true;
+                    document.getElementById('admin-toggle-btn').classList.add('on');
+                    document.getElementById('admin-toggle-btn').innerText = "🔴 관리자 모드 ON";
+                    document.getElementById('app-body').classList.add('admin-mode');
+                } else { alert("비번 오류"); }
+            } else {
+                IS_ADMIN = false;
+                document.getElementById('admin-toggle-btn').classList.remove('on');
+                document.getElementById('admin-toggle-btn').innerText = "⚙️ 관리자 모드";
+                document.getElementById('app-body').classList.remove('admin-mode');
+            }
+            renderCompanies(); renderGuides();
+        }
 
-  function render() {
-    const q = document.getElementById('search-input').value.toLowerCase();
-    const f = DATA.filter(d => d.name.toLowerCase().includes(q));
-    document.getElementById('list-body').innerHTML = f.reverse().map(d => `
-      <tr><td style="font-weight:800;">${d.name}</td><td>${d.code}</td><td>${d.period}</td>
-      <td style="color:${d.status==='운영중'?'#2e6ff2':'#94a3b8'}; font-weight:800;">${d.status}</td>
-      <td>${d.url}</td><td><button class="del-btn" onclick="del('${d.key}')">삭제</button></td></tr>`).join('');
-  }
+        function switchTab(idx) {
+            document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+            document.querySelectorAll('main').forEach((m, i) => m.classList.toggle('active', i === idx));
+        }
 
-  function deleteAllData() { if(confirm("전체 삭제?")) db.ref('companies').remove(); }
-  function del(k) { if(confirm("삭제?")) db.ref('companies').child(k).remove(); }
-  function toggleAdmin() { ADMIN = !ADMIN; document.getElementById('app-body').classList.toggle('admin-mode', ADMIN); render(); }
-  function downloadSample() {
-    const data = [["기업명", "기업코드", "운영기간", "연수원 URL"], ["운영예시", "A01", "2026.01~", "on.hunet.co.kr"], ["종료예시", "B01", "2025.01~2025.12", "off.hunet.co.kr"]];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Sheet1");
-    XLSX.writeFile(wb, "WorkHub_샘플.xlsx");
-  }
-  window.onload = load;
-</script>
+        function renderCompanies() {
+            const q = document.getElementById('search-comp').value.toLowerCase();
+            const f = COMPANIES.filter(c => c.name.toLowerCase().includes(q));
+            document.getElementById('company-list').innerHTML = f.reverse().map(c => `<tr><td><b>${c.name}</b></td><td>${c.code}</td><td>${c.period}</td><td style="color:${c.status==='운영중'?'#2e6ff2':'#94a3b8'}; font-weight:800;">${c.status}</td><td>${c.url}</td><td class="del-col"><button class="del-btn" onclick="delItem('companies','${c.key}')">삭제</button></td></tr>`).join('');
+        }
+
+        function renderGuides() {
+            document.getElementById('guide-list').innerHTML = GUIDES.map(g => `<tr><td>${g.name}</td><td><a href="${g.link}" target="_blank">링크</a></td><td class="del-col"><button class="del-btn" onclick="delItem('guides','${g.key}')">삭제</button></td></tr>`).join('');
+        }
+
+        async function addCompany() {
+            const name = document.getElementById('c-name').value;
+            if(!name) return;
+            await db.ref('companies').push({ name, code: document.getElementById('c-code').value, url: document.getElementById('c-url').value, period: document.getElementById('c-period').value, status: getStatus(document.getElementById('c-period').value) });
+            document.getElementById('c-name').value = '';
+        }
+
+        async function addGuide() {
+            const name = document.getElementById('guide-name').value;
+            const link = document.getElementById('guide-link').value;
+            if(!name || !link) return;
+            await db.ref('guides').push({ name, link });
+            document.getElementById('guide-name').value = ''; document.getElementById('guide-link').value = '';
+        }
+
+        function getStatus(p) { return (p.includes('~') && p.split('~')[1].length >= 4) ? "종료" : "운영중"; }
+        function showLoading(v) { document.getElementById('loading-overlay').style.display = v ? 'flex' : 'none'; }
+        function resetData(path) { if(confirm("초기화?")) db.ref(path).remove(); }
+        function delItem(path, key) { if(confirm("삭제?")) db.ref(path).child(key).remove(); }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
