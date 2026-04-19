@@ -3,92 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro</title>
+<title>WorkHub Pro | 기업 관리 시스템</title>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
   :root {
-    --bg-color: #f3f6ff;
-    --primary-blue: #6366f1;
-    --text-dark: #334155;
-    --card-bg: #ffffff;
-    --input-bg: #f8fafc;
-    --border-color: #e2e8f0;
+    --bg-color: #f4f7ff;
+    --primary: #6366f1;
+    --text-dark: #1e293b;
+    --text-light: #64748b;
+    --white: #ffffff;
+    --border: #e2e8f0;
   }
 
-  body { 
-    font-family: 'Pretendard', sans-serif; 
-    margin: 0; background-color: var(--bg-color); color: var(--text-dark);
-  }
-
-  /* Header Section */
-  header { 
-    padding: 60px 20px 40px; text-align: center; position: relative;
-  }
-  .admin-btn {
-    position: absolute; top: 20px; right: 20px;
-    background: white; border: 1px solid var(--border-color);
-    padding: 8px 16px; border-radius: 10px; font-size: 13px; cursor: pointer;
-  }
-  .main-logo { font-size: 42px; font-weight: 900; color: #1e293b; margin-bottom: 30px; }
-
-  /* Tab Menu */
-  .nav-tabs { display: inline-flex; background: white; padding: 6px; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-  .nav-btn {
-    padding: 12px 28px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 14px;
-    display: flex; align-items: center; gap: 8px; background: transparent; color: #64748b;
-  }
-  .nav-btn.active { background: var(--primary-blue); color: white; }
-
-  /* Main Layout */
-  main { max-width: 1200px; margin: 0 auto 60px; display: grid; grid-template-columns: 1.8fr 1fr; gap: 24px; padding: 0 20px; }
-
-  .card { background: var(--card-bg); border-radius: 30px; padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
-  .card-title { font-size: 20px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
-  .card-title::before { content: ''; width: 4px; height: 18px; background: var(--primary-blue); border-radius: 10px; }
-
-  /* 통계 숫자 (요구사항 2) */
-  .stats-row { display: flex; gap: 15px; margin-bottom: 20px; }
-  .stat-box { flex: 1; padding: 15px; background: var(--input-bg); border-radius: 15px; text-align: center; border: 1px solid var(--border-color); }
-  .stat-box span { display: block; font-size: 12px; color: #64748b; margin-bottom: 5px; }
-  .stat-box b { font-size: 20px; color: var(--primary-blue); }
-
-  /* Input Styles */
-  input, select {
-    width: 100%; box-sizing: border-box; padding: 16px 20px; border-radius: 15px;
-    border: 1px solid transparent; background: var(--input-bg); font-size: 14px; outline: none; margin-bottom: 12px;
-  }
-  input:focus { border-color: var(--primary-blue); background: white; }
-
-  /* 엑셀 업로드 영역 (요구사항 1) */
-  .excel-upload-zone {
-    border: 2px dashed #d1d5db; border-radius: 20px; padding: 25px; text-align: center; margin-bottom: 20px; background: #fcfdff;
-  }
-  .excel-upload-zone p { font-size: 13px; font-weight: 700; color: var(--primary-blue); margin-top: 0; }
-
-  .btn-submit {
-    width: 100%; padding: 16px; border-radius: 15px; border: none; background: var(--primary-blue);
-    color: white; font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.3s;
-  }
-  .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
-
-  /* 테이블 스타일 */
-  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-  th { text-align: left; font-size: 13px; color: #94a3b8; padding: 10px; border-bottom: 1px solid var(--border-color); }
-  td { padding: 15px 10px; font-size: 14px; border-bottom: 1px solid #f8fafc; }
+  body { font-family: 'Pretendard', sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-dark); }
   
-  .status-on { color: var(--primary-blue); font-weight: 700; }
-  .status-off { color: #94a3b8; }
+  /* Header & Logo */
+  header { padding: 50px 20px 30px; text-align: center; }
+  .logo { font-size: 36px; font-weight: 900; color: #0f172a; margin-bottom: 25px; letter-spacing: -1px; }
+
+  /* Tab Navigation */
+  .nav-tabs { display: inline-flex; background: var(--white); padding: 6px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 40px; }
+  .nav-btn {
+    padding: 10px 30px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s;
+    background: transparent; color: var(--text-light); font-size: 14px;
+  }
+  .nav-btn.active { background: var(--primary); color: var(--white); }
+
+  /* Layout Container */
+  main { max-width: 1200px; margin: 0 auto 50px; padding: 0 20px; display: grid; grid-template-columns: 1.8fr 1fr; gap: 25px; }
+
+  /* Card UI */
+  .card { background: var(--white); border-radius: 24px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); }
+  .card-title { font-size: 19px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  .card-title::before { content: ''; width: 4px; height: 18px; background: var(--primary); border-radius: 10px; }
+
+  /* 2. 통계 현황 섹션 */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-box { background: #f8faff; border: 1px solid #eef2ff; padding: 15px; border-radius: 16px; text-align: center; }
+  .stat-label { font-size: 12px; color: var(--text-light); margin-bottom: 4px; display: block; }
+  .stat-val { font-size: 22px; font-weight: 900; color: var(--primary); }
+
+  /* Input & Search */
+  input, select {
+    width: 100%; box-sizing: border-box; padding: 14px 18px; border-radius: 12px;
+    border: 1px solid #f1f5f9; background: #f8fafc; outline: none; font-size: 14px; margin-bottom: 12px;
+  }
+  input:focus { border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.05); }
+
+  /* 1. 엑셀 업로드 박스 */
+  .excel-box { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 20px; }
+  .excel-label { color: var(--primary); font-weight: 800; font-size: 13px; display: block; margin-bottom: 10px; }
+
+  /* Buttons */
+  .btn-primary {
+    width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--primary);
+    color: var(--white); font-weight: 700; cursor: pointer; transition: 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
+
+  /* Table */
+  .table-wrap { margin-top: 10px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 500px; }
+  th { text-align: left; padding: 12px; font-size: 12px; color: var(--text-light); border-bottom: 2px solid #f1f5f9; }
+  td { padding: 14px 12px; font-size: 14px; border-bottom: 1px solid #f8fafc; }
+  .status-on { color: var(--primary); font-weight: 700; }
 </style>
 </head>
 <body>
 
 <header>
-  <button class="admin-btn" onclick="checkAdmin()">⚙️ 관리자 모드</button>
-  <div class="main-logo">WorkHub Pro</div>
+  <div class="logo">WorkHub Pro</div>
   <div class="nav-tabs">
     <button class="nav-btn active">🏢 기업관리시스템</button>
-    <button class="nav-btn" onclick="location.href='#'">🚀 워크허브</button>
+    <button class="nav-btn" onclick="alert('워크허브 준비 중')">🚀 워크허브</button>
   </div>
 </header>
 
@@ -96,107 +84,108 @@
   <section class="card">
     <div class="card-title">기업 현황 관리</div>
     
-    <div class="stats-row">
-      <div class="stat-box"><span>전체 기업</span><b id="count-all">0</b></div>
-      <div class="stat-box"><span>운영 중</span><b id="count-on">0</b></div>
-      <div class="stat-box"><span>종료</span><b id="count-off">0</b></div>
+    <div class="stats-grid">
+      <div class="stat-box"><span class="stat-label">전체 기업</span><b class="stat-val" id="total-cnt">0</b></div>
+      <div class="stat-box"><span class="stat-label">운영 중</span><b class="stat-val" id="on-cnt">0</b></div>
+      <div class="stat-box"><span class="stat-label">종료</span><b class="stat-val" id="off-cnt">0</b></div>
     </div>
 
-    <input id="corp-search" placeholder="기업명으로 검색... (빈 칸 엔터 시 전체 목록)" onkeyup="if(event.key==='Enter') renderTable()">
+    <input type="text" id="search-input" placeholder="기업명 검색 (입력 후 Enter / 공백 엔터 시 전체 노출)" onkeyup="if(event.key==='Enter') renderList()">
 
-    <div id="table-container">
+    <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>기업명</th><th>코드</th><th>상태</th><th>운영기간</th><th>관리</th></tr>
+          <tr><th>기업명</th><th>코드</th><th>상태</th><th>기간</th><th>관리</th></tr>
         </thead>
-        <tbody id="corp-list">
-          </tbody>
+        <tbody id="list-body"></tbody>
       </table>
     </div>
   </section>
 
   <section class="card">
     <div class="card-title">신규 기업 등록</div>
-    
-    <div class="excel-upload-zone">
-      <p>엑셀/CSV 일괄 등록</p>
-      <input type="file" id="excel-input" style="background:transparent; padding:0; font-size:12px;">
+
+    <div class="excel-box">
+      <span class="excel-label">엑셀/CSV 일괄 등록</span>
+      <input type="file" id="excel-file" style="font-size: 11px;">
     </div>
 
-    <div style="margin-bottom: 10px; font-size: 13px; font-weight: 700; color: #64748b;">개별 등록</div>
-    <input id="in-name" placeholder="기업명 입력">
-    <input id="in-code" placeholder="기업코드 입력">
-    <input id="in-url" placeholder="기업 URL (http://...)">
-    <select id="in-status">
+    <div style="font-size: 13px; font-weight: 800; margin-bottom: 8px; color: var(--text-light);">개별 정보 기입</div>
+    <input type="text" id="reg-name" placeholder="기업명 입력">
+    <input type="text" id="reg-code" placeholder="기업코드 입력">
+    <input type="text" id="reg-url" placeholder="URL (http://...)">
+    <select id="reg-status">
       <option value="운영중">운영 중</option>
       <option value="종료">종료</option>
     </select>
-    <input id="in-period" placeholder="운영기간 (예: 2024~2025)">
+    <input type="text" id="reg-period" placeholder="운영기간 (예: 20년)">
     
-    <button class="btn-submit" onclick="addCorp()">기업 추가하기</button>
+    <button class="btn-primary" onclick="handleRegister()">기업 추가하기</button>
   </section>
 </main>
 
 <script>
-  let CORPORATIONS = JSON.parse(localStorage.getItem("wh_pro_corps") || "[]");
+  // 데이터 저장소 (로컬 스토리지)
+  let DATA = JSON.parse(localStorage.getItem("workhub_corps") || "[]");
 
-  // 등록 기능 (요구사항 4)
-  function addCorp() {
-    const name = document.getElementById("in-name").value;
-    const code = document.getElementById("in-code").value;
-    const url = document.getElementById("in-url").value;
-    const status = document.getElementById("in-status").value;
-    const period = document.getElementById("in-period").value;
+  // 등록 함수
+  function handleRegister() {
+    const name = document.getElementById("reg-name").value;
+    const code = document.getElementById("reg-code").value;
+    const url = document.getElementById("reg-url").value;
+    const status = document.getElementById("reg-status").value;
+    const period = document.getElementById("reg-period").value;
 
-    if(!name) return alert("기업명을 입력해주세요.");
+    if(!name) return alert("기업명을 입력해 주세요!");
 
-    CORPORATIONS.unshift({ name, code, url, status, period });
-    localStorage.setItem("wh_pro_corps", JSON.stringify(CORPORATIONS));
-    
+    // 데이터 추가
+    DATA.unshift({ name, code, url, status, period });
+    localStorage.setItem("workhub_corps", JSON.stringify(DATA));
+
     // 입력창 초기화
-    document.querySelectorAll('input').forEach(i => { if(i.id !== 'corp-search') i.value = ""; });
-    renderTable();
+    document.getElementById("reg-name").value = "";
+    document.getElementById("reg-code").value = "";
+    document.getElementById("reg-url").value = "";
+    document.getElementById("reg-period").value = "";
+
+    renderList();
   }
 
-  // 검색 및 리스트 렌더링 (요구사항 2, 3)
-  function renderTable() {
-    const q = document.getElementById("corp-search").value.trim().toLowerCase();
-    const tbody = document.getElementById("corp-list");
+  // 렌더링 및 검색 함수
+  function renderList() {
+    const keyword = document.getElementById("search-input").value.trim().toLowerCase();
+    const tbody = document.getElementById("list-body");
     
-    // 필터링 (공백이면 전체 노출)
-    const filtered = CORPORATIONS.filter(c => c.name.toLowerCase().includes(q));
+    // 필터링
+    const filtered = DATA.filter(item => item.name.toLowerCase().includes(keyword));
 
     // 통계 업데이트
-    document.getElementById("count-all").innerText = CORPORATIONS.length;
-    document.getElementById("count-on").innerText = CORPORATIONS.filter(c => c.status === '운영중').length;
-    document.getElementById("count-off").innerText = CORPORATIONS.filter(c => c.status === '종료').length;
+    document.getElementById("total-cnt").innerText = DATA.length;
+    document.getElementById("on-cnt").innerText = DATA.filter(d => d.status === '운영중').length;
+    document.getElementById("off-cnt").innerText = DATA.filter(d => d.status === '종료').length;
 
-    tbody.innerHTML = filtered.map((c, idx) => `
+    // 테이블 출력
+    tbody.innerHTML = filtered.map((item, idx) => `
       <tr>
-        <td style="font-weight:700;">${c.name}</td>
-        <td>${c.code}</td>
-        <td><span class="${c.status === '운영중' ? 'status-on' : 'status-off'}">${c.status}</span></td>
-        <td>${c.period}</td>
-        <td>
-          <button onclick="deleteCorp(${idx})" style="border:none; background:none; color:#f43f5e; cursor:pointer; font-size:12px;">삭제</button>
-        </td>
+        <td style="font-weight:700;">${item.name}</td>
+        <td>${item.code}</td>
+        <td><span class="${item.status === '운영중' ? 'status-on' : ''}">${item.status}</span></td>
+        <td>${item.period}</td>
+        <td><button onclick="deleteItem(${idx})" style="border:none; background:none; color:#f43f5e; cursor:pointer; font-size:12px;">삭제</button></td>
       </tr>
-    `).join('') || '<tr><td colspan="5" style="text-align:center; padding:50px; color:#94a3b8;">등록된 기업이 없습니다.</td></tr>';
+    `).join('') || '<tr><td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">데이터가 없습니다.</td></tr>';
   }
 
-  function deleteCorp(idx) {
-    if(confirm("정말 삭제하시겠습니까?")) {
-      CORPORATIONS.splice(idx, 1);
-      localStorage.setItem("wh_pro_corps", JSON.stringify(CORPORATIONS));
-      renderTable();
+  function deleteItem(idx) {
+    if(confirm("이 기업 정보를 삭제할까요?")) {
+      DATA.splice(idx, 1);
+      localStorage.setItem("workhub_corps", JSON.stringify(DATA));
+      renderList();
     }
   }
 
-  function checkAdmin() {
-    if(prompt("관리자 비밀번호") === "6559") alert("관리자 모드 활성화");
-  }
-
-  window.onload = renderTable;
+  // 초기 실행
+  window.onload = renderList;
 </script>
 </body>
 </html>
