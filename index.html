@@ -3,18 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | 정밀 업데이트 버전</title>
+<title>WorkHub Pro | 통합 관리 시스템 v7</title>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-  :root { --bg-color: #f4f7ff; --primary: #6366f1; --text-dark: #1e293b; --text-light: #64748b; --white: #ffffff; --border: #e2e8f0; --accent: #ff4d4d; }
+  :root { --bg-color: #f4f7ff; --primary: #2563eb; --primary-light: #eff6ff; --text-dark: #1e293b; --text-light: #64748b; --white: #ffffff; --border: #e2e8f0; --accent: #ef4444; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-dark); }
   
   header { padding: 40px 20px 10px; text-align: center; position: relative; }
   .logo { font-size: 34px; font-weight: 900; color: #0f172a; margin-bottom: 25px; letter-spacing: -1px; }
   
-  /* 관리자 버튼: OFF(기본), ON(빨간색) */
-  .admin-btn { position: absolute; top: 20px; right: 20px; padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-light); font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.3s; z-index: 10; }
-  .admin-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3); }
+  .admin-btn { position: absolute; top: 20px; right: 20px; padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-light); font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.3s; z-index: 100; }
+  .admin-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
 
   .nav-tabs { display: inline-flex; background: var(--white); padding: 6px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
   .nav-btn { padding: 12px 25px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; background: transparent; color: var(--text-light); font-size: 14px; }
@@ -24,52 +23,47 @@
   .tab-content { display: none; grid-template-columns: 1.8fr 1.1fr; gap: 30px; }
   .tab-content.active { display: grid; }
 
-  .card { background: var(--white); border-radius: 28px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); height: fit-content; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.03); }
+  .card { background: var(--white); border-radius: 28px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); height: fit-content; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.03); position: relative; }
   .card-title { font-size: 19px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
   .card-title::before { content: ''; width: 4px; height: 18px; background: var(--primary); border-radius: 10px; }
 
-  /* 상단 요약 바 */
   .summary-bar { display: flex; gap: 15px; margin-bottom: 20px; }
-  .summary-item { flex: 1; background: var(--white); padding: 20px; border-radius: 22px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+  .summary-item { flex: 1; background: var(--white); padding: 20px; border-radius: 22px; text-align: center; border: 1px solid #f1f5f9; }
   .summary-label { font-size: 13px; color: var(--text-light); font-weight: 700; margin-bottom: 8px; }
   .summary-value { font-size: 24px; font-weight: 900; color: var(--text-dark); }
   .summary-value.on { color: var(--primary); }
 
-  input, textarea, select { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1.5px solid #f1f5f9; background: #f8fafc; outline: none; font-size: 14px; margin-bottom: 12px; transition: 0.2s; }
+  input, textarea, select { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1.5px solid #f1f5f9; background: #f8fafc; outline: none; font-size: 14px; margin-bottom: 12px; }
   input:focus { border-color: var(--primary); background: #fff; }
   
   .btn-primary { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: 800; cursor: pointer; font-size: 15px; }
-  .btn-dark { background: #1e293b; color: white; }
-  
-  /* 관리자 전용 전체 삭제 버튼 */
-  .btn-danger-all { display: none; width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--accent); background: transparent; color: var(--accent); font-weight: 800; cursor: pointer; margin-top: 15px; }
+  .btn-danger-all { display: none; width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--accent); background: transparent; color: var(--accent); font-weight: 800; cursor: pointer; margin-top: 10px; }
   .admin-active .btn-danger-all { display: block; }
 
   .list-table { width: 100%; border-collapse: collapse; }
   .list-table th { text-align: left; padding: 12px; font-size: 12px; color: var(--text-light); border-bottom: 2px solid #f1f5f9; }
-  .list-table td { padding: 16px 12px; font-size: 14px; border-bottom: 1px solid #f8fafc; }
+  .list-table td { padding: 16px 12px; border-bottom: 1px solid #f8fafc; font-size: 14px; }
   
-  .del-btn { display: none; border: none; cursor: pointer; background: none; color: var(--accent); font-size: 12px; font-weight: bold; }
-  .admin-active .del-btn { display: inline-block; }
+  .del-btn { display: none; border: none; cursor: pointer; background: var(--primary-light); color: var(--primary); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; margin-left: 5px; }
+  .admin-active .del-btn { inline-block; }
+  .del-btn.real-del { color: var(--accent); background: #fff1f1; }
 
   .badge { padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; }
-  .badge.on { background: #eef2ff; color: var(--primary); }
-  .badge.off { background: #f1f5f9; color: var(--text-light); }
+  .badge.on { background: var(--primary-light); color: var(--primary); }
 
-  /* 로딩 오버레이 */
   #loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; justify-content:center; align-items:center; flex-direction:column; font-weight:800; color:var(--primary); }
 </style>
 </head>
 <body id="main-body">
 
-<div id="loading-overlay">⏳ 데이터 등록 중...</div>
+<div id="loading-overlay">⏳ 처리 중입니다...</div>
 
 <header>
   <button class="admin-btn" id="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
   <div class="logo">WorkHub Pro</div>
   <div class="nav-tabs">
-    <button class="nav-btn active" onclick="switchTab('corp-tab', this)">🏢 기업관리시스템</button>
-    <button class="nav-btn" onclick="switchTab('guide-tab', this)">🚀 워크허브</button>
+    <button class="nav-btn active" id="tab-btn-corp" onclick="switchTab('corp-tab', this)">🏢 기업관리시스템</button>
+    <button class="nav-btn" id="tab-btn-guide" onclick="switchTab('guide-tab', this)">🚀 워크허브</button>
   </div>
 </header>
 
@@ -81,73 +75,67 @@
         <div class="summary-item"><div class="summary-label">운영중</div><div class="summary-value on" id="count-on">0</div></div>
         <div class="summary-item"><div class="summary-label">종료</div><div class="summary-value" id="count-off">0</div></div>
       </div>
-
       <section class="card">
         <div class="card-title">기업 현황 리스트</div>
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
           <input type="text" id="c-search-name" placeholder="기업명 검색" onkeyup="renderCorps()" style="margin-bottom:0;">
-          <input type="text" id="c-search-code" placeholder="기업코드 (100% 일치)" onkeyup="renderCorps()" style="margin-bottom:0; flex: 0.6;">
+          <input type="text" id="c-search-code" placeholder="기업코드(100%)" onkeyup="renderCorps()" style="margin-bottom:0; flex:0.6;">
         </div>
-        <div style="overflow-x:auto;">
-          <table class="list-table">
-            <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="del-btn">관리</th></tr></thead>
-            <tbody id="corp-list-body"></tbody>
-          </table>
-          <div id="empty-msg" style="display:none; text-align:center; padding:50px; color:var(--text-light);">데이터가 없습니다.</div>
-        </div>
+        <table class="list-table">
+          <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="del-btn">관리</th></tr></thead>
+          <tbody id="corp-list-body"></tbody>
+        </table>
       </section>
     </div>
-
     <div class="side-col">
       <section class="card">
-        <div class="card-title">신규 기업 수기 등록</div>
+        <div class="card-title">기업 수기 등록</div>
         <input id="in-c-name" placeholder="기업명">
         <input id="in-c-code" placeholder="기업코드">
         <input id="in-c-url" placeholder="URL">
-        <select id="in-c-status">
-          <option value="운영중">운영중</option>
-          <option value="종료">종료</option>
-        </select>
-        <input id="in-c-period" placeholder="운영기간 (예: ~)">
-        <button class="btn-primary" onclick="addCorpManual()">즉시 등록</button>
+        <select id="in-c-status"><option value="운영중">운영중</option><option value="종료">종료</option></select>
+        <input id="in-c-period" placeholder="운영기간 (~)">
+        <button class="btn-primary" onclick="addCorp()">등록</button>
       </section>
-
       <section class="card">
         <div class="card-title">파일 일괄 등록</div>
-        <input type="file" id="csv-file-input" style="font-size:11px; margin-bottom:10px;">
-        <button class="btn-primary btn-dark" onclick="processFileUpload()">파일 등록하기</button>
-        <button class="btn-danger-all" onclick="resetAllCorps()">전체 데이터 삭제</button>
-        <p style="font-size:11px; color:var(--text-light); line-height:1.5; margin-top:15px;">
-          ※ 기간이 <b>'~'</b>인 경우 자동으로 <b>운영중</b> 처리됩니다.
-        </p>
+        <input type="file" id="csv-file" style="font-size:11px;">
+        <button class="btn-primary" style="background:#1e293b;" onclick="uploadFile()">파일 등록하기</button>
+        <button class="btn-danger-all" onclick="clearData('corp')">기업 데이터 전체 삭제</button>
       </section>
     </div>
   </div>
 
   <div id="guide-tab" class="tab-content">
-    <section class="card">
-      <div class="card-title">가이드 보관함</div>
-      <input type="text" id="g-search" placeholder="검색어 입력..." onkeyup="renderGuides()">
-      <div id="guide-list-area"></div>
-    </section>
+    <div>
+      <section class="card">
+        <div class="card-title">워크허브 가이드</div>
+        <input type="text" id="g-search" placeholder="가이드 내용 검색..." onkeyup="renderGuides()">
+        <div id="guide-list-area"></div>
+      </section>
+    </div>
     <div class="side-col">
       <section class="card">
         <div class="card-title">오늘의 공유사항</div>
-        <div id="share-box" style="display:none; background:#eff6ff; padding:15px; border-radius:15px; margin-bottom:15px; border:1px solid #dbeafe;">
-          <div id="today-msg" style="font-weight:700; color:#1e40af; white-space:pre-wrap;"></div>
-        </div>
-        <textarea id="in-s-text" placeholder="공유사항 입력..." rows="3"></textarea>
-        <button class="btn-primary" onclick="saveShare()">공유 등록</button>
+        <div id="share-box" style="display:none; background:var(--primary-light); padding:15px; border-radius:15px; margin-bottom:15px; color:var(--primary); font-weight:700;"></div>
+        <textarea id="in-s-text" placeholder="공유할 내용을 입력하세요..." rows="3"></textarea>
+        <button class="btn-primary" onclick="saveShare()">소식 등록</button>
+      </section>
+      <section class="card">
+        <div class="card-title">신규 가이드 등록</div>
+        <input id="in-g-cat" placeholder="카테고리 (예: 공통, 정산)">
+        <textarea id="in-g-text" placeholder="가이드 내용을 입력하세요..." rows="4"></textarea>
+        <button class="btn-primary" onclick="addGuide()">가이드 저장</button>
+        <button class="btn-danger-all" onclick="clearData('guide')">가이드 전체 삭제</button>
       </section>
     </div>
   </div>
 </main>
 
 <script>
-  // 저장소 버전 v6로 갱신
-  let DB_CORPS = JSON.parse(localStorage.getItem("wh_corp_v6") || "[]");
-  let DB_GUIDES = JSON.parse(localStorage.getItem("wh_guide_v6") || "[]");
-  let TODAY_MSG = localStorage.getItem("wh_share_v6") || "";
+  let DB_CORPS = JSON.parse(localStorage.getItem("wh_final_c_v8") || "[]");
+  let DB_GUIDES = JSON.parse(localStorage.getItem("wh_final_g_v8") || "[]");
+  let SHARE_MSG = localStorage.getItem("wh_final_s_v8") || "";
   let IS_ADMIN = false;
 
   function toggleAdmin() {
@@ -155,16 +143,14 @@
       if(prompt("비밀번호(6559)") === "6559") {
         IS_ADMIN = true;
         document.getElementById("main-body").classList.add("admin-active");
-        const btn = document.getElementById("admin-toggle-btn");
-        btn.classList.add("active");
-        btn.innerText = "🔓 관리자 ON";
+        document.getElementById("admin-toggle-btn").classList.add("active");
+        document.getElementById("admin-toggle-btn").innerText = "🔓 관리자 ON";
       }
     } else {
       IS_ADMIN = false;
       document.getElementById("main-body").classList.remove("admin-active");
-      const btn = document.getElementById("admin-toggle-btn");
-      btn.classList.remove("active");
-      btn.innerText = "⚙️ 관리자 모드";
+      document.getElementById("admin-toggle-btn").classList.remove("active");
+      document.getElementById("admin-toggle-btn").innerText = "⚙️ 관리자 모드";
     }
     renderCorps(); renderGuides();
   }
@@ -176,118 +162,119 @@
     btn.classList.add('active');
   }
 
-  function resetAllCorps() {
-    if(confirm("모든 데이터를 삭제하시겠습니까?")) {
-      DB_CORPS = []; saveDB(); alert("삭제 완료");
-    }
-  }
-
-  function addCorpManual() {
+  // --- 기업 관리 ---
+  function addCorp() {
     const name = document.getElementById("in-c-name").value.trim();
-    if(!name) return alert("기업명 필수");
+    if(!name) return alert("기업명을 입력하세요.");
     DB_CORPS.unshift({
-      name,
-      code: document.getElementById("in-c-code").value.trim(),
-      url: document.getElementById("in-c-url").value.trim(),
+      name, code: document.getElementById("in-c-code").value,
+      url: document.getElementById("in-c-url").value,
       status: document.getElementById("in-c-status").value,
-      period: document.getElementById("in-c-period").value.trim() || "~"
+      period: document.getElementById("in-c-period").value || "~"
     });
-    saveDB();
-    alert("등록 완료");
+    saveDB(); alert("등록되었습니다.");
   }
 
-  function processFileUpload() {
-    const fileInput = document.getElementById("csv-file-input");
-    if(!fileInput.files[0]) return alert("파일 선택 필수");
-
+  function uploadFile() {
+    const file = document.getElementById("csv-file").files[0];
+    if(!file) return alert("파일을 선택하세요.");
     document.getElementById("loading-overlay").style.display = "flex";
-
     const reader = new FileReader();
     reader.onload = (e) => {
       const lines = e.target.result.split(/\r?\n/);
       let hIdx = lines.findIndex(l => l.includes("기업명"));
-      
       lines.slice(hIdx + 1).forEach(row => {
         if(!row.trim()) return;
         const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(',');
         const p = cols.map(v => v.replace(/^"|"$/g, '').trim());
         const period = p[2] || "~";
         const status = (period === "~" || period.includes("202")) ? "운영중" : "종료";
-        DB_CORPS.push({ name: p[0], code: p[1]||'-', period: period, status: status, url: p[4]||'' });
+        DB_CORPS.push({ name:p[0], code:p[1]||'-', period:period, status:status, url:p[4]||'' });
       });
-
-      saveDB();
-      fileInput.value = "";
-      document.getElementById("loading-overlay").style.display = "none";
-      alert("등록 완료");
+      saveDB(); document.getElementById("loading-overlay").style.display = "none"; alert("등록 완료");
     };
-    reader.readAsText(fileInput.files[0], "UTF-8");
+    reader.readAsText(file, "UTF-8");
   }
 
   function renderCorps() {
     const sName = document.getElementById("c-search-name").value.toLowerCase();
     const sCode = document.getElementById("c-search-code").value.trim();
-
-    const filtered = DB_CORPS.filter(c => {
-      const nMatch = c.name.toLowerCase().includes(sName);
-      const cMatch = sCode === "" || String(c.code) === sCode;
-      return nMatch && cMatch;
-    });
+    const filtered = DB_CORPS.filter(c => c.name.toLowerCase().includes(sName) && (sCode==="" || String(c.code)===sCode));
 
     document.getElementById("count-all").innerText = DB_CORPS.length;
     document.getElementById("count-on").innerText = DB_CORPS.filter(c => c.status === "운영중").length;
     document.getElementById("count-off").innerText = DB_CORPS.filter(c => c.status === "종료").length;
 
-    const tbody = document.getElementById("corp-list-body");
-    if(filtered.length === 0) {
-      tbody.innerHTML = "";
-      document.getElementById("empty-msg").style.display = "block";
-    } else {
-      document.getElementById("empty-msg").style.display = "none";
-      tbody.innerHTML = filtered.map((c, i) => `
-        <tr>
-          <td style="font-weight:800;">${c.name}</td>
-          <td style="color:var(--text-light);">${c.code}</td>
-          <td style="font-size:12px;">${c.period}</td>
-          <td><span class="badge ${c.status === '운영중' ? 'on' : 'off'}">${c.status}</span></td>
-          <td>${c.url ? `<a href="${c.url}" target="_blank">🔗</a>` : '-'}</td>
-          <td><button class="del-btn" onclick="deleteCorp(${i})">삭제</button></td>
-        </tr>`).join('');
-    }
+    document.getElementById("corp-list-body").innerHTML = filtered.map((c, i) => `
+      <tr>
+        <td style="font-weight:800;">${c.name}</td>
+        <td>${c.code}</td>
+        <td style="font-size:12px;">${c.period}</td>
+        <td><span class="badge on">${c.status}</span></td>
+        <td>${c.url ? `<a href="${c.url}" target="_blank">🔗</a>` : '-'}</td>
+        <td><button class="del-btn real-del" onclick="deleteItem('corp', ${i})">삭제</button></td>
+      </tr>`).join('');
   }
 
-  function saveShare() {
-    TODAY_MSG = document.getElementById("in-s-text").value.trim();
-    localStorage.setItem("wh_share_v6", TODAY_MSG);
-    renderShare();
-  }
-
-  function renderShare() {
-    const box = document.getElementById("share-box");
-    if(TODAY_MSG) {
-      box.style.display = "block";
-      document.getElementById("today-msg").innerText = TODAY_MSG;
-    } else {
-      box.style.display = "none";
-    }
+  // --- 워크허브 (가이드) ---
+  function addGuide() {
+    const text = document.getElementById("in-g-text").value.trim();
+    if(!text) return alert("내용을 입력하세요.");
+    DB_GUIDES.unshift({ category: document.getElementById("in-g-cat").value || "일반", text: text });
+    saveDB(); document.getElementById("in-g-text").value = ""; alert("가이드가 저장되었습니다.");
   }
 
   function renderGuides() {
     const q = document.getElementById("g-search").value.toLowerCase();
-    const filtered = DB_GUIDES.filter(g => g.text.toLowerCase().includes(q));
+    const filtered = DB_GUIDES.filter(g => g.text.toLowerCase().includes(q) || g.category.toLowerCase().includes(q));
     document.getElementById("guide-list-area").innerHTML = filtered.map((g, i) => `
       <div class="card" style="padding:20px;">
-        <div style="font-weight:700;">${g.text}</div>
-        <button class="del-btn" onclick="deleteGuide(${i})">삭제</button>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <span class="badge on">${g.category}</span>
+          <div>
+            <button class="del-btn" onclick="editGuide(${i})">수정</button>
+            <button class="del-btn real-del" onclick="deleteItem('guide', ${i})">삭제</button>
+          </div>
+        </div>
+        <div style="margin-top:10px; font-weight:700; line-height:1.6; white-space:pre-wrap;">${g.text}</div>
       </div>`).join('');
   }
 
-  function deleteCorp(i) { DB_CORPS.splice(i,1); saveDB(); }
-  function deleteGuide(i) { DB_GUIDES.splice(i,1); saveDB(); }
+  function editGuide(i) {
+    const newText = prompt("가이드 내용을 수정하세요:", DB_GUIDES[i].text);
+    if(newText) { DB_GUIDES[i].text = newText; saveDB(); }
+  }
+
+  // --- 공통 기능 ---
+  function saveShare() {
+    SHARE_MSG = document.getElementById("in-s-text").value.trim();
+    localStorage.setItem("wh_final_s_v8", SHARE_MSG);
+    renderShare(); document.getElementById("in-s-text").value = "";
+  }
+
+  function renderShare() {
+    const box = document.getElementById("share-box");
+    if(SHARE_MSG) { box.style.display = "block"; box.innerText = SHARE_MSG; }
+    else box.style.display = "none";
+  }
+
+  function deleteItem(type, i) {
+    if(!confirm("삭제하시겠습니까?")) return;
+    if(type === 'corp') DB_CORPS.splice(i, 1);
+    else DB_GUIDES.splice(i, 1);
+    saveDB();
+  }
+
+  function clearData(type) {
+    if(!confirm("해당 탭의 모든 데이터를 삭제하시겠습니까?")) return;
+    if(type === 'corp') DB_CORPS = [];
+    else DB_GUIDES = [];
+    saveDB(); alert("삭제 완료");
+  }
 
   function saveDB() {
-    localStorage.setItem("wh_corp_v6", JSON.stringify(DB_CORPS));
-    localStorage.setItem("wh_guide_v6", JSON.stringify(DB_GUIDES));
+    localStorage.setItem("wh_final_c_v8", JSON.stringify(DB_CORPS));
+    localStorage.setItem("wh_final_g_v8", JSON.stringify(DB_GUIDES));
     renderCorps(); renderGuides();
   }
 
