@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>WorkHub Pro - logic Fix</title>
+<title>WorkHub Pro - Full Restore</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -23,22 +23,21 @@
   .card { background: var(--white); border-radius: 25px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border); }
   .card-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; position: relative; padding-left: 15px; }
   .card-title::before { content: ''; position: absolute; left: 0; width: 5px; height: 20px; background: var(--main-blue); border-radius: 10px; }
-  input, textarea { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; box-sizing: border-box; background: #fcfdfe; font-family: inherit; }
+  input, textarea { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 12px; box-sizing: border-box; background: #fcfdfe; font-family: inherit; font-size: 14px; }
   .btn-blue { width: 100%; padding: 18px; border-radius: 12px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; }
   .btn-sample { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #1e293b; color: #fff; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
-  .btn-nuke { background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: 800; cursor: pointer; display: none; }
+  .btn-nuke { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; display: none; }
   .admin-mode .btn-nuke { display: block; }
   .list-table { width: 100%; border-collapse: collapse; }
   .list-table th, .list-table td { text-align: left; padding: 15px; border-bottom: 1px solid #f1f5f9; }
-  .share-item { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; }
-  .share-time { font-size: 11px; color: #94a3b8; margin-top: 5px; }
-  #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; align-items: center; justify-content: center; z-index: 10000; font-weight: 900; color: var(--main-blue); }
+  .share-item { padding: 15px; border-bottom: 1px solid #eee; background: #fcfdfe; border-radius: 10px; margin-bottom: 10px; }
+  .share-time { font-size: 11px; color: #94a3b8; margin-top: 5px; font-weight: 600; }
+  hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
 </style>
 </head>
 <body id="app-body">
-<div id="loading">처리 중...</div>
 <header>
-  <button class="admin-gate" id="admin-btn" onclick="loginAdmin()">⚙️ 관리자 모드</button>
+  <button class="admin-gate" onclick="loginAdmin()">⚙️ 관리자 모드</button>
   <div class="logo">WorkHub Pro</div>
   <div class="nav-tabs">
     <button class="nav-btn active" onclick="tab(0)">🏢 기업관리시스템</button>
@@ -54,8 +53,8 @@
       <div class="status-box"><div>종료</div><div class="status-value" id="c-off">0</div></div>
     </div>
     <div class="card">
-      <div class="card-title"><span>기업 현황 리스트</span><button class="btn-nuke" onclick="nuke()">⚠️ 전체 데이터 강제 삭제</button></div>
-      <input type="text" id="search" placeholder="기업명 검색..." onkeyup="render()">
+      <div class="card-title"><span>기업 현황 리스트</span><button class="btn-nuke" onclick="nuke('companies')">데이터 초기화</button></div>
+      <input type="text" id="search" placeholder="기업명 검색..." onkeyup="renderComp()">
       <table class="list-table">
         <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th></tr></thead>
         <tbody id="tbody"></tbody>
@@ -64,28 +63,35 @@
   </section>
   <aside>
     <div class="card">
-      <div class="card-title"><span>기업 데이터 등록</span></div>
-      <button class="btn-sample" onclick="downCompSample()">📥 기업 양식 받기</button>
+      <div class="card-title"><span>기업 수기 등록</span></div>
+      <input type="text" id="add-name" placeholder="기업명">
+      <input type="text" id="add-code" placeholder="기업코드">
+      <input type="text" id="add-period" placeholder="운영기간 (예: 2026.01~)">
+      <input type="text" id="add-url" placeholder="연수원 URL">
+      <button class="btn-blue" onclick="addOneComp()">기업 등록하기</button>
+      <hr>
+      <div class="card-title" style="font-size:16px;"><span>엑셀 대량 등록</span></div>
+      <button class="btn-sample" onclick="downCompSample()">📥 기업 양식 다운로드</button>
       <input type="file" id="xl-input" accept=".xlsx">
-      <button class="btn-blue" onclick="upComp()">파일 등록하기</button>
+      <button class="btn-blue" onclick="upComp()" style="background:#475569;">파일 등록하기</button>
     </div>
   </aside>
 </main>
 
 <main id="tab-1" style="grid-template-columns: 1.5fr 1fr;">
-  <section><div class="card"><div class="card-title"><span>가이드 보관함</span></div><div id="guide-list" style="text-align: center; padding: 50px 0; color: #94a3b8;">가이드를 등록하세요.</div></div></section>
+  <section><div class="card"><div class="card-title"><span>가이드 보관함</span></div><div id="guide-display"></div></div></section>
   <aside style="display: flex; flex-direction: column; gap: 25px;">
     <div class="card">
       <div class="card-title"><span>오늘의 공유사항</span></div>
-      <textarea id="share-text" placeholder="공유할 내용을 입력하세요..."></textarea>
+      <textarea id="share-text" placeholder="공유할 내용을 입력하세요..." style="height: 100px;"></textarea>
       <button class="btn-blue" onclick="addShare()">소식 공유</button>
       <div id="share-list" style="margin-top: 20px; max-height: 300px; overflow-y: auto;"></div>
     </div>
     <div class="card">
       <div class="card-title"><span>가이드 등록</span></div>
-      <button class="btn-sample" onclick="downGuideSample()" style="background:#475569;">📥 워크허브 가이드 샘플</button>
+      <button class="btn-sample" onclick="downGuideSample()" style="background:#475569;">📥 워크허브 샘플 받기</button>
       <input type="file" id="guide-input" accept=".xlsx" style="margin-bottom:10px;">
-      <button class="btn-blue" onclick="upGuide()" style="background:#eef2ff; color:var(--main-blue);">엑셀로 가이드 대량 등록</button>
+      <button class="btn-blue" onclick="upGuide()" style="background:#eef2ff; color:var(--main-blue);">엑셀로 가이드 등록</button>
     </div>
   </aside>
 </main>
@@ -103,17 +109,32 @@
   function init() {
     db.ref('companies').on('value', s => {
       const v = s.val();
-      const list = v ? Object.entries(v).map(([k, val]) => ({ ...val, key: k })) : [];
+      const list = v ? Object.values(v) : [];
       document.getElementById('c-all').innerText = list.length;
       document.getElementById('c-on').innerText = list.filter(i => i.status === '운영중').length;
       document.getElementById('c-off').innerText = list.filter(i => i.status === '종료').length;
-      document.getElementById('tbody').innerHTML = list.reverse().map(i => `<tr><td><b>${i.name}</b></td><td>${i.code}</td><td>${i.period}</td><td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:800;">${i.status}</td><td>${i.url}</td></tr>`).join('');
+      renderComp(list);
     });
     db.ref('shares').on('value', s => {
       const v = s.val();
       const list = v ? Object.values(v) : [];
       document.getElementById('share-list').innerHTML = list.reverse().map(i => `<div class="share-item"><div>${i.text}</div><div class="share-time">${i.time}</div></div>`).join('');
     });
+    db.ref('guides').on('value', s => {
+      const v = s.val();
+      const list = v ? Object.values(v) : [];
+      document.getElementById('guide-display').innerHTML = list.reverse().map(i => `<div class="share-item"><b>[${i.company}]</b> ${i.keyword}<br><small>${i.content}</small></div>`).join('');
+    });
+  }
+
+  function addOneComp() {
+    const name = document.getElementById('add-name').value;
+    const period = document.getElementById('add-period').value;
+    if(!name || !period) return alert("기업명과 기간은 필수입니다.");
+    const status = period.endsWith('~') ? '운영중' : '종료';
+    db.ref('companies').push({ name, code: document.getElementById('add-code').value, period, url: document.getElementById('add-url').value, status });
+    alert("등록되었습니다.");
+    ["add-name", "add-code", "add-period", "add-url"].forEach(id => document.getElementById(id).value = '');
   }
 
   function addShare() {
@@ -130,38 +151,56 @@
     if(!file) return;
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+      const rows = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }).Sheets.Sheet1);
       const up = {};
       rows.forEach(r => {
         const period = String(r['운영기간'] || '');
-        // [수정] ~로 끝나면 운영중, 아니면 종료 자동 판별
-        const status = period.endsWith('~') ? '운영중' : '종료';
         const k = db.ref().child('companies').push().key;
-        up[`/companies/${k}`] = { name: r['기업명'], code: r['기업코드']||'', period: period, url: r['연수원 URL']||'', status: status };
+        up[`/companies/${k}`] = { name: r['기업명'], code: r['기업코드']||'', period, url: r['연수원 URL']||'', status: period.endsWith('~') ? '운영중' : '종료' };
       });
       await db.ref().update(up);
-      alert("등록 완료 (기간에 따라 상태 자동 분류)");
+      alert("대량 등록 완료");
     };
     reader.readAsArrayBuffer(file);
   }
 
+  async function upGuide() {
+    const file = document.getElementById('guide-input').files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const rows = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }).Sheets.Sheet1);
+      const up = {};
+      rows.forEach(r => {
+        const k = db.ref().child('guides').push().key;
+        up[`/guides/${k}`] = { company: r['대상기업'], keyword: r['키워드'], content: r['가이드내용'] };
+      });
+      await db.ref().update(up);
+      alert("가이드 등록 완료");
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function renderComp(data) {
+    const q = document.getElementById('search').value.toLowerCase();
+    const list = (data || []).filter(i => i.name.toLowerCase().includes(q));
+    document.getElementById('tbody').innerHTML = list.reverse().map(i => `<tr><td><b>${i.name}</b></td><td>${i.code}</td><td>${i.period}</td><td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:800;">${i.status}</td><td>${i.url}</td></tr>`).join('');
+  }
+
   function downCompSample() {
-    const data = [["기업명", "기업코드", "운영기간", "연수원 URL"], ["기업A", "CODE1", "2026.01~", "a.com"], ["기업B", "CODE2", "2025.01~2026.03", "b.com"]];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Sheet1");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["기업명", "기업코드", "운영기간", "연수원 URL"], ["샘플기업", "C001", "2026.01~", "test.com"]]), "Sheet1");
     XLSX.writeFile(wb, "WorkHub_Company_Sample.xlsx");
   }
 
   function downGuideSample() {
-    const data = [["대상기업", "키워드", "가이드내용"]];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Sheet1");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"]]), "Sheet1");
     XLSX.writeFile(wb, "WorkHub_Guide_Sample.xlsx");
   }
 
   function loginAdmin() { if(prompt("비번(6559)") === "6559") document.getElementById('app-body').classList.add('admin-mode'); }
-  async function nuke() { if(confirm("전체 삭제?")) await db.ref('companies').remove(); }
+  async function nuke(p) { if(confirm("초기화?")) await db.ref(p).remove(); }
   function tab(i) {
     document.querySelectorAll('.nav-btn').forEach((b, idx) => b.classList.toggle('active', idx === i));
     document.querySelectorAll('main').forEach((m, idx) => m.classList.toggle('active', idx === i));
