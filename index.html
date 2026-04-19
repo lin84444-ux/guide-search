@@ -11,7 +11,6 @@
   :root { --main-blue: #6366f1; --bg: #f4f7ff; --white: #ffffff; --border: #e2e8f0; --admin-red: #ef4444; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: #1e293b; font-size: 16px; }
   
-  /* 헤더 및 우상단 스위치 */
   header { padding: 30px 40px; text-align: center; background: #fff; border-bottom: 1px solid var(--border); position: relative; }
   .logo { font-size: 28px; font-weight: 900; color: var(--main-blue); }
   .header-admin { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 10px; font-size: 14px; color: #64748b; font-weight: 700; }
@@ -31,7 +30,6 @@
   .card-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; position: relative; padding-left: 15px; }
   .card-title::before { content: ''; position: absolute; left: 0; width: 5px; height: 22px; background: var(--main-blue); border-radius: 10px; }
   
-  /* 스위치 디자인 */
   .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
@@ -46,7 +44,8 @@
   .list-table { width: 100%; border-collapse: collapse; font-size: 16px; }
   .list-table th, .list-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
   
-  .guide-item { padding: 20px; border-bottom: 1px solid #eee; background: #fcfdfe; border-radius: 15px; margin-bottom: 12px; position: relative; }
+  /* 오늘의 공유사항 아이템 */
+  .share-item { padding: 20px; border-bottom: 1px solid #eee; background: #fcfdfe; border-radius: 15px; margin-bottom: 12px; position: relative; }
   .admin-only { display: none; position: absolute; top: 20px; right: 20px; gap: 8px; }
   .btn-red { background: var(--admin-red); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; }
 </style>
@@ -102,22 +101,22 @@
 <main id="tab-1" style="grid-template-columns: 1.5fr 1fr;">
   <section>
     <div class="card">
-      <div class="card-title">가이드 검색</div>
+      <div class="card-title">오늘의 공유사항</div>
       <input type="text" id="guide-search" placeholder="검색어 입력 후 엔터" onkeypress="if(event.keyCode==13) filterGuides()">
       <div id="guide-display" style="margin-top:15px;"></div>
     </div>
   </section>
   <aside>
     <div class="card">
-      <div class="card-title">가이드 등록</div>
-      <input type="text" id="g-comp" placeholder="대상기업">
+      <div class="card-title">공유사항 등록</div>
+      <input type="text" id="g-comp" placeholder="기업명">
       <input type="text" id="g-key" placeholder="키워드">
-      <textarea id="g-content" placeholder="가이드 내용" style="height:120px;"></textarea>
+      <textarea id="g-content" placeholder="공유 내용" style="height:120px;"></textarea>
       <button class="btn-blue" onclick="addOneGuide()">수기 등록</button>
       <hr style="margin:25px 0; border:0; border-top:1px solid #eee;">
-      <button class="btn-sample" onclick="downGuideSample()">📥 가이드 양식 다운로드</button>
+      <button class="btn-sample" onclick="downGuideSample()">📥 양식 다운로드</button>
       <input type="file" id="guide-input" accept=".xlsx">
-      <button class="btn-blue" onclick="upGuide()" style="background:#475569;">엑셀 가이드 등록</button>
+      <button class="btn-blue" onclick="upGuide()" style="background:#475569;">엑셀 대량 등록</button>
     </div>
   </aside>
 </main>
@@ -167,12 +166,12 @@
     } else {
       isAdmin = false;
     }
-    renderGuides(allGuides); // 리스트 갱신하여 버튼 제어
+    renderGuides(allGuides);
   }
 
   function renderGuides(data) {
     document.getElementById('guide-display').innerHTML = data.slice().reverse().map(i => `
-      <div class="guide-item">
+      <div class="share-item">
         <div class="admin-only" style="display:${isAdmin?'flex':'none'}">
           <button class="btn-red" onclick="editGuide('${i.id}')">수정</button>
           <button class="btn-red" onclick="delGuide('${i.id}')">삭제</button>
@@ -199,7 +198,7 @@
   function addOneComp() {
     const name = document.getElementById('add-name').value;
     const period = document.getElementById('add-period').value;
-    if(!name || !period) return alert("기업명/기간 필수!");
+    if(!name || !period) return alert("필수 입력 확인!");
     db.ref('companies').push({ name, code: document.getElementById('add-code').value, period, url: document.getElementById('add-url').value, status: period.endsWith('~') ? '운영중' : '종료' });
     ["add-name", "add-code", "add-period", "add-url"].forEach(id => document.getElementById(id).value = '');
   }
@@ -243,7 +242,7 @@
         up[`/guides/${k}`] = { company: r['대상기업'], keyword: r['키워드'], content: r['가이드내용'] };
       });
       await db.ref().update(up);
-      alert("가이드 등록 완료");
+      alert("공유사항 등록 완료");
     };
     reader.readAsArrayBuffer(file);
   }
@@ -257,7 +256,7 @@
   function downGuideSample() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"]]), "Sheet1");
-    XLSX.writeFile(wb, "WorkHub_Guide_Sample.xlsx");
+    XLSX.writeFile(wb, "WorkHub_Share_Sample.xlsx");
   }
 
   function tab(i) {
