@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>WorkHub Pro - Admin Master</title>
+<title>WorkHub Pro</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -10,8 +10,12 @@
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
   :root { --main-blue: #6366f1; --bg: #f4f7ff; --white: #ffffff; --border: #e2e8f0; --admin-red: #ef4444; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: #1e293b; font-size: 16px; }
-  header { padding: 30px 20px; text-align: center; background: #fff; border-bottom: 1px solid var(--border); }
+  
+  /* 헤더 및 우상단 스위치 */
+  header { padding: 30px 40px; text-align: center; background: #fff; border-bottom: 1px solid var(--border); position: relative; }
   .logo { font-size: 28px; font-weight: 900; color: var(--main-blue); }
+  .header-admin { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 10px; font-size: 14px; color: #64748b; font-weight: 700; }
+  
   .nav-tabs { display: inline-flex; background: #f1f5f9; padding: 6px; border-radius: 15px; margin-top: 15px; }
   .nav-btn { padding: 12px 30px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; color: #64748b; background: transparent; font-size: 16px; }
   .nav-btn.active { background: var(--white); color: var(--main-blue); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -21,29 +25,26 @@
   
   .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
   .status-box { background: var(--white); padding: 30px 15px; border-radius: 20px; text-align: center; border: 1px solid var(--border); }
-  .status-label { font-size: 16px; color: #64748b; font-weight: 600; }
   .status-value { font-size: 32px; font-weight: 900; margin-top: 8px; }
 
   .card { background: var(--white); border-radius: 25px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border); margin-bottom: 25px; }
-  .card-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; position: relative; padding-left: 15px; display: flex; justify-content: space-between; align-items: center; }
+  .card-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; position: relative; padding-left: 15px; }
   .card-title::before { content: ''; position: absolute; left: 0; width: 5px; height: 22px; background: var(--main-blue); border-radius: 10px; }
   
-  /* 관리자 토글 스위치 */
-  .admin-toggle-box { font-size: 14px; display: flex; align-items: center; gap: 10px; color: #64748b; }
-  .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+  /* 스위치 디자인 */
+  .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+  .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
   input:checked + .slider { background-color: var(--admin-red); }
-  input:checked + .slider:before { transform: translateX(24px); }
+  input:checked + .slider:before { transform: translateX(22px); }
 
   input, textarea { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 10px; box-sizing: border-box; background: #fcfdfe; font-size: 16px; font-family: inherit; }
   .btn-blue { width: 100%; padding: 18px; border-radius: 12px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 17px; }
   .btn-sample { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #1e293b; color: #fff; font-weight: 700; cursor: pointer; margin-bottom: 10px; font-size: 14px; }
 
   .list-table { width: 100%; border-collapse: collapse; font-size: 16px; }
-  .list-table th { background: #f8fafc; padding: 15px; text-align: left; color: #64748b; border-bottom: 1px solid var(--border); }
-  .list-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+  .list-table th, .list-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
   
   .guide-item { padding: 20px; border-bottom: 1px solid #eee; background: #fcfdfe; border-radius: 15px; margin-bottom: 12px; position: relative; }
   .admin-only { display: none; position: absolute; top: 20px; right: 20px; gap: 8px; }
@@ -58,30 +59,26 @@
     <button class="nav-btn active" onclick="tab(0)">🏢 기업관리시스템</button>
     <button class="nav-btn" onclick="tab(1)">🚀 워크허브</button>
   </div>
+  <div class="header-admin">
+    관리자 모드
+    <label class="switch">
+      <input type="checkbox" id="admin-switch" onchange="toggleAdmin()">
+      <span class="slider"></span>
+    </label>
+  </div>
 </header>
 
 <main id="tab-0" class="active">
   <section>
     <div class="status-grid">
-      <div class="status-box">
-        <div class="status-label">전체</div>
-        <div class="status-value" id="c-all">0</div>
-      </div>
-      <div class="status-box">
-        <div class="status-label">운영중</div>
-        <div class="status-value" id="c-on" style="color:var(--main-blue)">0</div>
-      </div>
-      <div class="status-box">
-        <div class="status-label">종료</div>
-        <div class="status-value" id="c-off">0</div>
-      </div>
+      <div class="status-box"><div>전체</div><div class="status-value" id="c-all">0</div></div>
+      <div class="status-box"><div>운영중</div><div class="status-value" id="c-on" style="color:var(--main-blue)">0</div></div>
+      <div class="status-box"><div>종료</div><div class="status-value" id="c-off">0</div></div>
     </div>
     <div class="card">
       <div class="card-title">기업 현황 리스트</div>
       <table class="list-table">
-        <thead>
-          <tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>연수원 URL</th></tr>
-        </thead>
+        <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>연수원 URL</th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -105,17 +102,8 @@
 <main id="tab-1" style="grid-template-columns: 1.5fr 1fr;">
   <section>
     <div class="card">
-      <div class="card-title">
-        오늘의 가이드 검색
-        <div class="admin-toggle-box">
-          관리자 모드
-          <label class="switch">
-            <input type="checkbox" id="admin-switch" onchange="toggleAdmin()">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-      <input type="text" id="guide-search" placeholder="검색어 입력 후 엔터 (공란 엔터 시 전체 노출)" onkeypress="if(event.keyCode==13) filterGuides()">
+      <div class="card-title">오늘의 가이드 검색</div>
+      <input type="text" id="guide-search" placeholder="검색어 입력 후 엔터" onkeypress="if(event.keyCode==13) filterGuides()">
       <div id="guide-display" style="margin-top:15px;"></div>
     </div>
   </section>
@@ -166,13 +154,24 @@
   }
 
   function toggleAdmin() {
-    isAdmin = document.getElementById('admin-switch').checked;
-    const btns = document.querySelectorAll('.admin-only');
-    btns.forEach(b => b.style.display = isAdmin ? 'flex' : 'none');
+    const sw = document.getElementById('admin-switch');
+    if (sw.checked) {
+      const pw = prompt("관리자 비밀번호를 입력하세요.");
+      if (pw === '6559') {
+        isAdmin = true;
+      } else {
+        alert("비밀번호가 틀렸습니다.");
+        sw.checked = false;
+        isAdmin = false;
+      }
+    } else {
+      isAdmin = false;
+    }
+    renderGuides(allGuides); // 리스트 갱신하여 버튼 제어
   }
 
   function renderGuides(data) {
-    document.getElementById('guide-display').innerHTML = data.reverse().map(i => `
+    document.getElementById('guide-display').innerHTML = data.slice().reverse().map(i => `
       <div class="guide-item">
         <div class="admin-only" style="display:${isAdmin?'flex':'none'}">
           <button class="btn-red" onclick="editGuide('${i.id}')">수정</button>
@@ -190,18 +189,17 @@
     else renderGuides(allGuides.filter(i => i.company.toLowerCase().includes(q) || i.keyword.toLowerCase().includes(q) || i.content.toLowerCase().includes(q)));
   }
 
-  // 관리자 기능
   function delGuide(id) { if(confirm("삭제하시겠습니까?")) db.ref('guides/'+id).remove(); }
   function editGuide(id) {
     const target = allGuides.find(i => i.id === id);
-    const newContent = prompt("수정할 가이드 내용을 입력하세요:", target.content);
+    const newContent = prompt("수정할 내용을 입력하세요:", target.content);
     if(newContent) db.ref('guides/'+id).update({ content: newContent });
   }
 
   function addOneComp() {
     const name = document.getElementById('add-name').value;
     const period = document.getElementById('add-period').value;
-    if(!name || !period) return alert("필수 입력 확인!");
+    if(!name || !period) return alert("기업명/기간 필수!");
     db.ref('companies').push({ name, code: document.getElementById('add-code').value, period, url: document.getElementById('add-url').value, status: period.endsWith('~') ? '운영중' : '종료' });
     ["add-name", "add-code", "add-period", "add-url"].forEach(id => document.getElementById(id).value = '');
   }
@@ -210,7 +208,7 @@
     const company = document.getElementById('g-comp').value;
     const keyword = document.getElementById('g-key').value;
     const content = document.getElementById('g-content').value;
-    if(!company || !keyword || !content) return alert("모든 내용을 입력하세요.");
+    if(!company || !keyword || !content) return alert("전체 입력 필수!");
     db.ref('guides').push({ company, keyword, content });
     ["g-comp", "g-key", "g-content"].forEach(id => document.getElementById(id).value = '');
   }
@@ -228,7 +226,7 @@
         up[`/companies/${k}`] = { name: r['기업명'], code: r['기업코드']||'', period: p, url: r['연수원 URL']||'', status: p.endsWith('~') ? '운영중' : '종료' };
       });
       await db.ref().update(up);
-      alert("기업 등록 완료");
+      alert("등록 완료");
     };
     reader.readAsArrayBuffer(file);
   }
