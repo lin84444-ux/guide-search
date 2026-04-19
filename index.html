@@ -12,6 +12,7 @@
   :root { --main-blue: #2e6ff2; --bg: #f4f7ff; --white: #ffffff; --border: #eef2f8; --text: #1e293b; --light-gray: #94a3b8; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: var(--text); }
   
+  /* 디자인 레이아웃 (image_626ee2.png 반영) */
   header { padding: 40px 20px 10px; text-align: center; position: relative; }
   .logo { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 25px; }
   .admin-btn { position: absolute; top: 20px; right: 25px; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border); background: #fff; cursor: pointer; color: #64748b; font-size: 13px; font-weight: 600; }
@@ -90,7 +91,7 @@
 </main>
 
 <script>
-  // 사용자님 실제 Firebase 설정
+  // 사용자님 Firebase 설정 (image_61952b.png)
   const firebaseConfig = {
     apiKey: "AIzaSyAtn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE",
     authDomain: "workhub-pro-be742.firebaseapp.com",
@@ -115,21 +116,10 @@
     });
   }
 
-  // 개별 등록
-  function add() {
-    const n = document.getElementById('in-name').value.trim();
-    if(!n) return alert("기업명을 입력하세요.");
-    db.ref('/').push({
-      name: n, code: document.getElementById('in-code').value,
-      url: document.getElementById('in-url').value,
-      status: document.getElementById('in-status').value,
-      period: document.getElementById('in-period').value || "~"
-    }).then(() => alert("등록 성공!"));
-  }
-
-  // 엑셀 일괄 업로드 기능
+  // [수정] 엑셀 업로드 실제 로직
   function uploadExcel() {
-    const file = document.getElementById('file-input').files[0];
+    const fileInput = document.getElementById('file-input');
+    const file = fileInput.files[0];
     if (!file) return alert("파일을 선택해주세요.");
 
     const reader = new FileReader();
@@ -139,20 +129,39 @@
       const sheetName = workbook.SheetNames[0];
       const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
+      let count = 0;
       rows.forEach(row => {
-        if (row['기업명']) {
+        // 엑셀 헤더: 기업명, 기업코드, 오픈기간, url 중 하나라도 있으면 등록
+        const name = row['기업명'] || row['name'];
+        if (name) {
           db.ref('/').push({
-            name: row['기업명'],
-            code: row['기업코드'] || '',
-            period: row['오픈기간'] || row['운영기간'] || '~',
+            name: name,
+            code: row['기업코드'] || row['code'] || '',
+            period: row['오픈기간'] || row['period'] || '~',
             url: row['url'] || '',
             status: '운영중'
           });
+          count++;
         }
       });
-      alert(rows.length + "건의 데이터 등록을 시작했습니다.");
+      alert(count + "건의 기업 정보가 파이어베이스에 등록되었습니다.");
+      fileInput.value = ""; // 선택 초기화
     };
     reader.readAsArrayBuffer(file);
+  }
+
+  function add() {
+    const n = document.getElementById('in-name').value.trim();
+    if(!n) return alert("기업명을 입력하세요.");
+    db.ref('/').push({
+      name: n, code: document.getElementById('in-code').value,
+      url: document.getElementById('in-url').value,
+      status: document.getElementById('in-status').value,
+      period: document.getElementById('in-period').value || "~"
+    }).then(() => {
+      alert("등록되었습니다!");
+      document.getElementById('in-name').value = "";
+    });
   }
 
   function render() {
