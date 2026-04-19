@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro - 최종본</title>
+<title>WorkHub Pro</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,24 +11,39 @@
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
   :root { --main-blue: #2e6ff2; --bg: #f4f7ff; --white: #ffffff; --border: #eef2f8; --text: #1e293b; --danger: #ef4444; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+  
+  /* [추가] 로딩 오버레이 스타일 */
+  #loading-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 9999;
+  }
+  .spinner {
+    width: 50px; height: 50px; border: 5px solid var(--border);
+    border-top: 5px solid var(--main-blue); border-radius: 50%;
+    animation: spin 1s linear infinite; margin-bottom: 15px;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
   header { padding: 40px 20px 10px; text-align: center; position: relative; }
   .logo { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 25px; }
   .admin-btn { position: absolute; top: 20px; right: 25px; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border); background: #fff; cursor: pointer; color: #64748b; font-size: 13px; font-weight: 600; }
   .nav-tabs { display: inline-flex; background: var(--white); padding: 6px; border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 40px; }
   .nav-btn { padding: 12px 28px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: #94a3b8; font-size: 14px; }
   .nav-btn.active { background: var(--main-blue); color: #fff; }
+
   main { max-width: 1400px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: 1.8fr 1.1fr; gap: 30px; }
-  .summary-bar { display: flex; gap: 20px; margin-bottom: 30px; }
-  .summary-item { flex: 1; background: var(--white); padding: 30px 20px; border-radius: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.02); }
-  .summary-val { font-size: 30px; font-weight: 900; color: #0f172a; }
   .card { background: var(--white); border-radius: 35px; padding: 35px; margin-bottom: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.03); }
-  .card-title { font-size: 20px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .card-title span::before { content: 'ㅣ'; color: var(--main-blue); font-weight: 900; }
+  .card-title { font-size: 20px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
+  .card-title span::before { content: 'ㅣ'; color: var(--main-blue); font-weight: 900; margin-right: 8px; }
+
   input, select { width: 100%; padding: 18px 20px; border-radius: 16px; border: 1.5px solid #f1f5f9; margin-bottom: 15px; box-sizing: border-box; background: #f8fafc; font-size: 15px; outline: none; }
-  .btn-submit { width: 100%; padding: 20px; border-radius: 18px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 16px; }
+  .btn-submit { width: 100%; padding: 20px; border-radius: 18px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; font-size: 16px; transition: 0.2s; }
   .btn-dark { background: #1e293b; margin-top: 10px; }
-  .btn-danger { background: var(--danger); font-size: 13px; padding: 10px 15px; border-radius: 12px; display: none; }
+  .btn-danger { background: var(--danger); font-size: 13px; padding: 10px 15px; border-radius: 12px; display: none; cursor: pointer; color: #fff; border: none; }
   .admin-mode .btn-danger { display: inline-block; }
+
   .list-table { width: 100%; border-collapse: collapse; }
   .list-table th { text-align: left; padding: 15px; font-size: 12.5px; color: #94a3b8; border-bottom: 2px solid #f8fafc; }
   .list-table td { padding: 22px 15px; border-bottom: 1px solid #fbfcfe; font-size: 14.5px; }
@@ -37,6 +52,12 @@
 </style>
 </head>
 <body id="app-body">
+
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div style="font-weight: 700; color: var(--main-blue);">데이터 처리 중...</div>
+</div>
+
 <header>
   <button class="admin-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
   <div class="logo">WorkHub Pro</div>
@@ -45,17 +66,13 @@
     <button class="nav-btn">🚀 워크허브</button>
   </div>
 </header>
+
 <main>
   <div>
-    <div class="summary-bar">
-      <div class="summary-item">전체<br><div class="summary-val" id="cnt-all">0</div></div>
-      <div class="summary-item">운영중<br><div class="summary-val" id="cnt-on" style="color:var(--main-blue)">0</div></div>
-      <div class="summary-item">종료<br><div class="summary-val" id="cnt-off">0</div></div>
-    </div>
     <section class="card">
       <div class="card-title">
         <span>기업 현황 리스트</span>
-        <button class="btn-submit btn-danger" onclick="deleteAllData()">전체 데이터 삭제</button>
+        <button class="btn-danger" onclick="deleteAllData()">전체 데이터 삭제</button>
       </div>
       <input type="text" id="search-input" placeholder="기업명 검색" onkeyup="render()">
       <table class="list-table">
@@ -69,9 +86,8 @@
       <div class="card-title"><span>기업 등록</span></div>
       <input id="in-name" placeholder="기업명">
       <input id="in-code" placeholder="기업코드">
-      <input id="in-url" placeholder="URL (000.hunet.co.kr)">
-      <select id="in-status"><option value="운영중">운영중</option><option value="종료">종료</option></select>
-      <input id="in-period" placeholder="운영기간 (~)">
+      <input id="in-url" placeholder="URL">
+      <input id="in-period" placeholder="운영기간 (예: 2026.01~)">
       <button class="btn-submit" onclick="addOne()">데이터 등록</button>
     </section>
     <section class="card">
@@ -97,57 +113,75 @@
   const db = firebase.database();
   let DATA = [], ADMIN = false;
 
+  function showLoading(show) {
+    document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+  }
+
   function load() {
     db.ref('companies').on('value', (ss) => {
       const val = ss.val();
       DATA = val ? Object.entries(val).map(([k, v]) => ({ ...v, key: k })) : [];
-      document.getElementById('cnt-all').innerText = DATA.length;
-      document.getElementById('cnt-on').innerText = DATA.filter(d => d.status === '운영중').length;
-      document.getElementById('cnt-off').innerText = DATA.filter(d => d.status === '종료').length;
       render();
     });
   }
 
   function downloadSample() {
-    const data = [["기업명", "기업코드", "운영기간", "상태", "연수원 URL"], ["샘플기업", "C001", "2026.01~", "운영중", "test.hunet.co.kr"]];
+    const data = [["기업명", "기업코드", "운영기간", "연수원 URL"], ["샘플기업", "C001", "2026.01~", "test.hunet.co.kr"]];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Sheet1");
     XLSX.writeFile(wb, "WorkHub_샘플양식.xlsx");
   }
 
-  function uploadExcel() {
+  async function uploadExcel() {
     const file = document.getElementById('excel-input').files[0];
     if (!file) return alert("파일을 선택하세요.");
+    
+    showLoading(true);
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
       const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
       const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-      rows.forEach(r => {
+      
+      for(const r of rows) {
         if (r['기업명']) {
-          db.ref('companies').push({
-            name: r['기업명'], code: r['기업코드'] || '', period: r['운영기간'] || '~',
-            url: r['연수원 URL'] || '', status: r['상태'] || '운영중'
+          const p = String(r['운영기간'] || '');
+          const status = (p.includes('~') && p.split('~')[1].trim() === "") ? "운영중" : "종료";
+          await db.ref('companies').push({
+            name: r['기업명'], code: r['기업코드'] || '', period: p,
+            url: r['연수원 URL'] || '', status: status
           });
         }
-      });
-      alert(rows.length + "건 등록 완료");
+      }
+      showLoading(false);
+      alert("등록 완료");
     };
     reader.readAsArrayBuffer(file);
   }
 
-  function deleteAllData() {
-    if(confirm("모든 데이터를 삭제하시겠습니까?")) db.ref('companies').remove().then(() => alert("삭제 완료"));
-  }
-
-  function addOne() {
+  async function addOne() {
     const n = document.getElementById('in-name').value;
+    const p = document.getElementById('in-period').value;
     if(!n) return alert("기업명 입력!");
-    db.ref('companies').push({
+
+    showLoading(true);
+    const status = (p.includes('~') && p.split('~')[1].trim() === "") ? "운영중" : "종료";
+    await db.ref('companies').push({
       name: n, code: document.getElementById('in-code').value,
       url: document.getElementById('in-url').value,
-      status: document.getElementById('in-status').value,
-      period: document.getElementById('in-period').value || "~"
-    }).then(() => { alert("등록 완료"); document.getElementById('in-name').value = ""; });
+      period: p, status: status
+    });
+    showLoading(false);
+    alert("등록 완료");
+  }
+
+  function deleteAllData() {
+    if(confirm("전체 삭제하시겠습니까?")) {
+      showLoading(true);
+      db.ref('companies').remove().then(() => {
+        showLoading(false);
+        alert("삭제 완료");
+      });
+    }
   }
 
   function render() {
