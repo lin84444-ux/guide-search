@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | 팀 공유 시스템 v18</title>
+<title>WorkHub Pro | 통합 관리 v21</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
@@ -11,37 +11,34 @@
   :root { --bg-color: #f4f7ff; --primary: #2563eb; --primary-hover: #1d4ed8; --primary-light: #eff6ff; --text-dark: #1e293b; --text-light: #64748b; --white: #ffffff; --border: #e2e8f0; --accent: #ef4444; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-dark); }
   
-  header { padding: 40px 20px 10px; text-align: center; position: relative; }
-  .logo { font-size: 34px; font-weight: 900; color: #0f172a; margin-bottom: 25px; letter-spacing: -1px; }
+  header { padding: 30px 20px 10px; text-align: center; position: relative; }
+  .logo { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 20px; letter-spacing: -1px; }
   
-  .admin-btn { position: absolute; top: 20px; right: 20px; padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-light); font-weight: 800; font-size: 13px; cursor: pointer; z-index: 100; }
-  .admin-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-
+  .admin-btn { position: absolute; top: 20px; right: 20px; padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-light); font-weight: 800; cursor: pointer; z-index: 100; }
+  
   .nav-tabs { display: inline-flex; background: var(--white); padding: 6px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
-  .nav-btn { padding: 12px 25px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: var(--text-light); font-size: 14px; }
+  .nav-btn { padding: 12px 25px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; background: transparent; color: var(--text-light); }
   .nav-btn.active { background: var(--primary); color: var(--white); }
 
-  main { max-width: 1400px; margin: 0 auto 50px; padding: 0 20px; }
+  main { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
   .tab-content { display: none; grid-template-columns: 1.8fr 1.1fr; gap: 30px; }
   .tab-content.active { display: grid; }
 
-  /* 상단 운영 현황 바 */
   .summary-bar { display: flex; gap: 15px; margin-bottom: 25px; }
   .summary-item { flex: 1; background: var(--white); padding: 20px; border-radius: 22px; text-align: center; border: 1px solid rgba(0,0,0,0.03); }
   .summary-label { font-size: 13px; color: var(--text-light); font-weight: 700; margin-bottom: 8px; }
-  .summary-value { font-size: 24px; font-weight: 900; color: var(--text-dark); }
+  .summary-value { font-size: 24px; font-weight: 900; }
   .summary-value.on { color: var(--primary); }
 
-  .card { background: var(--white); border-radius: 28px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); height: fit-content; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.03); }
+  .card { background: var(--white); border-radius: 28px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.03); }
   .card-title { font-size: 19px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
   .card-title::before { content: ''; width: 4px; height: 18px; background: var(--primary); border-radius: 10px; }
 
-  /* 샘플 다운로드 영역 */
-  .sample-box { background: #f8fafc; padding: 18px; border-radius: 14px; border: 1.5px dashed var(--border); font-size: 13px; line-height: 1.6; color: var(--text-light); margin-bottom: 20px; }
-  .btn-download { display: inline-block; margin-top: 10px; padding: 8px 15px; background: #fff; border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; font-weight: 800; cursor: pointer; text-decoration: none; }
+  .sample-box { background: #f8fafc; padding: 18px; border-radius: 14px; border: 1.5px dashed var(--border); font-size: 13px; margin-bottom: 20px; }
+  .btn-download { display: inline-block; margin-top: 10px; padding: 8px 15px; background: #fff; border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; font-weight: 800; text-decoration: none; cursor: pointer; }
 
   .search-area { display: flex; gap: 10px; margin-bottom: 25px; }
-  .search-input { flex: 1; padding: 16px 20px; border-radius: 14px; border: 1.5px solid var(--border); background: #f8fafc; font-size: 15px; outline: none; }
+  .search-input { flex: 1; padding: 16px 20px; border-radius: 14px; border: 1.5px solid var(--border); font-size: 15px; outline: none; }
 
   .list-table { width: 100%; border-collapse: collapse; }
   .list-table th { text-align: left; padding: 12px; font-size: 12px; color: var(--text-light); border-bottom: 2px solid #f1f5f9; }
@@ -52,18 +49,18 @@
   .badge.on { background: var(--primary-light); color: var(--primary); }
   .badge.off { background: #f1f5f9; color: var(--text-light); }
 
-  input, textarea, select { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1.5px solid #f1f5f9; background: #f8fafc; margin-bottom: 12px; font-family: inherit; }
+  input, textarea, select { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1.5px solid #f1f5f9; background: #f8fafc; margin-bottom: 12px; }
   .btn-primary { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: white; font-weight: 800; cursor: pointer; font-size: 15px; }
   
   .del-btn { display: none; border: none; cursor: pointer; background: #fff1f1; color: var(--accent); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; }
   .admin-active .del-btn { display: inline-block; }
 
-  #loading { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; justify-content:center; align-items:center; font-weight:800; color:var(--primary); }
+  #loading { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center; font-weight:800; color:var(--primary); }
 </style>
 </head>
 <body id="main-body">
 
-<div id="loading">⏳ 동기화 및 처리 중...</div>
+<div id="loading">⏳ 실시간 데이터 처리 중...</div>
 
 <header>
   <button class="admin-btn" id="admin-toggle" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
@@ -85,7 +82,7 @@
       <section class="card">
         <div class="card-title">기업 현황 리스트</div>
         <div class="search-area">
-          <input type="text" id="u-search" class="search-input" placeholder="검색어를 입력하세요 (기업명/코드)" onkeyup="renderCorps()">
+          <input type="text" id="u-search" class="search-input" placeholder="기업명 또는 코드 입력" onkeyup="renderCorps()">
         </div>
         <table class="list-table">
           <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>연수원 URL</th><th class="del-btn">관리</th></tr></thead>
@@ -93,6 +90,7 @@
         </table>
       </section>
     </div>
+    
     <div class="side-col">
       <section class="card">
         <div class="card-title">기업 수기 등록</div>
@@ -101,18 +99,17 @@
         <input id="in-url" placeholder="URL (000.hunet.co.kr)">
         <select id="in-status"><option value="운영중">운영중</option><option value="종료">종료</option></select>
         <input id="in-period" placeholder="운영기간 (~)">
-        <button class="btn-primary" onclick="addCorp()">등록하기</button>
+        <button class="btn-primary" onclick="addCorp()">등록 완료</button>
       </section>
+      
       <section class="card">
-        <div class="card-title">파일 업로드</div>
+        <div class="card-title">파일 등록</div>
         <div class="sample-box">
-          <strong>📂 양식 가이드</strong><br>
-          샘플 파일을 내려받아 형식에 맞춰 작성해주세요.<br>
+          <strong>📂 양식 다운로드</strong><br>아래 버튼을 눌러 양식을 받은 뒤 업로드하세요.<br>
           <button class="btn-download" onclick="downloadSample()">📥 샘플 다운로드</button>
         </div>
         <input type="file" id="csv-file" style="font-size:11px;">
         <button class="btn-primary" style="background:#1e293b; margin-top:10px;" onclick="uploadFile()">파일 등록</button>
-        <button class="del-btn" style="width:100%; margin-top:10px; background:#f1f5f9; color:#64748b;" onclick="clearRemote('corps')">전체 데이터 초기화</button>
       </section>
     </div>
   </div>
@@ -121,22 +118,22 @@
     <div>
       <section class="card">
         <div class="card-title">워크허브 가이드</div>
-        <input type="text" id="g-search" placeholder="검색어 입력..." onkeyup="renderGuides()" class="search-input" style="margin-bottom:20px;">
+        <input type="text" id="g-search" placeholder="검색..." onkeyup="renderGuides()" class="search-input" style="margin-bottom:20px;">
         <div id="guide-list"></div>
       </section>
     </div>
     <div class="side-col">
       <section class="card">
         <div class="card-title">가이드 등록</div>
-        <textarea id="in-g-text" placeholder="공유할 내용을 입력하세요..." rows="6"></textarea>
-        <button class="btn-primary" onclick="addGuide()">저장하기</button>
+        <textarea id="in-g-text" placeholder="공유할 내용 입력..." rows="6"></textarea>
+        <button class="btn-primary" onclick="addGuide()">가이드 저장</button>
       </section>
     </div>
   </div>
 </main>
 
 <script>
-  // 사용자님 Firebase 설정값 (이미지 기반 업데이트 완료)
+  // 사용자님 Firebase 고유 설정
   const firebaseConfig = {
     apiKey: "AIzaSyB7pI15lC-L2U_Y_uE888pZpZpZpZpZpZ", 
     authDomain: "workhub-pro.firebaseapp.com",
@@ -147,24 +144,23 @@
     appId: "1:338870335028:web:785f7560879f874f67609a"
   };
 
+  // 초기화 및 데이터베이스 연결 확인
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
+  
   let DB_CORPS = [], DB_GUIDES = [], IS_ADMIN = false;
 
-  // 샘플 파일 다운로드 (CSV 생성)
+  // 샘플 파일 다운로드
   function downloadSample() {
     const csvContent = "기업명,기업코드,오픈기간,url\n(주)휴넷,60000,~,000.hunet.co.kr";
     const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "기업관리_샘플양식.csv");
-    document.body.appendChild(link);
+    link.href = URL.createObjectURL(blob);
+    link.download = "워크허브_샘플양식.csv";
     link.click();
-    document.body.removeChild(link);
   }
 
-  // 실시간 수신
+  // 실시간 동기화
   db.ref('corps').on('value', (s) => {
     const d = s.val();
     DB_CORPS = d ? Object.entries(d).map(([k, v]) => ({ ...v, key: k })) : [];
@@ -186,7 +182,7 @@
   }
 
   function toggleAdmin() {
-    if(!IS_ADMIN && prompt("비밀번호:") === "6559") IS_ADMIN = true;
+    if(!IS_ADMIN && prompt("PW:") === "6559") IS_ADMIN = true;
     else IS_ADMIN = false;
     document.getElementById("main-body").classList.toggle("admin-active", IS_ADMIN);
     document.getElementById("admin-toggle").innerText = IS_ADMIN ? "🔓 관리자 ON" : "⚙️ 관리자 모드";
@@ -200,26 +196,37 @@
     btn.classList.add('active');
   }
 
+  // 수기 등록 함수 (에러 핸들링 추가)
   function addCorp() {
     const name = document.getElementById("in-name").value.trim();
     if(!name) return alert("기업명을 입력하세요.");
+    
     db.ref('corps').push({
-      name, code: document.getElementById("in-code").value,
+      name, 
+      code: document.getElementById("in-code").value,
       url: document.getElementById("in-url").value,
       status: document.getElementById("in-status").value,
       period: document.getElementById("in-period").value || "~"
-    }).then(() => alert("등록 성공!"));
+    }).then(() => {
+      alert("등록 완료!");
+      document.getElementById("in-name").value = "";
+    }).catch(err => {
+      alert("등록 실패: " + err.message);
+    });
   }
 
+  // 파일 등록 함수
   function uploadFile() {
     const file = document.getElementById("csv-file").files[0];
-    if(!file) return alert("파일을 먼저 선택하세요.");
+    if(!file) return alert("파일을 선택하세요.");
     document.getElementById("loading").style.display = "flex";
-    const reader = new FileReader();
-    reader.onload = (e) => {
+    
+    const r = new FileReader();
+    r.onload = (e) => {
       const rows = e.target.result.split(/\r?\n/);
-      let start = rows.findIndex(r => r.includes("기업명")) + 1;
+      let start = rows.findIndex(row => row.includes("기업명")) + 1;
       if(start === 0) start = 1;
+      
       rows.slice(start).forEach(row => {
         const p = row.split(',').map(v => v.replace(/^"|"$/g, '').trim());
         if(p[0]) db.ref('corps').push({ name: p[0], code: p[1]||'', period: p[2]||'~', status: '운영중', url: p[3]||'' });
@@ -227,7 +234,7 @@
       document.getElementById("loading").style.display = "none";
       alert("파일 등록이 완료되었습니다.");
     };
-    reader.readAsText(file, "UTF-8");
+    r.readAsText(file, "UTF-8");
   }
 
   function renderCorps() {
@@ -237,10 +244,10 @@
       <tr>
         <td style="font-weight:800;">${c.name}</td>
         <td>${c.code}</td>
-        <td style="font-size:12px; color:#64748b;">${c.period}</td>
+        <td style="font-size:12px;">${c.period}</td>
         <td><span class="badge ${c.status==='운영중'?'on':'off'}">${c.status}</span></td>
         <td>${c.url ? `<a href="${c.url.startsWith('http')?c.url:'https://'+c.url}" target="_blank" class="url-link">${c.url.replace(/^https?:\/\//,'')}</a>` : '-'}</td>
-        <td><button class="del-btn" onclick="deleteRemote('corps','${c.key}')">삭제</button></td>
+        <td><button class="del-btn" onclick="deleteItem('corps','${c.key}')">삭제</button></td>
       </tr>`).join('');
   }
 
@@ -248,7 +255,7 @@
     const t = document.getElementById("in-g-text").value.trim();
     if(t) db.ref('guides').push({ text: t }).then(() => {
       document.getElementById("in-g-text").value = "";
-      alert("가이드 저장 성공!");
+      alert("가이드 저장 완료!");
     });
   }
 
@@ -258,12 +265,11 @@
     document.getElementById("guide-list").innerHTML = f.reverse().map(g => `
       <div class="card" style="padding:20px; margin-bottom:15px;">
         <div style="white-space:pre-wrap; font-weight:700; line-height:1.6;">${g.text}</div>
-        <div style="margin-top:10px;"><button class="del-btn" onclick="deleteRemote('guides','${g.key}')">삭제</button></div>
+        <div style="margin-top:10px;"><button class="del-btn" onclick="deleteItem('guides','${g.key}')">삭제</button></div>
       </div>`).join('');
   }
 
-  function deleteRemote(p, k) { if(confirm("삭제하시겠습니까?")) db.ref(`${p}/${k}`).remove(); }
-  function clearRemote(p) { if(confirm("전체 삭제하시겠습니까?")) db.ref(p).remove(); }
+  function deleteItem(p, k) { if(confirm("정말 삭제하시겠습니까?")) db.ref(`${p}/${k}`).remove(); }
 
   window.onload = () => { renderCorps(); renderGuides(); };
 </script>
