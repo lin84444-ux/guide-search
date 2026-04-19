@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>WorkHub Pro - Full Restore</title>
+<title>WorkHub Pro - Final Fix</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -23,7 +23,7 @@
   .card { background: var(--white); border-radius: 25px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border); }
   .card-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; position: relative; padding-left: 15px; }
   .card-title::before { content: ''; position: absolute; left: 0; width: 5px; height: 20px; background: var(--main-blue); border-radius: 10px; }
-  input, textarea { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 12px; box-sizing: border-box; background: #fcfdfe; font-family: inherit; font-size: 14px; }
+  input, textarea { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 12px; box-sizing: border-box; background: #fcfdfe; font-size: 14px; }
   .btn-blue { width: 100%; padding: 18px; border-radius: 12px; border: none; background: var(--main-blue); color: #fff; font-weight: 800; cursor: pointer; }
   .btn-sample { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #1e293b; color: #fff; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
   .btn-nuke { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; display: none; }
@@ -71,7 +71,7 @@
       <button class="btn-blue" onclick="addOneComp()">기업 등록하기</button>
       <hr>
       <div class="card-title" style="font-size:16px;"><span>엑셀 대량 등록</span></div>
-      <button class="btn-sample" onclick="downCompSample()">📥 기업 양식 다운로드</button>
+      <button class="btn-sample" onclick="downCompSample()">📥 기업 양식 다운로드 (상태 제외)</button>
       <input type="file" id="xl-input" accept=".xlsx">
       <button class="btn-blue" onclick="upComp()" style="background:#475569;">파일 등록하기</button>
     </div>
@@ -85,13 +85,13 @@
       <div class="card-title"><span>오늘의 공유사항</span></div>
       <textarea id="share-text" placeholder="공유할 내용을 입력하세요..." style="height: 100px;"></textarea>
       <button class="btn-blue" onclick="addShare()">소식 공유</button>
-      <div id="share-list" style="margin-top: 20px; max-height: 300px; overflow-y: auto;"></div>
+      <div id="share-list" style="margin-top: 20px; max-height: 350px; overflow-y: auto;"></div>
     </div>
     <div class="card">
       <div class="card-title"><span>가이드 등록</span></div>
       <button class="btn-sample" onclick="downGuideSample()" style="background:#475569;">📥 워크허브 샘플 받기</button>
       <input type="file" id="guide-input" accept=".xlsx" style="margin-bottom:10px;">
-      <button class="btn-blue" onclick="upGuide()" style="background:#eef2ff; color:var(--main-blue);">엑셀로 가이드 등록</button>
+      <button class="btn-blue" onclick="upGuide()" style="background:#eef2ff; color:var(--main-blue);">엑셀 가이드 등록</button>
     </div>
   </aside>
 </main>
@@ -130,10 +130,9 @@
   function addOneComp() {
     const name = document.getElementById('add-name').value;
     const period = document.getElementById('add-period').value;
-    if(!name || !period) return alert("기업명과 기간은 필수입니다.");
+    if(!name || !period) return alert("필수 입력 확인!");
     const status = period.endsWith('~') ? '운영중' : '종료';
     db.ref('companies').push({ name, code: document.getElementById('add-code').value, period, url: document.getElementById('add-url').value, status });
-    alert("등록되었습니다.");
     ["add-name", "add-code", "add-period", "add-url"].forEach(id => document.getElementById(id).value = '');
   }
 
@@ -159,7 +158,7 @@
         up[`/companies/${k}`] = { name: r['기업명'], code: r['기업코드']||'', period, url: r['연수원 URL']||'', status: period.endsWith('~') ? '운영중' : '종료' };
       });
       await db.ref().update(up);
-      alert("대량 등록 완료");
+      alert("등록 완료");
     };
     reader.readAsArrayBuffer(file);
   }
@@ -189,13 +188,13 @@
 
   function downCompSample() {
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["기업명", "기업코드", "운영기간", "연수원 URL"], ["샘플기업", "C001", "2026.01~", "test.com"]]), "Sheet1");
-    XLSX.writeFile(wb, "WorkHub_Company_Sample.xlsx");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["기업명", "기업코드", "운영기간", "연수원 URL"], ["기업A", "CODE1", "2026.01~", "a.com"]]), "Sheet1");
+    XLSX.writeFile(wb, "Company_Sample_NoStatus.xlsx");
   }
 
   function downGuideSample() {
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"]]), "Sheet1");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"], ["lh", "오류", "내용작성"]]), "Sheet1");
     XLSX.writeFile(wb, "WorkHub_Guide_Sample.xlsx");
   }
 
