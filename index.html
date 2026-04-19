@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WorkHub Pro | 팀 공유 시스템 v14</title>
+<title>WorkHub Pro | 팀 공유 및 UI 복구 v15</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-  :root { --bg-color: #f4f7ff; --primary: #2563eb; --primary-hover: #1d4ed8; --primary-light: #eff6ff; --text-dark: #1e293b; --text-light: #64748b; --white: #ffffff; --border: #e2e8f0; --accent: #ef4444; }
+  :root { --bg-color: #f4f7ff; --primary: #2563eb; --primary-light: #eff6ff; --text-dark: #1e293b; --text-light: #64748b; --white: #ffffff; --border: #e2e8f0; --accent: #ef4444; }
   body { font-family: 'Pretendard', sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-dark); }
   
   header { padding: 40px 20px 10px; text-align: center; position: relative; }
@@ -25,9 +25,20 @@
   .tab-content { display: none; grid-template-columns: 1.8fr 1.1fr; gap: 30px; }
   .tab-content.active { display: grid; }
 
+  /* 운영 현황 요약바 스타일 */
+  .summary-bar { display: flex; gap: 15px; margin-bottom: 25px; }
+  .summary-item { flex: 1; background: var(--white); padding: 20px; border-radius: 22px; text-align: center; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 4px 12px rgba(0,0,0,0.01); }
+  .summary-label { font-size: 13px; color: var(--text-light); font-weight: 700; margin-bottom: 8px; }
+  .summary-value { font-size: 24px; font-weight: 900; color: var(--text-dark); }
+  .summary-value.on { color: var(--primary); }
+
   .card { background: var(--white); border-radius: 28px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); height: fit-content; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.03); }
   .card-title { font-size: 19px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
   .card-title::before { content: ''; width: 4px; height: 18px; background: var(--primary); border-radius: 10px; }
+
+  /* 샘플 양식 가이드 */
+  .sample-box { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed var(--border); font-size: 12px; line-height: 1.6; color: var(--text-light); margin-bottom: 15px; }
+  .sample-code { color: var(--primary); font-family: monospace; font-weight: bold; }
 
   .search-area { display: flex; gap: 8px; margin-bottom: 25px; }
   .search-input { flex: 1; padding: 16px 20px; border-radius: 14px; border: 1.5px solid var(--border); background: #f8fafc; font-size: 15px; outline: none; }
@@ -38,6 +49,10 @@
   .list-table td { padding: 16px 12px; border-bottom: 1px solid #f8fafc; font-size: 14px; }
   
   .url-active-link { color: var(--primary); text-decoration: underline; font-weight: 700; font-size: 13px; }
+
+  .badge { padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; }
+  .badge.on { background: var(--primary-light); color: var(--primary); }
+  .badge.off { background: #f1f5f9; color: var(--text-light); }
 
   input, textarea, select { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1.5px solid #f1f5f9; background: #f8fafc; margin-bottom: 12px; font-family: inherit; }
   .btn-primary { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: 800; cursor: pointer; }
@@ -50,7 +65,7 @@
 </head>
 <body id="main-body">
 
-<div id="loading-overlay">⏳ 실시간 데이터를 동기화 중입니다...</div>
+<div id="loading-overlay">⏳ 데이터를 동기화 중입니다...</div>
 
 <header>
   <button class="admin-btn" id="admin-toggle-btn" onclick="toggleAdmin()">⚙️ 관리자 모드</button>
@@ -64,8 +79,14 @@
 <main>
   <div id="corp-tab" class="tab-content active">
     <div>
+      <div class="summary-bar">
+        <div class="summary-item"><div class="summary-label">전체 기업</div><div class="summary-value" id="count-all">0</div></div>
+        <div class="summary-item"><div class="summary-label">운영중</div><div class="summary-value on" id="count-on">0</div></div>
+        <div class="summary-item"><div class="summary-label">종료</div><div class="summary-value" id="count-off">0</div></div>
+      </div>
+
       <section class="card">
-        <div class="card-title">기업 현황 리스트 (실시간 공유됨)</div>
+        <div class="card-title">기업 현황 리스트</div>
         <div class="search-area">
           <input type="text" id="unified-search" class="search-input" placeholder="기업명 또는 코드를 입력하세요" onkeyup="renderCorps()">
           <button class="btn-search-trigger" onclick="renderCorps()">검색</button>
@@ -76,20 +97,28 @@
         </table>
       </section>
     </div>
+    
     <div class="side-col">
       <section class="card">
         <div class="card-title">기업 신규 등록</div>
         <input id="in-c-name" placeholder="기업명">
         <input id="in-c-code" placeholder="기업코드">
-        <input id="in-c-url" placeholder="URL (예: 000.hunet.co.kr)">
+        <input id="in-c-url" placeholder="URL (000.hunet.co.kr)">
         <select id="in-c-status"><option value="운영중">운영중</option><option value="종료">종료</option></select>
         <input id="in-c-period" placeholder="운영기간 (~)">
         <button class="btn-primary" onclick="addCorp()">공유 등록</button>
       </section>
+      
       <section class="card">
         <div class="card-title">파일 일괄 업로드</div>
+        <div class="sample-box">
+          <strong>💡 CSV 업로드 샘플 양식 (Header 포함)</strong><br>
+          <span class="sample-code">기업명,기업코드,오픈기간,url</span><br>
+          (주)휴넷,60000,20260101 ~ 20261231,hunet.co.kr
+        </div>
         <input type="file" id="csv-file-input" style="font-size:11px;">
         <button class="btn-primary" style="background:#1e293b;" onclick="handleFileUpload()">파일 일괄 공유</button>
+        <button class="del-btn" style="width:100%; margin-top:10px; background:#f1f5f9; color:#64748b;" onclick="clearRemote('corps')">데이터 전체 삭제</button>
       </section>
     </div>
   </div>
@@ -105,7 +134,7 @@
     <div class="side-col">
       <section class="card">
         <div class="card-title">가이드 등록</div>
-        <textarea id="in-g-text" placeholder="공유할 내용을 입력하세요..." rows="6"></textarea>
+        <textarea id="in-g-text" placeholder="팀원들과 공유할 가이드를 입력하세요..." rows="6"></textarea>
         <button class="btn-primary" onclick="addGuide()">가이드 저장</button>
       </section>
     </div>
@@ -113,9 +142,9 @@
 </main>
 
 <script>
-  // [필독] 공유를 위해 본인의 Firebase 설정값으로 아래를 교체해야 합니다.
+  // Firebase 설정 (사용자님 프로젝트 정보)
   const firebaseConfig = {
-    apiKey: "AIzaSy...", 
+    apiKey: "AIzaSy...", // 여기에 본인의 API Key를 넣으셔야 등록이 활성화됩니다.
     databaseURL: "https://workhub-pro-default-rtdb.firebaseio.com",
     projectId: "workhub-pro",
   };
@@ -127,10 +156,11 @@
   let DB_GUIDES = [];
   let IS_ADMIN = false;
 
-  // 실시간 데이터 수신
+  // 실시간 데이터 리스너
   db.ref('corps').on('value', (snapshot) => {
     const data = snapshot.val();
     DB_CORPS = data ? Object.entries(data).map(([key, val]) => ({ ...val, key })) : [];
+    updateSummary();
     renderCorps();
   });
 
@@ -140,9 +170,18 @@
     renderGuides();
   });
 
+  function updateSummary() {
+    const total = DB_CORPS.length;
+    const onCount = DB_CORPS.filter(c => c.status === "운영중").length;
+    const offCount = total - onCount;
+    document.getElementById("count-all").innerText = total;
+    document.getElementById("count-on").innerText = onCount;
+    document.getElementById("count-off").innerText = offCount;
+  }
+
   function toggleAdmin() {
     if(!IS_ADMIN) {
-      if(prompt("비밀번호:") === "6559") {
+      if(prompt("관리자 비밀번호:") === "6559") {
         IS_ADMIN = true;
         document.getElementById("main-body").classList.add("admin-active");
         document.getElementById("admin-toggle-btn").innerText = "🔓 관리자 ON";
@@ -164,14 +203,14 @@
 
   function addCorp() {
     const name = document.getElementById("in-c-name").value.trim();
-    if(!name) return;
+    if(!name) return alert("기업명을 입력하세요.");
     db.ref('corps').push({
-      name, code: document.getElementById("in-c-code").value,
+      name, 
+      code: document.getElementById("in-c-code").value,
       url: document.getElementById("in-c-url").value,
       status: document.getElementById("in-c-status").value,
       period: document.getElementById("in-c-period").value || "~"
-    });
-    alert("공유 데이터로 등록되었습니다.");
+    }).then(() => alert("등록 완료"));
   }
 
   function handleFileUpload() {
@@ -184,17 +223,17 @@
       let startIndex = rows.findIndex(r => r.includes("기업명")) + 1;
       if(startIndex === 0) startIndex = 1;
 
-      for(let i = startIndex; i < rows.length; i++) {
-        if(!rows[i].trim()) continue;
-        const p = rows[i].split(',').map(v => v.replace(/^"|"$/g, '').trim());
+      rows.slice(startIndex).forEach(row => {
+        if(!row.trim()) return;
+        const p = row.split(',').map(v => v.replace(/^"|"$/g, '').trim());
         if(p[0]) {
           db.ref('corps').push({
             name: p[0], code: p[1] || '', period: p[2] || "~",
-            status: (p[2] && p[2].includes("202")) ? "운영중" : "운영중",
+            status: (p[2] && p[2].includes("202")) ? "운영중" : "운영중", // 로직에 따라 수정 가능
             url: p[3] || ''
           });
         }
-      }
+      });
       document.getElementById("loading-overlay").style.display = "none";
       alert("전체 공유 완료!");
     };
@@ -222,8 +261,10 @@
 
   function addGuide() {
     const text = document.getElementById("in-g-text").value.trim();
-    if(text) db.ref('guides').push({ text });
-    document.getElementById("in-g-text").value = "";
+    if(text) db.ref('guides').push({ text }).then(() => {
+      document.getElementById("in-g-text").value = "";
+      alert("가이드 저장 완료");
+    });
   }
 
   function renderGuides() {
@@ -238,6 +279,10 @@
 
   function deleteRemote(path, key) {
     if(confirm("공유된 데이터를 삭제하시겠습니까?")) db.ref(`${path}/${key}`).remove();
+  }
+  
+  function clearRemote(path) {
+    if(confirm("주의! 모든 데이터가 삭제됩니다. 계속하시겠습니까?")) db.ref(path).remove();
   }
 
   window.onload = () => { renderCorps(); renderGuides(); };
