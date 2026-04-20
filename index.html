@@ -39,7 +39,6 @@
   .list-table th, .list-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
   #share-display { max-height: 400px; overflow-y: auto; padding: 5px; }
 
-  /* 가로 정렬 고정 */
   #c-all, #c-on, #c-off, 
   .list-table td:nth-child(4), 
   .list-table th:nth-child(4) {
@@ -81,15 +80,12 @@
         <div>종료</div><div class="status-value" id="c-off" style="font-size: 32px; font-weight: 900;">0</div>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">기업 현황 리스트 <button class="btn-red admin-view" style="display:none;" onclick="deleteAllData('companies')">전체 삭제</button></div>
-      
       <div style="display: flex; gap: 10px; margin-bottom: 20px;">
         <input type="text" id="comp-search" placeholder="기업명 또는 코드 검색..." onkeypress="if(event.keyCode==13) filterCompanies()" style="margin-bottom: 0;">
         <button class="btn-blue" onclick="filterCompanies()" style="width: 120px; padding: 0 10px; font-size: 14px; height: 50px; margin-bottom: 10px;">검색</button>
       </div>
-
       <div style="overflow-x: auto;">
         <table class="list-table">
           <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="admin-view" style="display:none;">관리</th></tr></thead>
@@ -107,9 +103,9 @@
       <input type="text" id="add-url" placeholder="연수원 URL">
       <button class="btn-blue" onclick="addOneComp()">수기 등록</button>
       <hr style="margin:25px 0; border:0; border-top:1px solid #eee;">
-      <button class="btn-sample" onclick="downCompSample()">📥 양식 다운로드</button>
-      <input type="file" id="xl-input" accept=".xlsx">
-      <button class="btn-blue" onclick="upComp()" style="background:#475569;">엑셀 대량 등록</button>
+      <button class="btn-sample" onclick="downCSV('company')">📥 CSV 양식 다운로드</button>
+      <input type="file" id="xl-input" accept=".csv">
+      <button class="btn-blue" onclick="upCSV('company')" style="background:#475569;">CSV 대량 등록</button>
     </div>
   </aside>
 </main>
@@ -142,9 +138,9 @@
       <textarea id="g-content" placeholder="상세 가이드 내용" style="height: 150px;"></textarea>
       <button class="btn-light-blue" onclick="addOneGuide()">가이드 저장</button>
       <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
-        <button class="btn-sample" onclick="downGuideSample()">📥 양식 다운로드</button>
-        <input type="file" id="guide-input" accept=".xlsx">
-        <button class="btn-blue" onclick="upGuide()" style="background:#475569; padding: 12px; font-size: 14px; margin-top: 5px;">엑셀 대량 등록</button>
+        <button class="btn-sample" onclick="downCSV('guide')">📥 CSV 양식 다운로드</button>
+        <input type="file" id="guide-input" accept=".csv">
+        <button class="btn-blue" onclick="upCSV('guide')" style="background:#475569; padding: 12px; font-size: 14px; margin-top: 5px;">CSV 대량 등록</button>
       </div>
     </div>
   </aside>
@@ -160,13 +156,12 @@
     db.ref('companies').on('value', s => {
       const v = s.val() || {}; 
       allCompanies = Object.keys(v).map(k => ({ id: k, ...v[k] }));
-      renderCompanies(allCompanies); // 실시간 데이터 업데이트 시 렌더링
+      renderCompanies(allCompanies);
       document.getElementById('c-all').innerText = allCompanies.length;
       document.getElementById('c-on').innerText = allCompanies.filter(i => i.status === '운영중').length;
       document.getElementById('c-off').innerText = allCompanies.filter(i => i.status === '종료').length;
       document.getElementById('guide-filter').innerHTML = '<option value="">전체 기업</option>' + allCompanies.map(i => `<option value="${i.name}">${i.name}</option>`).join('');
     });
-
     db.ref('shares').on('value', s => {
       const v = s.val() || {};
       const list = Object.keys(v).map(k => ({ id: k, ...v[k] }));
@@ -178,7 +173,6 @@
         </div>
       `).join('');
     });
-
     db.ref('guides').on('value', s => {
       const v = s.val() || {}; 
       allGuides = Object.keys(v).map(k => ({ id: k, ...v[k] })); 
@@ -186,10 +180,8 @@
     });
   }
 
-  // 기업 리스트 출력 함수 (검색 반영용)
   function renderCompanies(list) {
-    const tbody = document.getElementById('tbody');
-    tbody.innerHTML = list.slice().reverse().map(i => `
+    document.getElementById('tbody').innerHTML = list.slice().reverse().map(i => `
       <tr>
         <td><b>${i.name}</b></td>
         <td>${i.code||'-'}</td>
@@ -202,18 +194,64 @@
       </tr>`).join('');
   }
 
-  // [수정] 기업 검색 기능이 이제 정상 작동합니다.
   function filterCompanies() {
     const q = document.getElementById('comp-search').value.toLowerCase().trim();
-    if (!q) {
-      renderCompanies(allCompanies);
-      return;
-    }
-    const filtered = allCompanies.filter(i => 
-      (i.name && i.name.toLowerCase().includes(q)) || 
-      (i.code && i.code.toLowerCase().includes(q))
-    );
+    if (!q) { renderCompanies(allCompanies); return; }
+    const filtered = allCompanies.filter(i => (i.name && i.name.toLowerCase().includes(q)) || (i.code && i.code.toLowerCase().includes(q)));
     renderCompanies(filtered);
+  }
+
+  /* CSV 다운로드 함수 */
+  function downCSV(type) {
+    let content = "";
+    let fileName = "";
+    if(type === 'company') {
+      content = "\uFEFF기업명,기업코드,운영기간,연수원 URL\n예시기업,CODE01,2026.01~,https://link.com";
+      fileName = "Company_Sample.csv";
+    } else {
+      content = "\uFEFF대상기업,키워드,가이드내용\n예시기업,로그인,아이디는 사번입니다.";
+      fileName = "WorkHub_Guide_Sample.csv";
+    }
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+  }
+
+  /* CSV 업로드 및 즉시 반영 함수 */
+  async function upCSV(type) {
+    const inputId = type === 'company' ? 'xl-input' : 'guide-input';
+    const file = document.getElementById(inputId).files[0];
+    if(!file) return alert("파일을 선택해주세요.");
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const text = e.target.result;
+      const rows = text.split("\n").slice(1); // 헤더 제외
+      const updates = {};
+      
+      rows.forEach(row => {
+        const cols = row.split(",").map(c => c.trim());
+        if(cols.length < 2 || !cols[0]) return; // 빈 줄 방지
+        
+        const key = db.ref().child(type === 'company' ? 'companies' : 'guides').push().key;
+        if(type === 'company') {
+          const period = cols[2] || '';
+          updates[`/companies/${key}`] = {
+            name: cols[0], code: cols[1] || '', period: period,
+            url: cols[3] || '', status: period.endsWith('~') ? '운영중' : '종료'
+          };
+        } else {
+          updates[`/guides/${key}`] = { company: cols[0], keyword: cols[1] || '일반', content: cols[2] || '' };
+        }
+      });
+      
+      await db.ref().update(updates);
+      alert("등록 완료 및 리스트에 반영되었습니다.");
+      document.getElementById(inputId).value = "";
+    };
+    reader.readAsText(file, "UTF-8");
   }
 
   function addQuickShare() {
@@ -233,7 +271,6 @@
     if(!company || !content) return alert("기업명과 가이드 내용을 입력하세요!");
     db.ref('guides').push({ company, keyword: keyword||"일반", content });
     ["g-comp", "g-key", "g-content"].forEach(id => document.getElementById(id).value = '');
-    alert("가이드 저장 완료");
   }
 
   function renderGuides(data) {
@@ -273,26 +310,6 @@
     db.ref('companies').push({ name, code: document.getElementById('add-code').value, period, url: document.getElementById('add-url').value, status: period.endsWith('~') ? '운영중' : '종료' });
     ["add-name", "add-code", "add-period", "add-url"].forEach(id => document.getElementById(id).value = '');
   }
-
-  async function upComp() {
-    const file = document.getElementById('xl-input').files[0]; if(!file) return;
-    const reader = new FileReader(); reader.onload = async (e) => {
-      const rows = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }).Sheets.Sheet1);
-      const up = {}; rows.forEach(r => { const p = String(r['운영기간']||''); const k = db.ref().child('companies').push().key; up[`/companies/${k}`] = { name: r['기업명'], code: r['기업코드']||'', period: p, url: r['연수원 URL']||'', status: p.endsWith('~') ? '운영중' : '종료' }; });
-      await db.ref().update(up); alert("업로드 완료");
-    }; reader.readAsArrayBuffer(file);
-  }
-
-  async function upGuide() {
-    const file = document.getElementById('guide-input').files[0]; if(!file) return;
-    const reader = new FileReader(); reader.onload = async (e) => {
-      const rows = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }).Sheets.Sheet1);
-      rows.forEach(r => db.ref('guides').push({ company: r['대상기업'], keyword: r['키워드'], content: r['가이드내용'] })); alert("업로드 완료");
-    }; reader.readAsArrayBuffer(file);
-  }
-
-  function downCompSample() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["기업명", "기업코드", "운영기간", "연수원 URL"]]), "Sheet1"); XLSX.writeFile(wb, "Company_Sample.xlsx"); }
-  function downGuideSample() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["대상기업", "키워드", "가이드내용"]]), "Sheet1"); XLSX.writeFile(wb, "WorkHub_Sample.xlsx"); }
 
   window.onload = init;
 </script>
