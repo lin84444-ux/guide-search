@@ -39,7 +39,7 @@
   .list-table th, .list-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
   #share-display { max-height: 400px; overflow-y: auto; padding: 5px; }
 
-  /* 가로 정렬 강제 유지 */
+  /* 가로 정렬 고정 */
   #c-all, #c-on, #c-off, 
   .list-table td:nth-child(4), 
   .list-table th:nth-child(4) {
@@ -87,7 +87,7 @@
       
       <div style="display: flex; gap: 10px; margin-bottom: 20px;">
         <input type="text" id="comp-search" placeholder="기업명 또는 코드 검색..." onkeypress="if(event.keyCode==13) filterCompanies()" style="margin-bottom: 0;">
-        <button class="btn-blue" onclick="filterCompanies()" style="width: 120px; padding: 10px; font-size: 14px;">검색</button>
+        <button class="btn-blue" onclick="filterCompanies()" style="width: 120px; padding: 0 10px; font-size: 14px; height: 50px; margin-bottom: 10px;">검색</button>
       </div>
 
       <div style="overflow-x: auto;">
@@ -160,7 +160,7 @@
     db.ref('companies').on('value', s => {
       const v = s.val() || {}; 
       allCompanies = Object.keys(v).map(k => ({ id: k, ...v[k] }));
-      renderCompanies(allCompanies);
+      renderCompanies(allCompanies); // 실시간 데이터 업데이트 시 렌더링
       document.getElementById('c-all').innerText = allCompanies.length;
       document.getElementById('c-on').innerText = allCompanies.filter(i => i.status === '운영중').length;
       document.getElementById('c-off').innerText = allCompanies.filter(i => i.status === '종료').length;
@@ -186,8 +186,10 @@
     });
   }
 
+  // 기업 리스트 출력 함수 (검색 반영용)
   function renderCompanies(list) {
-    document.getElementById('tbody').innerHTML = list.slice().reverse().map(i => `
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = list.slice().reverse().map(i => `
       <tr>
         <td><b>${i.name}</b></td>
         <td>${i.code||'-'}</td>
@@ -200,9 +202,17 @@
       </tr>`).join('');
   }
 
+  // [수정] 기업 검색 기능이 이제 정상 작동합니다.
   function filterCompanies() {
-    const q = document.getElementById('comp-search').value.toLowerCase();
-    const filtered = allCompanies.filter(i => i.name.toLowerCase().includes(q) || (i.code && i.code.toLowerCase().includes(q)));
+    const q = document.getElementById('comp-search').value.toLowerCase().trim();
+    if (!q) {
+      renderCompanies(allCompanies);
+      return;
+    }
+    const filtered = allCompanies.filter(i => 
+      (i.name && i.name.toLowerCase().includes(q)) || 
+      (i.code && i.code.toLowerCase().includes(q))
+    );
     renderCompanies(filtered);
   }
 
