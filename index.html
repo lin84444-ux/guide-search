@@ -228,24 +228,20 @@
     reader.onload = async (e) => {
       const arrayBuffer = e.target.result;
       
-      // 국내 엑셀 CSV 파일(ANSI/CP949) 한글 깨짐을 방지하는 가장 확실한 방법
-      // 우선 CP949로 읽고, 만약 데이터가 없거나 비정상적일 때만 UTF-8 시도
+      // CP949로 먼저 읽기
       let decoder = new TextDecoder('cp949');
       let text = decoder.decode(arrayBuffer);
       
-      // UTF-8 파일일 경우를 대비한 안전 장치 (첫 글자가 깨짐 기호일 때)
-      if (text.startsWith('ï»¿') || text.includes('')) {
+      // 만약 UTF-8 BOM(ï»¿)이 감지되면 UTF-8로 다시 읽기 (오타 수정됨)
+      if (text.startsWith('ï»¿')) {
         text = new TextDecoder('utf-8').decode(arrayBuffer);
       }
 
-      const rows = text.split(/\r?\n/).filter(row => row.trim() !== ""); // 빈 줄 제거
+      const rows = text.split(/\r?\n/).filter(row => row.trim() !== "");
       const updates = {};
-      
-      // 첫 번째 줄(헤더) 제외
       const dataRows = rows.slice(1);
       
       dataRows.forEach(row => {
-        // 쉼표로 구분하되 따옴표 제거
         const cols = row.split(",").map(c => c.trim().replace(/^"|"$/g, ''));
         if(cols.length < 1 || !cols[0]) return; 
         
@@ -270,13 +266,12 @@
       
       try {
         await db.ref().update(updates);
-        alert("등록 성공! 리스트를 확인하세요.");
+        alert("등록 성공!");
         document.getElementById(inputId).value = "";
       } catch (err) {
-        alert("등록 실패: " + err.message);
+        alert("에러: " + err.message);
       }
     };
-    
     reader.readAsArrayBuffer(file);
   }
 
