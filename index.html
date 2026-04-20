@@ -175,65 +175,57 @@
       </tr>`).join('');
   }
 
-/* [최종 긴급] 등록 기능 및 한글 깨짐 완전 복구 함수 */
+  // [수정] CSV 파싱 로직 정규화 (가장 안전한 방식)
+  function parseCSV(text) {
+    const rows = text.split(/\r?\n/).filter(r => r.trim());
+    return rows.map(row => {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < row.length; i++) {
+        const char = row[i];
+        if (char === '"') inQuotes = !inQuotes;
+        else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result.map(v => v.replace(/^"|"$/g, ''));
+    });
+  }
+
   async function upCSV(type) {
     const inputId = type === 'company' ? 'xl-input' : 'guide-input';
     const file = document.getElementById(inputId).files[0];
-    if(!file) return alert("파일을 선택해주세요.");
-    
+    if(!file) return alert("파일 선택!");
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        const arrayBuffer = e.target.result;
+        const ab = e.target.result;
+        let text = new TextDecoder('utf-8').decode(ab);
+        if (text.includes('')) text = new TextDecoder('euc-kr').decode(ab);
         
-        // 1. 인코딩 처리 (EUC-KR 우선, 실패 시 UTF-8)
-        let decoder = new TextDecoder('euc-kr');
-        let text = decoder.decode(arrayBuffer);
-        if (text.includes('')) {
-          text = new TextDecoder('utf-8').decode(arrayBuffer);
-        }
-
-        const rows = text.split(/\r?\n/).filter(row => row.trim() !== "");
-        if (rows.length <= 1) return alert("데이터가 없습니다.");
+        const data = parseCSV(text);
+        if (data.length <= 1) return alert("데이터 없음");
 
         const updates = {};
-        const dataRows = rows.slice(1); // 헤더 제외
-        
-        dataRows.forEach(row => {
-          const cols = row.split(",").map(c => c.trim().replace(/^"|"$/g, ''));
-          if(!cols[0]) return; // 첫 번째 열(이름)이 없으면 스킵
-          
+        data.slice(1).forEach(cols => {
+          if(!cols[0]) return;
           const key = db.ref().child(type === 'company' ? 'companies' : 'guides').push().key;
-          
           if(type === 'company') {
-            const period = cols[2] || '';
-            updates[`/companies/${key}`] = {
-              name: cols[0],
-              code: cols[1] || '',
-              period: period,
-              url: cols[3] || '',
-              status: period.endsWith('~') ? '운영중' : '종료'
-            };
+            updates[`/companies/${key}`] = { name: cols[0], code: cols[1]||'', period: cols[2]||'', url: cols[3]||'', status: (cols[2]||'').endsWith('~')?'운영중':'종료' };
           } else {
-            updates[`/guides/${key}`] = {
-              company: cols[0],
-              keyword: cols[1] || '일반',
-              content: cols[2] || ''
-            };
+            updates[`/guides/${key}`] = { company: cols[0], keyword: cols[1]||'일반', content: cols[2]||'' };
           }
         });
-
-        // 2. 파이어베이스 업데이트 실행 (확실한 await 처리)
         await db.ref().update(updates);
-        alert("성공적으로 등록되었습니다!");
+        alert("등록 완료!");
         document.getElementById(inputId).value = "";
-        
-      } catch (err) {
-        console.error(err);
-        alert("등록 중 오류 발생: " + err.message);
-      }
+      } catch (err) { alert("오류: " + err.message); }
     };
-    
     reader.readAsArrayBuffer(file);
   }
 
@@ -251,6 +243,14 @@
     if(!name || !period) return alert("입력 누락");
     db.ref('companies').push({ name, code: document.getElementById('add-code').value, period, url: document.getElementById('add-url').value, status: period.endsWith('~')?'운영중':'종료' });
     ["add-name", "add-code", "add-period", "add-url"].forEach(id => document.getElementById(id).value = '');
+  }
+  
+  function addOneGuide() {
+    const company = document.getElementById('g-comp').value;
+    const content = document.getElementById('g-content').value;
+    if(!company || !content) return alert("입력 누락");
+    db.ref('guides').push({ company, keyword: document.getElementById('g-key').value || '일반', content });
+    ["g-comp", "g-key", "g-content"].forEach(id => document.getElementById(id).value = '');
   }
 
   function renderGuides(data) {
