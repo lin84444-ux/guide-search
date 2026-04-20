@@ -35,29 +35,29 @@
   input:checked + .slider:before { transform: translateX(22px); }
   .share-item { padding: 20px; border-bottom: 1px solid #eee; background: #fcfdfe; border-radius: 15px; margin-bottom: 12px; position: relative; }
   .admin-only { display: none; position: absolute; top: 20px; right: 20px; gap: 8px; }
-  .list-table { width: 100%; border-collapse: collapse; }
+  .list-table { width: 100%; border-collapse: collapse; table-layout: auto; } /* 자동 너비 조절 */
   .list-table th, .list-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
   #share-display { max-height: 400px; overflow-y: auto; padding: 5px; }
 
-  /* [중요] 세로 정렬 해결 코드 */
-  .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
-  .status-box { background: #fff; padding: 30px 10px; border-radius: 20px; text-align: center; border: 1px solid var(--border); }
-  .status-label { font-size: 16px; color: #64748b; margin-bottom: 8px; font-weight: 600; }
-  .status-value { 
-    font-size: 32px; 
-    font-weight: 900; 
-    display: block;      /* 블록 요소로 변경 */
-    white-space: nowrap; /* 자동 줄바꿈 절대 방지 */
-    width: 100%;         /* 전체 너비 사용 */
+  /* 핵심 수정: 모든 '상태' 텍스트를 강제로 가로로 정렬 */
+  #c-all, #c-on, #c-off, 
+  .list-table td:nth-child(4), 
+  .list-table th:nth-child(4) {
+    white-space: nowrap !important; /* 줄바꿈 절대 방지 */
+    min-width: 80px;               /* 최소 너비 확보 */
   }
 
-  /* 반응형 설정 */
-  @media (max-width: 768px) {
+  /* 반응형 (데이터 유지하면서 레이아웃만 조정) */
+  @media (max-width: 1024px) {
     main.active { grid-template-columns: 1fr; }
+    .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  }
+
+  @media (max-width: 768px) {
     .status-grid { grid-template-columns: 1fr; }
     header { padding: 20px; }
     .header-admin { position: relative; right: 0; top: 0; transform: none; justify-content: center; margin-top: 15px; }
-    .nav-tabs { flex-wrap: wrap; justify-content: center; }
+    .list-table { font-size: 14px; }
   }
 </style>
 </head>
@@ -76,24 +76,20 @@
 
 <main id="tab-0" class="active">
   <section>
-    <div class="status-grid">
-      <div class="status-box">
-        <div class="status-label">전체</div>
-        <div class="status-value" id="c-all">0</div>
+    <div class="status-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
+      <div class="status-box" style="background: #fff; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid var(--border);">
+        <div>전체</div><div class="status-value" id="c-all" style="font-size: 32px; font-weight: 900;">0</div>
       </div>
-      <div class="status-box">
-        <div class="status-label">운영중</div>
-        <div class="status-value" id="c-on" style="color: var(--main-blue);">0</div>
+      <div class="status-box" style="background: #fff; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid var(--border);">
+        <div>운영중</div><div class="status-value" id="c-on" style="font-size: 32px; font-weight: 900; color: var(--main-blue);">0</div>
       </div>
-      <div class="status-box">
-        <div class="status-label">종료</div>
-        <div class="status-value" id="c-off">0</div>
+      <div class="status-box" style="background: #fff; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid var(--border);">
+        <div>종료</div><div class="status-value" id="c-off" style="font-size: 32px; font-weight: 900;">0</div>
       </div>
     </div>
     <div class="card">
       <div class="card-title">기업 현황 리스트 <button class="btn-red admin-view" style="display:none;" onclick="deleteAllData('companies')">전체 삭제</button></div>
-      <div style="overflow-x: auto;">
-        <table class="list-table">
+      <div style="overflow-x: auto;"> <table class="list-table">
           <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="admin-view" style="display:none;">관리</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
@@ -156,7 +152,7 @@
 </main>
 
 <script>
-  // Firebase 설정
+  // Firebase 설정 (기존 데이터 유지)
   const firebaseConfig = { apiKey: "AIzaSyAtn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE", authDomain: "workhub-pro-be742.firebaseapp.com", databaseURL: "https://workhub-pro-be742-default-rtdb.firebaseio.com/", projectId: "workhub-pro-be742" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
@@ -197,7 +193,6 @@
     const now = new Date();
     const timeStr = now.getFullYear() + "-" + (now.getMonth() + 1).toString().padStart(2, '0') + "-" + now.getDate().toString().padStart(2, '0') + " " + 
                     now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0') + ":" + now.getSeconds().toString().padStart(2, '0');
-    
     db.ref('shares').push({ content, time: timeStr });
     document.getElementById('quick-content').value = '';
   }
@@ -234,7 +229,6 @@
   function deleteData(path, id) { if(confirm("삭제하시겠습니까?")) db.ref(`${path}/${id}`).remove(); }
   function deleteAllData(path) { if(confirm("정말 모든 데이터를 삭제하시겠습니까?")) db.ref(path).remove(); }
   function tab(i) { document.querySelectorAll('.nav-btn').forEach((b, idx) => b.classList.toggle('active', idx === i)); document.querySelectorAll('main').forEach((m, idx) => m.classList.toggle('active', idx === i)); }
-  
   function filterGuides() {
     const q = document.getElementById('guide-search').value.toLowerCase();
     const f = document.getElementById('guide-filter').value;
