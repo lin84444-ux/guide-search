@@ -35,29 +35,23 @@
   input:checked + .slider:before { transform: translateX(22px); }
   .share-item { padding: 20px; border-bottom: 1px solid #eee; background: #fcfdfe; border-radius: 15px; margin-bottom: 12px; position: relative; }
   .admin-only { display: none; position: absolute; top: 20px; right: 20px; gap: 8px; }
-  .list-table { width: 100%; border-collapse: collapse; table-layout: auto; } /* 자동 너비 조절 */
+  .list-table { width: 100%; border-collapse: collapse; table-layout: auto; }
   .list-table th, .list-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
   #share-display { max-height: 400px; overflow-y: auto; padding: 5px; }
 
-  /* 핵심 수정: 모든 '상태' 텍스트를 강제로 가로로 정렬 */
+  /* 가로 정렬 강제 유지 */
   #c-all, #c-on, #c-off, 
   .list-table td:nth-child(4), 
   .list-table th:nth-child(4) {
-    white-space: nowrap !important; /* 줄바꿈 절대 방지 */
-    min-width: 80px;               /* 최소 너비 확보 */
-  }
-
-  /* 반응형 (데이터 유지하면서 레이아웃만 조정) */
-  @media (max-width: 1024px) {
-    main.active { grid-template-columns: 1fr; }
-    .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    white-space: nowrap !important;
+    min-width: 80px;
   }
 
   @media (max-width: 768px) {
-    .status-grid { grid-template-columns: 1fr; }
+    main.active { grid-template-columns: 1fr; }
+    .status-grid { grid-template-columns: 1fr !important; }
     header { padding: 20px; }
     .header-admin { position: relative; right: 0; top: 0; transform: none; justify-content: center; margin-top: 15px; }
-    .list-table { font-size: 14px; }
   }
 </style>
 </head>
@@ -87,9 +81,17 @@
         <div>종료</div><div class="status-value" id="c-off" style="font-size: 32px; font-weight: 900;">0</div>
       </div>
     </div>
+
     <div class="card">
       <div class="card-title">기업 현황 리스트 <button class="btn-red admin-view" style="display:none;" onclick="deleteAllData('companies')">전체 삭제</button></div>
-      <div style="overflow-x: auto;"> <table class="list-table">
+      
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <input type="text" id="comp-search" placeholder="기업명 또는 코드 검색..." onkeypress="if(event.keyCode==13) filterCompanies()" style="margin-bottom: 0;">
+        <button class="btn-blue" onclick="filterCompanies()" style="width: 120px; padding: 10px; font-size: 14px;">검색</button>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="list-table">
           <thead><tr><th>기업명</th><th>코드</th><th>운영기간</th><th>상태</th><th>URL</th><th class="admin-view" style="display:none;">관리</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
@@ -118,7 +120,6 @@
       <div class="card-title">📢 실시간 공유사항 <button class="btn-red admin-view" style="display:none;" onclick="deleteAllData('shares')">전체 삭제</button></div>
       <div id="share-display"></div>
     </div>
-    
     <div class="card">
       <div class="card-title">가이드 보관함 <button class="btn-red admin-view" style="display:none;" onclick="deleteAllData('guides')">전체 삭제</button></div>
       <div style="display: flex; gap: 10px; margin-bottom: 20px;">
@@ -128,14 +129,12 @@
       <div id="guide-display"></div>
     </div>
   </section>
-
   <aside>
     <div class="card" style="margin-bottom: 20px;">
       <div class="card-title">오늘의 공유사항</div>
       <textarea id="quick-content" class="input-highlight" placeholder="공유할 내용을 입력하세요..." style="height: 120px;"></textarea>
       <button class="btn-blue" onclick="addQuickShare()">소식 공유</button>
     </div>
-
     <div class="card">
       <div class="card-title">가이드 등록</div>
       <input type="text" id="g-comp" placeholder="대상 기업명">
@@ -152,20 +151,20 @@
 </main>
 
 <script>
-  // Firebase 설정 (기존 데이터 유지)
   const firebaseConfig = { apiKey: "AIzaSyAtn4kWV3_D18zivOHIEAkW09Lqt2ZjHqE", authDomain: "workhub-pro-be742.firebaseapp.com", databaseURL: "https://workhub-pro-be742-default-rtdb.firebaseio.com/", projectId: "workhub-pro-be742" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-  let allGuides = []; let isAdmin = false;
+  let allGuides = []; let allCompanies = []; let isAdmin = false;
 
   function init() {
     db.ref('companies').on('value', s => {
-      const v = s.val() || {}; const list = Object.keys(v).map(k => ({ id: k, ...v[k] }));
-      document.getElementById('c-all').innerText = list.length;
-      document.getElementById('c-on').innerText = list.filter(i => i.status === '운영중').length;
-      document.getElementById('c-off').innerText = list.filter(i => i.status === '종료').length;
-      document.getElementById('tbody').innerHTML = list.reverse().map(i => `<tr><td><b>${i.name}</b></td><td>${i.code||'-'}</td><td>${i.period}</td><td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:700;">${i.status}</td><td>${i.url||'-'}</td><td class="admin-view" style="display:${isAdmin?'table-cell':'none'}"><button class="btn-red" onclick="deleteData('companies', '${i.id}')">삭제</button></td></tr>`).join('');
-      document.getElementById('guide-filter').innerHTML = '<option value="">전체 기업</option>' + list.map(i => `<option value="${i.name}">${i.name}</option>`).join('');
+      const v = s.val() || {}; 
+      allCompanies = Object.keys(v).map(k => ({ id: k, ...v[k] }));
+      renderCompanies(allCompanies);
+      document.getElementById('c-all').innerText = allCompanies.length;
+      document.getElementById('c-on').innerText = allCompanies.filter(i => i.status === '운영중').length;
+      document.getElementById('c-off').innerText = allCompanies.filter(i => i.status === '종료').length;
+      document.getElementById('guide-filter').innerHTML = '<option value="">전체 기업</option>' + allCompanies.map(i => `<option value="${i.name}">${i.name}</option>`).join('');
     });
 
     db.ref('shares').on('value', s => {
@@ -185,6 +184,26 @@
       allGuides = Object.keys(v).map(k => ({ id: k, ...v[k] })); 
       renderGuides(allGuides); 
     });
+  }
+
+  function renderCompanies(list) {
+    document.getElementById('tbody').innerHTML = list.slice().reverse().map(i => `
+      <tr>
+        <td><b>${i.name}</b></td>
+        <td>${i.code||'-'}</td>
+        <td>${i.period}</td>
+        <td style="color:${i.status==='운영중'?'#6366f1':'#94a3b8'};font-weight:700;">${i.status}</td>
+        <td>${i.url||'-'}</td>
+        <td class="admin-view" style="display:${isAdmin?'table-cell':'none'}">
+          <button class="btn-red" onclick="deleteData('companies', '${i.id}')">삭제</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function filterCompanies() {
+    const q = document.getElementById('comp-search').value.toLowerCase();
+    const filtered = allCompanies.filter(i => i.name.toLowerCase().includes(q) || (i.code && i.code.toLowerCase().includes(q)));
+    renderCompanies(filtered);
   }
 
   function addQuickShare() {
@@ -223,7 +242,7 @@
     const sw = document.getElementById('admin-switch');
     if (sw.checked) { if (prompt("비밀번호") === '6559') isAdmin = true; else { alert("불일치"); sw.checked = false; isAdmin = false; } } else isAdmin = false;
     document.querySelectorAll('.admin-view').forEach(el => el.style.display = isAdmin ? (el.tagName === 'TD' ? 'table-cell' : 'inline-block') : 'none');
-    init();
+    renderCompanies(allCompanies);
   }
 
   function deleteData(path, id) { if(confirm("삭제하시겠습니까?")) db.ref(`${path}/${id}`).remove(); }
